@@ -4,45 +4,66 @@ import * as React from 'react'
 import { AppHeader } from '@/components/inventory/app-header'
 import { InventoryFlow } from '@/components/inventory/inventory-flow'
 import { OperationsGrid } from '@/components/inventory/operations-grid'
+import { DashboardSection } from '@/components/inventory/dashboard-section'
 import { MaterialManagement } from '@/components/inventory/material-management'
+import { AlertsPanel } from '@/components/inventory/alerts-panel'
 import {
   SettingsOverview,
   SettingsSheet,
 } from '@/components/inventory/settings-panel'
-import { OperationPreview } from '@/components/inventory/operation-preview'
+import {
+  OperationDialogs,
+  type ActiveOp,
+  type ReceiptPrefill,
+} from '@/components/inventory/operation-dialogs'
+import { TransactionHistory } from '@/components/inventory/transaction-history'
+import { ReportsSection } from '@/components/inventory/reports-section'
 import { AppFooter } from '@/components/inventory/app-footer'
-import { initialMaterials } from '@/lib/inventory-data'
-import type { InventoryOperation } from '@/lib/inventory-data'
+import { useInventoryStats } from '@/lib/inventory-stats'
+import { inventoryOperations, type InventoryOperation } from '@/lib/inventory-data'
 
 export default function Home() {
   const [settingsOpen, setSettingsOpen] = React.useState(false)
-  const [previewOp, setPreviewOp] = React.useState<InventoryOperation | null>(
-    null
-  )
+  const [activeOp, setActiveOp] = React.useState<ActiveOp>(null)
+  const [prefill, setPrefill] = React.useState<ReceiptPrefill | null>(null)
 
-  const totalMaterials = initialMaterials.length
-  const lowStockCount = initialMaterials.filter(
-    (m) => m.stock <= m.minStock
-  ).length
-  const todayReceipts = 3
+  const stats = useInventoryStats()
+
+  const openOperation = (op: InventoryOperation, pf?: ReceiptPrefill) => {
+    setPrefill(pf ?? null)
+    setActiveOp(op)
+  }
+
+  const handleQuickReceipt = (materialId: string, qty: number) => {
+    const receiptOp = inventoryOperations.find((o) => o.id === 'nhap-hang')!
+    openOperation(receiptOp, { materialId, quantity: qty })
+  }
 
   return (
     <div className="flex min-h-screen flex-col">
       <AppHeader
         onOpenSettings={() => setSettingsOpen(true)}
-        lowStockCount={lowStockCount}
+        lowStockCount={stats.lowStockCount}
       />
 
       <main className="flex-1">
         <InventoryFlow
-          totalMaterials={totalMaterials}
-          lowStockCount={lowStockCount}
-          todayReceipts={todayReceipts}
+          totalMaterials={stats.totalMaterials}
+          lowStockCount={stats.lowStockCount}
+          todayReceipts={stats.todayReceipts}
         />
 
-        <OperationsGrid onSelect={(op) => setPreviewOp(op)} />
+        <OperationsGrid onSelect={(op) => openOperation(op)} />
+
+        <DashboardSection />
+
+        <AlertsPanel onQuickReceipt={handleQuickReceipt} />
 
         <MaterialManagement />
+
+        <TransactionHistory />
+
+        <ReportsSection />
 
         <SettingsOverview onOpen={() => setSettingsOpen(true)} />
       </main>
@@ -51,9 +72,10 @@ export default function Home() {
 
       {/* Global overlays */}
       <SettingsSheet open={settingsOpen} onOpenChange={setSettingsOpen} />
-      <OperationPreview
-        operation={previewOp}
-        onOpenChange={(o) => !o && setPreviewOp(null)}
+      <OperationDialogs
+        operation={activeOp}
+        onOpenChange={(o) => !o && setActiveOp(null)}
+        prefill={prefill}
       />
     </div>
   )

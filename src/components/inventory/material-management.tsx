@@ -15,13 +15,21 @@ import {
   Coffee,
 } from 'lucide-react'
 import {
-  initialMaterials,
   categoryLabels,
   categoryStyles,
   unitOptions,
   type Material,
   type MaterialCategory,
 } from '@/lib/inventory-data'
+import { useInventoryStore } from '@/lib/inventory-store'
+import {
+  formatVND,
+  formatNum,
+  daysUntil,
+  expiryLevel,
+  expiryLevelMeta,
+  formatDate,
+} from '@/lib/inventory-stats'
 import {
   Card,
   CardContent,
@@ -68,21 +76,13 @@ import {
 import { useToast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
 
-const formatVND = (n: number) =>
-  new Intl.NumberFormat('vi-VN', {
-    style: 'currency',
-    currency: 'VND',
-    maximumFractionDigits: 0,
-  }).format(n)
-
-const formatNum = (n: number) =>
-  new Intl.NumberFormat('vi-VN', { maximumFractionDigits: 2 }).format(n)
-
 type SortKey = 'name' | 'unitPrice' | 'stock' | 'barStock'
 
 export function MaterialManagement() {
   const { toast } = useToast()
-  const [materials, setMaterials] = React.useState<Material[]>(initialMaterials)
+  const materials = useInventoryStore((s) => s.materials)
+  const upsertMaterial = useInventoryStore((s) => s.upsertMaterial)
+  const deleteMaterial = useInventoryStore((s) => s.deleteMaterial)
   const [query, setQuery] = React.useState('')
   const [category, setCategory] = React.useState<MaterialCategory | 'all'>('all')
   const [sortKey, setSortKey] = React.useState<SortKey>('name')
@@ -128,32 +128,19 @@ export function MaterialManagement() {
   )
 
   const handleSave = (data: Omit<Material, 'id'> & { id?: string }) => {
-    if (data.id) {
-      setMaterials((prev) =>
-        prev.map((m) => (m.id === data.id ? ({ ...m, ...data } as Material) : m))
-      )
-      toast({
-        title: 'Đã cập nhật nguyên vật liệu',
-        description: data.name,
-      })
-    } else {
-      const newMat: Material = {
-        ...data,
-        id: `m${Date.now()}`,
-      } as Material
-      setMaterials((prev) => [newMat, ...prev])
-      toast({
-        title: 'Đã thêm nguyên vật liệu mới',
-        description: data.name,
-      })
-    }
+    const isEdit = !!data.id
+    upsertMaterial(data)
+    toast({
+      title: isEdit ? 'Đã cập nhật nguyên vật liệu' : 'Đã thêm nguyên vật liệu mới',
+      description: data.name,
+    })
     setDialogOpen(false)
     setEditing(null)
   }
 
   const handleDelete = () => {
     if (!deleteTarget) return
-    setMaterials((prev) => prev.filter((m) => m.id !== deleteTarget.id))
+    deleteMaterial(deleteTarget.id)
     toast({
       title: 'Đã xóa nguyên vật liệu',
       description: deleteTarget.name,
@@ -296,6 +283,7 @@ export function MaterialManagement() {
                   <th className="px-4 py-3 text-right font-medium">
                     <SortButton label="Tồn Bar" active={sortKey === 'barStock'} asc={sortAsc} onClick={() => toggleSort('barStock')} align="right" />
                   </th>
+                  <th className="px-4 py-3 text-center font-medium">Hạn SD</th>
                   <th className="px-4 py-3 text-center font-medium">TT</th>
                   <th className="px-4 py-3 text-right font-medium">Thao tác</th>
                 </tr>
@@ -340,6 +328,13 @@ export function MaterialManagement() {
                         </td>
                         <td className="px-4 py-3 text-right tabular-nums text-muted-foreground">
                           {formatNum(m.barStock)} {m.unitBar ?? ''}
+                        </td>
+                        <td className="px-4 py-3 text-center">
+                          {m.expiryDate ? (
+                            <ExpiryCell iso={m.expiryDate} />
+                          ) : (
+                            <span className="text-xs text-muted-foreground/60">—</span>
+                          )}
                         </td>
                         <td className="px-4 py-3 text-center">
                           {isLow ? (
@@ -391,7 +386,7 @@ export function MaterialManagement() {
                 </AnimatePresence>
                 {filtered.length === 0 && (
                   <tr>
-                    <td colSpan={10} className="px-4 py-12 text-center text-sm text-muted-foreground">
+                    <td colSpan={11} className="px-4 py-12 text-center text-sm text-muted-foreground">
                       Không tìm thấy nguyên vật liệu phù hợp.
                     </td>
                   </tr>
@@ -577,6 +572,50 @@ function Info({
   )
 }
 
+function ExpiryCell({ iso }: { iso: string }) {
+  const level = expiryLevel(iso)
+  const days = daysUntil(iso)
+  const meta = expiryLevelMeta[level]
+  if (level === 'none' || days === null) {
+    return <span className="text-xs text-muted-foreground/60">—</span>
+  }
+  return (
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <button
+            type="button"
+            className={cn(
+              'inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-medium',
+              meta.classes
+            )}
+          >
+            <span className={cn('size-1.5 rounded-full', meta.dot)} />
+            {days < 0 ? 'Hết hạn' : `${days} ngày`}
+          </button>
+        </TooltipTrigger>
+        <TooltipContent side="top">
+          Hết hạn {formatDate(iso)}
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  )
+}
+
+function ExpiryPreview({ iso }: { iso: string }) {
+  const level = expiryLevel(iso)
+  const days = daysUntil(iso)
+  if (level === 'none' || days === null) return null
+  const meta = expiryLevelMeta[level]
+  return (
+    <p className={cn('text-[11px] font-medium', meta.classes.split(' ')[1])}>
+      {days < 0
+        ? `Đã hết hạn ${Math.abs(days)} ngày`
+        : `Còn ${days} ngày — ${meta.label}`}
+    </p>
+  )
+}
+
 /* ---------- Add / Edit Dialog ---------- */
 
 function MaterialDialog({
@@ -601,12 +640,13 @@ function MaterialDialog({
     stock: 0,
     barStock: 0,
     minStock: 0,
+    expiryDate: '',
   })
 
   React.useEffect(() => {
     if (material) {
       const { id: _id, ...rest } = material
-      setForm(rest)
+      setForm({ ...rest, expiryDate: rest.expiryDate ?? '' })
     } else {
       setForm({
         name: '',
@@ -618,6 +658,7 @@ function MaterialDialog({
         stock: 0,
         barStock: 0,
         minStock: 0,
+        expiryDate: '',
       })
     }
   }, [material, open])
@@ -791,6 +832,37 @@ function MaterialDialog({
                 }
               />
             </div>
+          </div>
+
+          {/* Expiry date */}
+          <div className="space-y-1.5">
+            <Label htmlFor="m-expiry" className="text-xs font-medium text-muted-foreground">
+              Hạn sử dụng (để trống nếu không áp dụng)
+            </Label>
+            <div className="relative">
+              <Input
+                id="m-expiry"
+                type="date"
+                value={form.expiryDate ?? ''}
+                onChange={(e) =>
+                  setForm({ ...form, expiryDate: e.target.value || undefined })
+                }
+                className="pr-9"
+              />
+              {form.expiryDate && (
+                <button
+                  type="button"
+                  onClick={() => setForm({ ...form, expiryDate: undefined })}
+                  className="absolute right-2 top-1/2 grid size-6 -translate-y-1/2 place-items-center rounded text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                  aria-label="Xóa hạn sử dụng"
+                >
+                  <span className="text-lg leading-none">×</span>
+                </button>
+              )}
+            </div>
+            {form.expiryDate && (
+              <ExpiryPreview iso={form.expiryDate} />
+            )}
           </div>
 
           <DialogFooter>

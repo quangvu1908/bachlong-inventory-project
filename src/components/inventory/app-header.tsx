@@ -22,7 +22,9 @@ import { cn } from '@/lib/utils'
 const navItems = [
   { label: 'Tổng quan', href: '#tong-quan' },
   { label: 'Nghiệp vụ', href: '#nghiep-vu' },
-  { label: 'Nguyên vật liệu', href: '#nguyen-vat-lieu' },
+  { label: 'Vật liệu', href: '#nguyen-vat-lieu' },
+  { label: 'Lịch sử', href: '#lich-su' },
+  { label: 'Báo cáo', href: '#bao-cao' },
   { label: 'Cài đặt', href: '#cai-dat' },
 ]
 

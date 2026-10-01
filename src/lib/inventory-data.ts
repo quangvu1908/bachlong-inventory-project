@@ -125,6 +125,8 @@ export interface Material {
   stock: number
   barStock: number
   minStock: number
+  /** hạn sử dụng (ISO date) — nếu có */
+  expiryDate?: string
 }
 
 export const categoryLabels: Record<MaterialCategory, string> = {
@@ -157,6 +159,7 @@ export const initialMaterials: Material[] = [
     stock: 8.5,
     barStock: 600,
     minStock: 3,
+    expiryDate: '2026-12-01',
   },
   {
     id: 'm2',
@@ -169,6 +172,7 @@ export const initialMaterials: Material[] = [
     stock: 2.1,
     barStock: 250,
     minStock: 1,
+    expiryDate: '2026-10-09',
   },
   {
     id: 'm3',
@@ -181,6 +185,7 @@ export const initialMaterials: Material[] = [
     stock: 24,
     barStock: 4500,
     minStock: 10,
+    expiryDate: '2026-10-06',
   },
   {
     id: 'm4',
@@ -193,6 +198,7 @@ export const initialMaterials: Material[] = [
     stock: 30,
     barStock: 1200,
     minStock: 12,
+    expiryDate: '2027-04-01',
   },
   {
     id: 'm5',
@@ -229,6 +235,7 @@ export const initialMaterials: Material[] = [
     stock: 6.2,
     barStock: 1500,
     minStock: 3,
+    expiryDate: '2026-10-13',
   },
   {
     id: 'm8',
@@ -253,6 +260,7 @@ export const initialMaterials: Material[] = [
     stock: 2.4,
     barStock: 500,
     minStock: 1.5,
+    expiryDate: '2026-10-21',
   },
   {
     id: 'm10',
@@ -265,6 +273,7 @@ export const initialMaterials: Material[] = [
     stock: 5,
     barStock: 24,
     minStock: 3,
+    expiryDate: '2026-10-04',
   },
   {
     id: 'm11',

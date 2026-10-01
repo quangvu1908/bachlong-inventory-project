@@ -13,6 +13,7 @@ import {
   ChevronRight,
   Save,
   RotateCcw,
+  Trash2,
 } from 'lucide-react'
 import {
   Sheet,
@@ -41,8 +42,20 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
 import { Separator } from '@/components/ui/separator'
 import { useToast } from '@/hooks/use-toast'
+import { useInventoryStore } from '@/lib/inventory-store'
 import { cn } from '@/lib/utils'
 
 interface SettingsState {
@@ -78,6 +91,7 @@ interface SettingsSheetProps {
 
 export function SettingsSheet({ open, onOpenChange }: SettingsSheetProps) {
   const { toast } = useToast()
+  const resetData = useInventoryStore((s) => s.resetData)
   const [settings, setSettings] = React.useState<SettingsState>(defaultSettings)
 
   const update = <K extends keyof SettingsState>(
@@ -93,12 +107,21 @@ export function SettingsSheet({ open, onOpenChange }: SettingsSheetProps) {
     onOpenChange(false)
   }
 
-  const handleReset = () => {
+  const handleResetSettings = () => {
     setSettings(defaultSettings)
     toast({
       title: 'Đã khôi phục mặc định',
       description: 'Tất cả cài đặt trở về giá trị ban đầu.',
     })
+  }
+
+  const handleResetData = () => {
+    resetData()
+    toast({
+      title: 'Đã đặt lại dữ liệu kho',
+      description: 'Nguyên vật liệu & giao dịch về trạng thái ban đầu.',
+    })
+    onOpenChange(false)
   }
 
   return (
@@ -242,11 +265,39 @@ export function SettingsSheet({ open, onOpenChange }: SettingsSheetProps) {
               <RotateCcw className="size-4" />
               Khôi phục từ bản sao lưu
             </Button>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="w-full justify-start gap-2 border-destructive/30 text-destructive hover:bg-destructive/5 hover:text-destructive"
+                >
+                  <Trash2 className="size-4" />
+                  Đặt lại dữ liệu kho…
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Đặt lại dữ liệu kho?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Toàn bộ nguyên vật liệu và lịch sử giao dịch sẽ trở về trạng thái ban đầu. Hành động này không thể hoàn tác.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Hủy</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={handleResetData}
+                    className="bg-destructive text-white hover:bg-destructive/90"
+                  >
+                    Đặt lại
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </SettingGroup>
         </div>
 
         <SheetFooter className="border-t border-border/60 px-6 py-4">
-          <Button variant="ghost" onClick={handleReset} className="gap-2">
+          <Button variant="ghost" onClick={handleResetSettings} className="gap-2">
             <RotateCcw className="size-4" />
             Khôi phục
           </Button>
