@@ -342,6 +342,9 @@ export function DashboardSection() {
                 <XAxis
                   dataKey="name"
                   tick={{ fontSize: 11, fill: 'oklch(0.5 0.02 60)' }}
+                  // Show ~7 evenly spaced labels; for 7 days show all, for 30 show every ~4th
+                  interval={days === 30 ? 3 : 0}
+                  minTickGap={8}
                 />
                 <YAxis
                   allowDecimals={false}

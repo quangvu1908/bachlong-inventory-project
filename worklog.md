@@ -236,3 +236,37 @@ Unresolved / Next-phase recommendations:
 - localStorage vẫn (chưa Prisma/API) — nếu multi-user cần backend.
 - Có thể thêm: in PDF phiếu, lịch kiểm kê định kỳ (cron nhắc), drag-drop NVL, export Excel (.xlsx).
 - Line chart 30 ngày hơi dày (28 labels) — có thể ẩn bớt ticks hoặc dùng brush zoom.
+
+---
+Task ID: 7
+Agent: main (Z.ai Code) — webDevReview cron round 6
+Task: Đánh giá trạng thái, QA, fix line chart 30 ngày dày nhãn, build transaction detail + print view, polish styling.
+
+Work Log:
+- Đọc worklog.md round 1-6 → app ổn định, không lỗi. QA agent-browser: render sạch, 0 console error.
+- **Fix line chart 30 ngày dày nhãn** (unresolved round trước):
+  - XAxis thêm `interval={days === 30 ? 3 : 0}` + `minTickGap={8}` → 30 ngày hiển thị ~8 nhãn cách đều (02,06,10,14,18,22,26,30) thay vì 28 nhãn chồng nhau; 7 ngày vẫn hiện tất cả.
+- **Build transaction detail + print view** (tính năng mới lớn):
+  - Transaction rows → `motion.button` clickable, onClick set `detailTx` state.
+  - `TransactionDetailDialog`: Dialog hiển thị chi tiết đầy đủ — NVL, loại, ngày nghiệp vụ, giờ ghi nhận, số lượng (tone màu theo loại), đơn giá, thành tiền, và riêng cho kiểm kê: tồn trước/sau/chênh lệch + ghi chú.
+  - `handlePrint`: mở `window.open('', '_blank')` → viết HTML phiếu in (style F&B: header Trà House caramel, badge mã phiếu, rows dashed, amount lớn, note box, footer timestamp) → `window.print()` auto-trigger.
+  - Nút "In phiếu" + "Đóng" trong dialog.
+  - Helper `DetailRow` component.
+- Polish: transaction rows hover bg-muted/40 + focus state, detail dialog tone colors theo loại giao dịch.
+- Lint sạch (0 error/warning). Dev log compile 200 OK.
+- Agent Browser QA end-to-end:
+  - **Line chart fix VERIFIED**: toggle "30 ngày" → X-axis hiện 8 nhãn cách đều (02-09...30-09) không chồng; 7 ngày hiện đủ 7 nhãn.
+  - **Transaction detail VERIFIED**: click giao dịch "Trà đen Đài Loan · Nhập hàng · +5 kg · 900.000 ₫" → dialog mở đúng: NVL, loại, ngày 25/09/2026, giờ 20:33, +5 kg, 180.000 ₫, thành tiền 900.000 ₫, ghi chú "Nhập lô từ NCC Minh Long", nút "In phiếu".
+  - **Print VERIFIED**: click "In phiếu" → tab mới mở (title "Phiếu Nhập hàng - seed0"), HTML phiếu in render đúng, window.print() auto-trigger.
+  - Không console error / runtime error toàn bộ phiên.
+
+Stage Summary:
+- Fix line chart 30 ngày: X-axis interval adaptive (8 nhãn thay 28), giải quyết vấn đề nhãn chồng (unresolved round trước).
+- Transaction detail + print: click bất kỳ giao dịch → dialog chi tiết đầy đủ + in phiếu F&B-style (window.open + print) — tính năng thực tế cho tiệm trà sữa.
+- Polish: clickable rows với focus states, tone colors theo loại.
+- Artifacts mở rộng: `transaction-history.tsx` (detail dialog + print), `dashboard-section.tsx` (XAxis interval).
+
+Unresolved / Next-phase recommendations:
+- Print window không verify được file PDF vật lý (giới hạn sandbox), nhưng HTML render + window.print() API chuẩn.
+- localStorage vẫn (chưa Prisma/API) — nếu multi-user cần backend.
+- Có thể thêm: lịch kiểm kê định kỳ (cron nhắc), export Excel (.xlsx), drag-drop NVL, multi-receipt batch nhập.

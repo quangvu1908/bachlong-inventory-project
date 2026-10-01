@@ -7,6 +7,8 @@ import {
   Filter,
   ArrowDownUp,
   Inbox,
+  Printer,
+  X,
 } from 'lucide-react'
 import {
   Card,
@@ -18,13 +20,20 @@ import {
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from '@/components/ui/dialog'
+import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { useInventoryStore, type TransactionType } from '@/lib/inventory-store'
+import { useInventoryStore, type TransactionType, type Transaction } from '@/lib/inventory-store'
 import {
   transactionTypeMeta,
   formatVND,
@@ -49,6 +58,7 @@ export function TransactionHistory() {
   const transactions = useInventoryStore((s) => s.transactions)
   const [filter, setFilter] = React.useState<FilterType>('all')
   const [sort, setSort] = React.useState<SortMode>('newest')
+  const [detailTx, setDetailTx] = React.useState<Transaction | null>(null)
 
   const filtered = React.useMemo(() => {
     let list = transactions.filter((t) => filter === 'all' || t.type === filter)
@@ -146,12 +156,13 @@ export function TransactionHistory() {
             {filtered.map((tx, idx) => {
               const meta = transactionTypeMeta[tx.type]
               return (
-                <motion.div
+                <motion.button
                   key={tx.id}
                   initial={{ opacity: 0, x: -8 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.25, delay: Math.min(idx * 0.02, 0.3) }}
-                  className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-muted/30 sm:px-5"
+                  onClick={() => setDetailTx(tx)}
+                  className="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-muted/40 focus:bg-muted/40 focus:outline-none sm:px-5"
                 >
                   {/* icon */}
                   <div
@@ -217,13 +228,209 @@ export function TransactionHistory() {
                       </div>
                     )}
                   </div>
-                </motion.div>
+                </motion.button>
               )
             })}
           </div>
         </CardContent>
       </Card>
+
+      {/* Transaction detail dialog */}
+      <TransactionDetailDialog
+        tx={detailTx}
+        onClose={() => setDetailTx(null)}
+      />
     </section>
+  )
+}
+
+/* ---------- Transaction detail + print ---------- */
+
+function TransactionDetailDialog({
+  tx,
+  onClose,
+}: {
+  tx: Transaction | null
+  onClose: () => void
+}) {
+  const open = !!tx
+  return (
+    <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="max-w-[440px]">
+        {tx && <TransactionDetailBody tx={tx} onClose={onClose} />}
+      </DialogContent>
+    </Dialog>
+  )
+}
+
+function TransactionDetailBody({
+  tx,
+  onClose,
+}: {
+  tx: Transaction
+  onClose: () => void
+}) {
+  const meta = transactionTypeMeta[tx.type]
+  const isCheck = tx.type === 'KIEM_KE' || tx.type === 'KIEM_KE_BAR'
+
+  const handlePrint = () => {
+    const typeLabel = meta.label
+    const amountLine =
+      tx.amount > 0
+        ? `<div class="row"><span>Thành tiền</span><strong>${formatVND(tx.amount)}</strong></div>`
+        : ''
+    const checkLine = isCheck
+      ? `<div class="row"><span>Tồn trước</span><span>${formatNum(tx.before)} ${tx.unit}</span></div>
+         <div class="row"><span>Tồn sau</span><span>${formatNum(tx.after)} ${tx.unit}</span></div>
+         <div class="row"><span>Chênh lệch</span><span>${tx.quantity >= 0 ? '+' : ''}${formatNum(tx.quantity)} ${tx.unit}</span></div>`
+      : ''
+    const html = `<!doctype html><html lang="vi"><head><meta charset="utf-8"><title>Phiếu ${typeLabel} - ${tx.id}</title>
+      <style>
+        *{box-sizing:border-box} body{font-family:ui-sans-serif,system-ui,sans-serif;padding:32px;color:#1a1a1a;max-width:480px;margin:0 auto}
+        .header{text-align:center;border-bottom:2px solid #8b5e3c;padding-bottom:12px;margin-bottom:16px}
+        .header h1{font-size:18px;margin:0;color:#8b5e3c}
+        .header .sub{font-size:12px;color:#666;margin-top:2px}
+        .badge{display:inline-block;background:#f4ede0;color:#8b5e3c;padding:2px 10px;border-radius:999px;font-size:11px;font-weight:600;margin-top:6px}
+        .row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px dashed #ddd;font-size:13px}
+        .row:last-child{border-bottom:none}
+        .row strong{font-weight:600}
+        .amount{font-size:20px;font-weight:700;color:#8b5e3c;text-align:right;margin-top:12px}
+        .note{margin-top:16px;padding:10px;background:#faf7f2;border-radius:6px;font-size:12px;color:#555}
+        .footer{margin-top:24px;text-align:center;font-size:10px;color:#999;border-top:1px solid #eee;padding-top:10px}
+        @media print{body{padding:0}}
+      </style></head><body>
+      <div class="header">
+        <h1>Trà House</h1>
+        <div class="sub">Phiếu ${typeLabel}</div>
+        <div class="badge">${tx.id}</div>
+      </div>
+      <div class="row"><span>Ngày nghiệp vụ</span><strong>${formatDate(tx.date)}</strong></div>
+      <div class="row"><span>Nguyên vật liệu</span><strong>${tx.materialName}</strong></div>
+      <div class="row"><span>Loại</span><span>${typeLabel}</span></div>
+      <div class="row"><span>Số lượng</span><strong>${tx.quantity >= 0 ? '+' : ''}${formatNum(tx.quantity)} ${tx.unit}</strong></div>
+      <div class="row"><span>Đơn giá</span><span>${formatVND(tx.unitPrice)}</span></div>
+      ${amountLine}
+      ${checkLine}
+      ${tx.note ? `<div class="note"><strong>Ghi chú:</strong> ${tx.note}</div>` : ''}
+      <div class="amount">${tx.amount > 0 ? formatVND(tx.amount) : ''}</div>
+      <div class="footer">In lúc ${new Date().toLocaleString('vi-VN')} · Trà House — Hệ thống kiểm soát tồn kho</div>
+      <script>window.onload=function(){window.print()}</script>
+      </body></html>`
+    const printWin = window.open('', '_blank', 'width=520,height=700')
+    if (printWin) {
+      printWin.document.write(html)
+      printWin.document.close()
+    }
+  }
+
+  return (
+    <div>
+      <DialogHeader>
+        <DialogTitle className="flex items-center gap-2">
+          <span className={cn('grid size-9 place-items-center rounded-xl border', meta.color)}>
+            <span className={cn('size-2.5 rounded-full', meta.dot)} />
+          </span>
+          Chi tiết giao dịch
+        </DialogTitle>
+        <DialogDescription>
+          Phiếu {meta.label} · {tx.id}
+        </DialogDescription>
+      </DialogHeader>
+
+      <div className="space-y-1.5 py-2">
+        <DetailRow label="Nguyên vật liệu" value={tx.materialName} strong />
+        <DetailRow label="Loại nghiệp vụ" value={meta.label} />
+        <DetailRow label="Ngày nghiệp vụ" value={formatDate(tx.date)} />
+        <DetailRow
+          label="Giờ ghi nhận"
+          value={formatDateTime(tx.createdAt)}
+        />
+        <div className="my-2 border-t border-border/60" />
+        <DetailRow
+          label="Số lượng"
+          value={`${tx.quantity >= 0 ? '+' : ''}${formatNum(tx.quantity)} ${tx.unit}`}
+          strong
+          tone={
+            tx.type === 'NHAP_HANG'
+              ? 'text-amber-600 dark:text-amber-300'
+              : tx.type === 'XUAT_KHO_BAR'
+              ? 'text-orange-600 dark:text-orange-300'
+              : tx.quantity >= 0
+              ? 'text-teal-600 dark:text-teal-300'
+              : 'text-rose-600 dark:text-rose-300'
+          }
+        />
+        <DetailRow label="Đơn giá" value={formatVND(tx.unitPrice)} />
+        {tx.amount > 0 && (
+          <DetailRow
+            label="Thành tiền"
+            value={formatVND(tx.amount)}
+            strong
+            tone="text-primary"
+          />
+        )}
+        {isCheck && (
+          <>
+            <div className="my-2 border-t border-border/60" />
+            <DetailRow label="Tồn trước" value={`${formatNum(tx.before)} ${tx.unit}`} />
+            <DetailRow label="Tồn sau" value={`${formatNum(tx.after)} ${tx.unit}`} />
+            <DetailRow
+              label="Chênh lệch"
+              value={`${tx.quantity >= 0 ? '+' : ''}${formatNum(tx.quantity)} ${tx.unit}`}
+              tone={
+                tx.quantity >= 0
+                  ? 'text-teal-600 dark:text-teal-300'
+                  : 'text-rose-600 dark:text-rose-300'
+              }
+            />
+          </>
+        )}
+        {tx.note && (
+          <div className="mt-3 rounded-lg border border-border/60 bg-muted/30 px-3 py-2 text-xs">
+            <span className="font-medium text-muted-foreground">Ghi chú: </span>
+            {tx.note}
+          </div>
+        )}
+      </div>
+
+      <div className="mt-4 flex justify-end gap-2">
+        <Button variant="outline" onClick={onClose} className="gap-1.5">
+          <X className="size-4" />
+          Đóng
+        </Button>
+        <Button onClick={handlePrint} className="gap-1.5">
+          <Printer className="size-4" />
+          In phiếu
+        </Button>
+      </div>
+    </div>
+  )
+}
+
+function DetailRow({
+  label,
+  value,
+  strong,
+  tone,
+}: {
+  label: string
+  value: string
+  strong?: boolean
+  tone?: string
+}) {
+  return (
+    <div className="flex items-center justify-between gap-3 text-sm">
+      <span className="text-muted-foreground">{label}</span>
+      <span
+        className={cn(
+          'tabular-nums',
+          strong && 'font-semibold',
+          tone
+        )}
+      >
+        {value}
+      </span>
+    </div>
   )
 }
 
