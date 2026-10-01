@@ -154,6 +154,13 @@ export function MaterialManagement() {
     setDialogOpen(true)
   }
 
+  // Listen for "add material" command from command palette
+  React.useEffect(() => {
+    const handler = () => openAdd()
+    window.addEventListener('tra-house:add-material', handler)
+    return () => window.removeEventListener('tra-house:add-material', handler)
+  }, [])
+
   const openEdit = (m: Material) => {
     setEditing(m)
     setDialogOpen(true)

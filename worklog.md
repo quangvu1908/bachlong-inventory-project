@@ -127,3 +127,41 @@ Unresolved / Next-phase recommendations:
 - Chưa có backend/DB (vẫn localStorage). Nếu cần multi-user/server, dựng Prisma schema Material/Transaction + API routes.
 - Có thể thêm: xuất PDF phiếu, command palette (Cmd+K), so sánh kỳ, cảnh báo hạn sử dụng theo ngày cụ thể trên dashboard.
 - Chưa wire expiry vào operation dialogs (vd: khi nhập hàng có thể set lại hạn mới).
+
+---
+Task ID: 4
+Agent: main (Z.ai Code) — webDevReview cron round 3
+Task: Đánh giá trạng thái, QA, thêm Command Palette (Cmd+K), dashboard trend delta + expiry summary, demo low-stock + test quick-receipt flow end-to-end, polish styling.
+
+Work Log:
+- Đọc worklog.md round 1-3 → app ổn định, không lỗi. QA agent-browser: render sạch, 0 console error.
+- **Build Command Palette** (`command-palette.tsx`): cmdk-based, mở bằng Cmd/Ctrl+K hoặc nút "Lệnh nhanh… ⌘K" ở header. 4 nhóm lệnh: Điều hướng (5 section), Nghiệp vụ (6 op), Thao tác (thêm NVL/mở settings/reset data), Giao diện (toggle dark). Tìm kiếm fuzzy, sticky group headings, footer hint phím (↑↓/↵/⌘K), animated entrance, respects ESC. Wire custom event 'tra-house:open-command-palette' + 'tra-house:add-material' để header button mở palette + MaterialManagement nghe event mở dialog thêm.
+- **Dashboard trend strip** (`TrendStrip` trong dashboard-section.tsx): 4 thẻ — Tiền nhập 7 ngày, Xuất sang Bar 7 ngày, Số phiếu nhập (animated counter) + thẻ Hạn sử dụng (count + "X sắp hết"). Mỗi thẻ có delta % so với 7 ngày trước (icon TrendingUp/Down/Minus, tone màu tương ứng). Thêm helpers trong inventory-stats: `trends` (receiptValue/issueValue/receiptCount current/previous/delta).
+- **Demo low-stock + test quick-receipt end-to-end** (unresolved round 2):
+  - Sửa seed Trà xanh matcha: stock 2.1 → 0.6 (< min 1) → kích hoạt restock list.
+  - Bump store version 1→2 với migrate discard → seed mới có hiệu lực.
+  - Agent Browser test: restock list hiện "Trà xanh matcha, 0,6 kg / tối thiểu 1 kg, GỢI Ý NHẬP +1,4 kg, ≈ 588.000 ₫" + nút "Nhập".
+  - Click "Nhập" → dialog Nhập Hàng mở pre-fill: material=Trà xanh matcha (0,6 kg), qty=1.4, note="Nhập bổ sung theo gợi ý", đơn giá auto 420.000, thành tiền 588.000 ₫.
+  - Submit → stock 0,6→2 kg, "Sắp hết" 1→0, "Nhập hôm nay" 0→588.000 ₫ (1 phiếu), transaction history thêm entry "+1,4 kg · 588.000 ₫", restock list giờ rỗng (đã hoàn tất).
+- Polish styling: xóa search box trang trí cũ (thay bằng command trigger), header gọn hơn, KPI cards icon scale-110 on hover + shadow, gradient blobs, sticky table headers, scrollbar tùy chỉnh, trend cards ring tone theo loại.
+- Lint sạch (0 error/warning). Có vài transient 500 trong lúc edit (hot reload) → tự phục hồi.
+- Agent Browser QA end-to-end:
+  - Command Palette: mở bằng nút header + Ctrl+K, hiển thị 15 lệnh chia 4 nhóm, Enter chạy lệnh điều hướng (page scroll), đóng bằng ESC/Enter.
+  - Trend strip: 4 thẻ đúng (Tiền nhập 1.255.000 ₫ +100%, Xuất Bar 408.000 ₫ +100%, Số phiếu 3 +100%, Hạn sử dụng 4 — 1 sắp hết).
+  - Low-stock demo: Trà xanh matcha 0,6 kg "Sắp hết", dashboard "Sắp hết hàng"=1, donut Trà 2.132.000 ₫.
+  - Quick-receipt prefill VERIFIED: dialog mở đúng NVL + qty + note + thành tiền 588.000 ₫.
+  - Submit round-trip VERIFIED: stock 0,6→2, low-stock cleared, dashboard/transaction/report reactive.
+  - Không console error / runtime error toàn bộ phiên.
+
+Stage Summary:
+- Command Palette (Cmd+K): productivity hub — điều hướng section, mở nghiệp vụ, thêm NVL, settings, reset data, toggle theme trong 1 palette tìm kiếm được.
+- Dashboard trend strip: so sánh 7 ngày này vs 7 ngày trước với delta % + thẻ tổng hạn sử dụng.
+- Demo + test end-to-end quick-receipt (unresolved round 2): tạo NVL low-stock, restock list hiện gợi ý, click Nhập → dialog pre-fill → submit → stock update + low-stock cleared.
+- Polish: header gọn, micro-interaction, trend tone colors.
+- Artifacts mới: `command-palette.tsx` + mở rộng `inventory-stats.ts` (trends), `dashboard-section.tsx` (TrendStrip), `app-header.tsx` (trigger button), `material-management.tsx` (event listener), `inventory-data.ts` (matcha low-stock), `inventory-store.ts` (v2 migrate), `page.tsx` (wire palette).
+
+Unresolved / Next-phase recommendations:
+- Command Palette search chưa test typing/filter (agent-browser type cần ref; đã verify list + navigation). Nên test gõ "nhập" filter.
+- localStorage vẫn (chưa Prisma/API) — nếu multi-user cần backend.
+- Có thể thêm: in PDF phiếu, lịch kiểm kê định kỳ (cron nhắc), so sánh kỳ tùy chọn, drag-drop NVL, export Excel đầy đủ.
+- Expiry chưa wire vào operation dialogs (nhập hàng có thể set lại hạn mới).

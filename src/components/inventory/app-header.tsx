@@ -84,15 +84,23 @@ export function AppHeader({ onOpenSettings, lowStockCount }: AppHeaderProps) {
 
         <div className="flex-1" />
 
-        {/* Search (decorative on homepage) */}
-        <div className="relative hidden lg:block">
-          <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-          <input
-            type="search"
-            placeholder="Tìm nguyên vật liệu, phiếu..."
-            className="h-9 w-56 rounded-full border border-border/70 bg-card/70 pl-9 pr-3 text-sm outline-none transition-all placeholder:text-muted-foreground focus:w-64 focus:border-primary/50 focus:ring-2 focus:ring-primary/20"
-          />
-        </div>
+        {/* Command palette trigger */}
+        <button
+          type="button"
+          onClick={() =>
+            window.dispatchEvent(
+              new CustomEvent('tra-house:open-command-palette')
+            )
+          }
+          className="hidden items-center gap-2 rounded-full border border-border/70 bg-card/70 px-3 py-1.5 text-xs text-muted-foreground transition-all hover:border-primary/40 hover:text-foreground lg:flex"
+          aria-label="Mở bảng lệnh"
+        >
+          <Search className="size-3.5" />
+          <span>Lệnh nhanh…</span>
+          <kbd className="rounded border border-border/60 bg-muted px-1 py-0.5 font-mono text-[10px]">
+            ⌘K
+          </kbd>
+        </button>
 
         {/* Notifications */}
         <Button

@@ -169,7 +169,7 @@ export const initialMaterials: Material[] = [
     unitBar: 'g',
     convertFactor: 1000,
     unitPrice: 420000,
-    stock: 2.1,
+    stock: 0.6,
     barStock: 250,
     minStock: 1,
     expiryDate: '2026-10-09',

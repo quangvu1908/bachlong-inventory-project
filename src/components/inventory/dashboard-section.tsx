@@ -22,10 +22,13 @@ import {
   Boxes,
   AlertTriangle,
   TrendingUp,
+  TrendingDown,
   PackagePlus,
   ArrowRightLeft,
   ClipboardCheck,
   Activity,
+  CalendarClock,
+  Minus,
 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -164,6 +167,9 @@ export function DashboardSection() {
           )
         })}
       </div>
+
+      {/* Trend strip + expiry summary */}
+      <TrendStrip />
 
       {/* Charts row */}
       <div className="mt-4 grid gap-4 lg:grid-cols-5">
@@ -391,6 +397,151 @@ export function DashboardSection() {
         </CardContent>
       </Card>
     </section>
+  )
+}
+
+function TrendStrip() {
+  const stats = useInventoryStats()
+  const { trends, expiringMaterials } = stats
+
+  const expiringCount = expiringMaterials.length
+  const criticalCount = expiringMaterials.filter(
+    (e) => e.level === 'expired' || e.level === 'critical'
+  ).length
+
+  const trendCards = [
+    {
+      label: 'Tiền nhập 7 ngày',
+      current: trends.receiptValue.current,
+      previous: trends.receiptValue.previous,
+      delta: trends.receiptValue.delta,
+      icon: PackagePlus,
+      tone: 'text-teal-600 bg-teal-500/10 ring-teal-500/20',
+    },
+    {
+      label: 'Xuất sang Bar 7 ngày',
+      current: trends.issueValue.current,
+      previous: trends.issueValue.previous,
+      delta: trends.issueValue.delta,
+      icon: ArrowRightLeft,
+      tone: 'text-orange-600 bg-orange-500/10 ring-orange-500/20',
+    },
+    {
+      label: 'Số phiếu nhập',
+      current: trends.receiptCount.current,
+      previous: trends.receiptCount.previous,
+      delta: trends.receiptCount.delta,
+      icon: TrendingUp,
+      tone: 'text-amber-600 bg-amber-500/10 ring-amber-500/20',
+      isCount: true,
+    },
+  ]
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: '-40px' }}
+      transition={{ duration: 0.4 }}
+      className="mt-3 grid gap-3 lg:grid-cols-4"
+    >
+      {trendCards.map((c) => {
+        const Icon = c.icon
+        const delta = c.delta
+        const isUp = delta > 0
+        const isFlat = delta === 0
+        const DeltaIcon = isFlat ? Minus : isUp ? TrendingUp : TrendingDown
+        const deltaTone = isFlat
+          ? 'text-muted-foreground bg-muted'
+          : isUp
+          ? 'text-emerald-700 bg-emerald-500/10 dark:text-emerald-300'
+          : 'text-rose-700 bg-rose-500/10 dark:text-rose-300'
+        return (
+          <Card key={c.label} className="border-border/60 p-3.5">
+            <div className="flex items-center gap-2">
+              <div
+                className={cn(
+                  'grid size-7 place-items-center rounded-lg ring-1',
+                  c.tone
+                )}
+              >
+                <Icon className="size-3.5" />
+              </div>
+              <span className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+                {c.label}
+              </span>
+            </div>
+            <div className="mt-2 flex items-baseline justify-between gap-2">
+              <span className="text-lg font-bold tabular-nums">
+                {c.isCount ? (
+                  <AnimatedCounter
+                    value={c.current}
+                    format={(n) => String(Math.round(n))}
+                  />
+                ) : (
+                  <AnimatedCounter value={c.current} format={formatVND} />
+                )}
+              </span>
+              <span
+                className={cn(
+                  'inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[11px] font-semibold',
+                  deltaTone
+                )}
+                title={`Kỳ trước: ${c.isCount ? c.previous : formatVND(c.previous)}`}
+              >
+                <DeltaIcon className="size-3" />
+                {isFlat
+                  ? '0%'
+                  : `${isUp ? '+' : ''}${delta.toFixed(0)}%`}
+              </span>
+            </div>
+            <div className="mt-0.5 text-[10px] text-muted-foreground/80">
+              vs 7 ngày trước: {c.isCount ? c.previous : formatVND(c.previous)}
+            </div>
+          </Card>
+        )
+      })}
+
+      {/* Expiry summary card */}
+      <Card
+        className={cn(
+          'border-border/60 p-3.5',
+          criticalCount > 0 && 'border-rose-500/30 bg-rose-500/5'
+        )}
+      >
+        <div className="flex items-center gap-2">
+          <div
+            className={cn(
+              'grid size-7 place-items-center rounded-lg ring-1',
+              criticalCount > 0
+                ? 'text-rose-600 bg-rose-500/10 ring-rose-500/20'
+                : 'text-emerald-600 bg-emerald-500/10 ring-emerald-500/20'
+            )}
+          >
+            <CalendarClock className="size-3.5" />
+          </div>
+          <span className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+            Hạn sử dụng
+          </span>
+        </div>
+        <div className="mt-2 flex items-baseline justify-between gap-2">
+          <span className="text-lg font-bold tabular-nums">
+            <AnimatedCounter value={expiringCount} format={(n) => String(Math.round(n))} />
+          </span>
+          {criticalCount > 0 && (
+            <span className="inline-flex items-center gap-0.5 rounded-full bg-rose-500/10 px-1.5 py-0.5 text-[11px] font-semibold text-rose-700 dark:text-rose-300">
+              <AlertTriangle className="size-3" />
+              {criticalCount} sắp hết
+            </span>
+          )}
+        </div>
+        <div className="mt-0.5 text-[10px] text-muted-foreground/80">
+          {expiringCount > 0
+            ? 'Xem chi tiết tại Cảnh báo & gợi ý'
+            : 'Tất cả NVL còn hạn an toàn'}
+        </div>
+      </Card>
+    </motion.div>
   )
 }
 

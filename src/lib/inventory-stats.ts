@@ -175,6 +175,59 @@ export function useInventoryStats() {
     }
   })
 
+  // trend: this 7 days vs previous 7 days
+  const todayStart = new Date()
+  todayStart.setHours(0, 0, 0, 0)
+  const period7Start = new Date(todayStart.getTime() - 6 * 86400000)
+  const prev7Start = new Date(todayStart.getTime() - 13 * 86400000)
+  const period7StartIso = period7Start.toISOString().slice(0, 10)
+  const prev7StartIso = prev7Start.toISOString().slice(0, 10)
+  const todayIso = todayStart.toISOString().slice(0, 10)
+
+  const txIn7 = transactions.filter(
+    (t) => t.date >= period7StartIso && t.date <= todayIso
+  )
+  const txPrev7 = transactions.filter(
+    (t) => t.date >= prev7StartIso && t.date < period7StartIso
+  )
+  const receiptValue7 = txIn7
+    .filter((t) => t.type === 'NHAP_HANG')
+    .reduce((s, t) => s + t.amount, 0)
+  const receiptValuePrev7 = txPrev7
+    .filter((t) => t.type === 'NHAP_HANG')
+    .reduce((s, t) => s + t.amount, 0)
+  const issueValue7 = txIn7
+    .filter((t) => t.type === 'XUAT_KHO_BAR')
+    .reduce((s, t) => s + t.amount, 0)
+  const issueValuePrev7 = txPrev7
+    .filter((t) => t.type === 'XUAT_KHO_BAR')
+    .reduce((s, t) => s + t.amount, 0)
+  const receiptCount7 = txIn7.filter((t) => t.type === 'NHAP_HANG').length
+  const receiptCountPrev7 = txPrev7.filter((t) => t.type === 'NHAP_HANG').length
+
+  const pctDelta = (cur: number, prev: number) => {
+    if (prev === 0) return cur === 0 ? 0 : 100
+    return ((cur - prev) / prev) * 100
+  }
+
+  const trends = {
+    receiptValue: {
+      current: receiptValue7,
+      previous: receiptValuePrev7,
+      delta: pctDelta(receiptValue7, receiptValuePrev7),
+    },
+    issueValue: {
+      current: issueValue7,
+      previous: issueValuePrev7,
+      delta: pctDelta(issueValue7, issueValuePrev7),
+    },
+    receiptCount: {
+      current: receiptCount7,
+      previous: receiptCountPrev7,
+      delta: pctDelta(receiptCount7, receiptCountPrev7),
+    },
+  }
+
   return {
     materials,
     transactions,
@@ -189,6 +242,7 @@ export function useInventoryStats() {
     last7Days,
     expiringMaterials,
     restockSuggestions,
+    trends,
   }
 }
 

@@ -320,8 +320,10 @@ export const useInventoryStore = create<InventoryState>()(
         set({ materials: initialMaterials, transactions: seedTransactions() }),
     }),
     {
-      name: 'tra-house-inventory-v1',
-      version: 1,
+      name: 'tra-house-inventory-v2',
+      version: 2,
+      // discard any persisted state from older versions → use fresh seed
+      migrate: () => undefined as unknown as Partial<InventoryState>,
     }
   )
 )

@@ -16,6 +16,7 @@ import {
   type ActiveOp,
   type ReceiptPrefill,
 } from '@/components/inventory/operation-dialogs'
+import { CommandPalette } from '@/components/inventory/command-palette'
 import { TransactionHistory } from '@/components/inventory/transaction-history'
 import { ReportsSection } from '@/components/inventory/reports-section'
 import { AppFooter } from '@/components/inventory/app-footer'
@@ -32,6 +33,11 @@ export default function Home() {
   const openOperation = (op: InventoryOperation, pf?: ReceiptPrefill) => {
     setPrefill(pf ?? null)
     setActiveOp(op)
+  }
+
+  const openOperationById = (opId: string) => {
+    const op = inventoryOperations.find((o) => o.id === opId)
+    if (op) openOperation(op)
   }
 
   const handleQuickReceipt = (materialId: string, qty: number) => {
@@ -76,6 +82,10 @@ export default function Home() {
         operation={activeOp}
         onOpenChange={(o) => !o && setActiveOp(null)}
         prefill={prefill}
+      />
+      <CommandPalette
+        onOpenSettings={() => setSettingsOpen(true)}
+        onOpenOperation={openOperationById}
       />
     </div>
   )
