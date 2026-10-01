@@ -9,7 +9,9 @@ const basePath = "/bachlong-inventory-project";
 const nextConfig: NextConfig = {
   ...(isGhPages
     ? { output: "export" as const, basePath, assetPrefix: basePath }
-    : {}),
+    // "standalone" is what the repo's `npm run build` script expects (it copies
+    // into .next/standalone for self-hosting); Vercel also builds fine from it.
+    : { output: "standalone" as const }),
   images: {
     unoptimized: true,
   },
