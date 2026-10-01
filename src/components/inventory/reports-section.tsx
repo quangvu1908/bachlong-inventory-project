@@ -29,6 +29,7 @@ import {
 } from '@/lib/inventory-stats'
 import { categoryLabels, categoryStyles } from '@/lib/inventory-data'
 import { downloadCSV, csvFilename } from '@/lib/csv-export'
+import { matchVi } from '@/lib/vi-search'
 import { useToast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
 
@@ -67,9 +68,7 @@ function StockReport() {
   const { toast } = useToast()
   const [query, setQuery] = React.useState('')
 
-  const filtered = materials.filter((m) =>
-    m.name.toLowerCase().includes(query.toLowerCase())
-  )
+  const filtered = materials.filter((m) => matchVi(m.name, query))
 
   const totalKho = materials.reduce((s, m) => s + m.unitPrice * m.stock, 0)
   const totalBar = materials.reduce((s, m) => {

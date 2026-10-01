@@ -22,6 +22,7 @@ import {
   type MaterialCategory,
 } from '@/lib/inventory-data'
 import { useInventoryStore } from '@/lib/inventory-store'
+import { matchVi } from '@/lib/vi-search'
 import {
   formatVND,
   formatNum,
@@ -93,7 +94,7 @@ export function MaterialManagement() {
 
   const filtered = React.useMemo(() => {
     let list = materials.filter((m) => {
-      const matchQuery = m.name.toLowerCase().includes(query.toLowerCase())
+      const matchQuery = matchVi(m.name, query)
       const matchCat = category === 'all' || m.category === category
       return matchQuery && matchCat
     })

@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/command'
 import { categoryLabels, categoryStyles, type Material } from '@/lib/inventory-data'
 import { formatNum } from '@/lib/inventory-stats'
+import { matchVi } from '@/lib/vi-search'
 import { cn } from '@/lib/utils'
 
 interface MaterialComboboxProps {
@@ -38,12 +39,10 @@ export function MaterialCombobox({
   const selected = materials.find((m) => m.id === value)
 
   const filtered = React.useMemo(() => {
-    const q = query.trim().toLowerCase()
+    const q = query.trim()
     if (!q) return materials
     return materials.filter(
-      (m) =>
-        m.name.toLowerCase().includes(q) ||
-        categoryLabels[m.category].toLowerCase().includes(q)
+      (m) => matchVi(m.name, q) || matchVi(categoryLabels[m.category], q)
     )
   }, [materials, query])
 

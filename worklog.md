@@ -296,3 +296,31 @@ Unresolved / Next-phase recommendations:
 - Combobox search chưa hỗ trợ gõ không dấu (vd "sua" thay "sữa") — có thể thêm normalize dấu tiếng Việt.
 - localStorage vẫn (chưa Prisma/API) — nếu multi-user cần backend.
 - Có thể thêm: lịch kiểm kê định kỳ (cron nhắc), export Excel (.xlsx), drag-drop NVL, multi-receipt batch nhập.
+
+---
+Task ID: 9
+Agent: main (Z.ai Code) — webDevReview cron round 8
+Task: Đánh giá trạng thái, QA, thêm diacritic-insensitive search (bỏ dấu tiếng Việt) cho combobox + material-management + reports search.
+
+Work Log:
+- Đọc worklog.md round 1-8 → app ổn định, không lỗi. QA agent-browser: render sạch, 0 console error.
+- **Tạo `vi-search.ts`**: utility `normalizeVi` (NFD decomposition + strip combining marks + đ→d + lowercase) và `matchVi(haystack, needle)` — cho phép gõ "sua" match "sữa", "tran" match "trân", "duong" match "đường".
+- **Wire vào 3 chỗ search**:
+  - `material-combobox.tsx`: filter NVL theo tên/danh mục dùng matchVi.
+  - `material-management.tsx`: ô "Tìm theo tên nguyên vật liệu" dùng matchVi.
+  - `reports-section.tsx` (StockReport): ô "Lọc theo tên NVL" dùng matchVi.
+- Lint sạch (0 error/warning). Dev log compile 200 OK.
+- Agent Browser QA end-to-end:
+  - **Combobox diacritic search VERIFIED**: mở Nhập Hàng → combobox → gõ "sua" (không dấu) → match 2 NVL "Sữa tươi", "Sữa đặc"; gõ "tran" → match "Đường trắng", "Trân châu đen", "Trân châu trắng".
+  - **Material-management search VERIFIED**: gõ "duong" (không dấu) → "Hiển thị 4 / 12 mục" (Đường nâu, Đường trắng, Sữa đặc có đường, Sữa tươi không đường — tất cả chứa "đường" normalized).
+  - Không console error / runtime error toàn bộ phiên.
+
+Stage Summary:
+- Diacritic-insensitive search (bỏ dấu tiếng Việt) trên 3 chỗ: MaterialCombobox, bảng NVL, báo cáo Tồn Kho — giải quyết unresolved round trước ("sua" thay "sữa").
+- UX tốt hơn cho người dùng gõ nhanh không dấu — đặc thù tiếng Việt.
+- Artifacts mới: `vi-search.ts` + mở rộng `material-combobox.tsx`, `material-management.tsx`, `reports-section.tsx`.
+
+Unresolved / Next-phase recommendations:
+- localStorage vẫn (chưa Prisma/API) — nếu multi-user cần backend.
+- Có thể thêm: lịch kiểm kê định kỳ (cron nhắc), export Excel (.xlsx), drag-drop NVL, multi-receipt batch nhập.
+- Combobox chưa keyboard navigate (cmdk hỗ trợ sẵn ↑↓/↵ nhưng nên verify).
