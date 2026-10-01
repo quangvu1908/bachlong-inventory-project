@@ -25,6 +25,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
+import { Switch } from '@/components/ui/switch'
 import { Badge } from '@/components/ui/badge'
 import {
   Select,
@@ -38,7 +39,7 @@ import {
   CardContent,
 } from '@/components/ui/card'
 import { useInventoryStore } from '@/lib/inventory-store'
-import { formatVND, formatNum } from '@/lib/inventory-stats'
+import { formatVND, formatNum, formatDate } from '@/lib/inventory-stats'
 import { useToast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
 import type { InventoryOperation } from '@/lib/inventory-data'
@@ -220,18 +221,33 @@ function ReceiptForm({
   const [note, setNote] = React.useState(
     prefill ? 'Nhập bổ sung theo gợi ý' : ''
   )
+  const [expiryDate, setExpiryDate] = React.useState<string>('')
+  const [updateExpiry, setUpdateExpiry] = React.useState(false)
 
   const selected = materials.find((m) => m.id === materialId)
   React.useEffect(() => {
     if (selected && unitPrice === 0) setUnitPrice(selected.unitPrice)
   }, [selected, unitPrice])
+  // when toggling "update expiry" on, prefill with current expiry if any
+  React.useEffect(() => {
+    if (updateExpiry && selected && !expiryDate) {
+      setExpiryDate(selected.expiryDate ?? '')
+    }
+  }, [updateExpiry, selected, expiryDate])
 
   const amount = quantity * unitPrice
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault()
     if (!materialId || quantity <= 0) return
-    recordReceipt({ materialId, quantity, unitPrice, date, note })
+    recordReceipt({
+      materialId,
+      quantity,
+      unitPrice,
+      date,
+      note,
+      expiryDate: updateExpiry ? expiryDate || undefined : undefined,
+    })
     toast({
       title: 'Đã ghi nhận nhập hàng',
       description: `${selected?.name}: +${formatNum(quantity)} ${selected?.unit} · ${formatVND(amount)}`,
@@ -308,6 +324,38 @@ function ReceiptForm({
             className="min-h-[60px] resize-none"
           />
         </Field>
+
+        {/* Expiry toggle */}
+        <div className="rounded-xl border border-border/60 bg-muted/30 p-3">
+          <label className="flex cursor-pointer items-center justify-between gap-2">
+            <span className="text-xs font-medium text-muted-foreground">
+              Cập nhật hạn sử dụng cho lô này
+            </span>
+            <Switch checked={updateExpiry} onCheckedChange={setUpdateExpiry} />
+          </label>
+          {updateExpiry && (
+            <div className="mt-3 space-y-1.5">
+              <Label htmlFor="r-expiry" className="text-xs text-muted-foreground">
+                Hạn sử dụng mới
+              </Label>
+              <div className="relative">
+                <Calendar className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  id="r-expiry"
+                  type="date"
+                  value={expiryDate}
+                  onChange={(e) => setExpiryDate(e.target.value)}
+                  className="pl-9"
+                />
+              </div>
+              {selected?.expiryDate && !expiryDate && (
+                <p className="text-[11px] text-muted-foreground">
+                  Hạn hiện tại: {formatDate(selected.expiryDate)}
+                </p>
+              )}
+            </div>
+          )}
+        </div>
       </div>
 
       {amount > 0 && (

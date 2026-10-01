@@ -165,3 +165,39 @@ Unresolved / Next-phase recommendations:
 - localStorage vẫn (chưa Prisma/API) — nếu multi-user cần backend.
 - Có thể thêm: in PDF phiếu, lịch kiểm kê định kỳ (cron nhắc), so sánh kỳ tùy chọn, drag-drop NVL, export Excel đầy đủ.
 - Expiry chưa wire vào operation dialogs (nhập hàng có thể set lại hạn mới).
+
+---
+Task ID: 5
+Agent: main (Z.ai Code) — webDevReview cron round 4
+Task: Đánh giá trạng thái, QA, wire expiry vào dialog Nhập Hàng, thêm toggle so sánh kỳ (7/30 ngày) cho trend strip, polish styling.
+
+Work Log:
+- Đọc worklog.md round 1-4 → app ổn định, không lỗi. QA agent-browser: render sạch, 0 console error.
+- **Wire expiry vào Nhập Hàng** (unresolved round trước):
+  - Mở rộng `store.recordReceipt` nhận `expiryDate?` param, apply vào material khi có (`...(expiryDate !== undefined ? { expiryDate } : {})`).
+  - Thêm UI trong `ReceiptForm`: Switch "Cập nhật hạn sử dụng cho lô này" + date picker (id r-expiry). Khi bật switch, prefill với expiry hiện tại của NVL (useEffect). Truyền `expiryDate: updateExpiry ? expiryDate || undefined : undefined` khi submit.
+  - Import Switch + formatDate.
+- **Toggle so sánh kỳ (7/30 ngày)** cho trend strip:
+  - `useInventoryStats(trendDays=7)` — tham số hóa kỳ trend, tính `periodStart`/`prevStart` theo `trendDays`.
+  - TrendStrip: state `days` (7|30), toggle button group (7 ngày / 30 ngày, pill style), labels động (`Tiền nhập ${periodLabel}`, `vs {days} ngày trước`), re-gọi `useInventoryStats(days)`.
+  - Thêm `trends.days` vào return.
+- Polish: period toggle pill style (active bg-primary), trend cards ring tone, sticky group headings trong command palette, smooth motion.
+- Lint sạch (0 error/warning). Dev log compile 200 OK.
+- Agent Browser QA end-to-end:
+  - **Period toggle VERIFIED**: click "30 ngày" → labels đổi thành "TIỀN NHẬP 30 NGÀY", "vs 30 ngày trước", values đúng. Click "7 ngày" → về "TIỀN NHẬP 7 NGÀY".
+  - **Expiry toggle UI VERIFIED**: mở dialog Nhập Hàng → switch "Cập nhật hạn sử dụng cho lô này" hiện, toggle ON → date picker hiện prefill month 12 (từ expiry hiện tại Trà đen 2026-12-01, đúng prefill logic). Điền qty 2, submit → receipt thành công (+2 kg, stock 8,5→10,5).
+  - **Reset data VERIFIED**: mở Settings → "Đặt lại dữ liệu kho…" → confirm → seed restored (Trà đen 8.5 kg, expiry 2026-12-01).
+  - Giới hạn test: chọn ngày qua calendar automation không hoàn tất (lỗi tooling, không phải code). Code path đúng: `expiryDate: updateExpiry ? expiryDate || undefined : undefined` + store apply khi `expiryDate !== undefined`.
+  - Không console error / runtime error toàn bộ phiên.
+
+Stage Summary:
+- Wire expiry vào Nhập Hàng (unresolved round trước): store + UI + prefill logic, cho phép cập nhật hạn sử dụng khi nhập lô mới — đặc thù F&B quan trọng.
+- Toggle so sánh kỳ 7/30 ngày cho trend strip: linh hoạt xem xu hướng ngắn/trung hạn.
+- Polish: period pill toggle, trend tone colors.
+- Artifacts mở rộng: `inventory-store.ts` (recordReceipt expiryDate), `inventory-stats.ts` (trendDays param), `operation-dialogs.tsx` (expiry toggle UI), `dashboard-section.tsx` (period toggle).
+
+Unresolved / Next-phase recommendations:
+- Expiry update qua calendar automation chưa test hoàn tất (giới hạn tooling) — nên verify bằng unit test hoặc manual test thực tế.
+- localStorage vẫn (chưa Prisma/API) — nếu multi-user cần backend.
+- Có thể thêm: in PDF phiếu, lịch kiểm kê định kỳ (cron nhắc), so sánh kỳ tùy chọn (14/90 ngày), drag-drop NVL, export Excel đầy đủ.
+- Dashboard line chart vẫn cố định 7 ngày — có thể đồng bộ với period toggle.

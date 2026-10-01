@@ -401,7 +401,8 @@ export function DashboardSection() {
 }
 
 function TrendStrip() {
-  const stats = useInventoryStats()
+  const [days, setDays] = React.useState<7 | 30>(7)
+  const stats = useInventoryStats(days)
   const { trends, expiringMaterials } = stats
 
   const expiringCount = expiringMaterials.length
@@ -409,9 +410,10 @@ function TrendStrip() {
     (e) => e.level === 'expired' || e.level === 'critical'
   ).length
 
+  const periodLabel = `${days} ngày`
   const trendCards = [
     {
-      label: 'Tiền nhập 7 ngày',
+      label: `Tiền nhập ${periodLabel}`,
       current: trends.receiptValue.current,
       previous: trends.receiptValue.previous,
       delta: trends.receiptValue.delta,
@@ -419,7 +421,7 @@ function TrendStrip() {
       tone: 'text-teal-600 bg-teal-500/10 ring-teal-500/20',
     },
     {
-      label: 'Xuất sang Bar 7 ngày',
+      label: `Xuất sang Bar ${periodLabel}`,
       current: trends.issueValue.current,
       previous: trends.issueValue.previous,
       delta: trends.issueValue.delta,
@@ -438,12 +440,40 @@ function TrendStrip() {
   ]
 
   return (
+    <div className="mt-3">
+      {/* Period toggle */}
+      <div className="mb-2 flex items-center justify-end">
+        <div className="inline-flex items-center gap-0.5 rounded-full border border-border/60 bg-card/60 p-0.5 text-xs">
+          <button
+            onClick={() => setDays(7)}
+            className={cn(
+              'rounded-full px-3 py-1 font-medium transition-all',
+              days === 7
+                ? 'bg-primary text-primary-foreground shadow-sm'
+                : 'text-muted-foreground hover:text-foreground'
+            )}
+          >
+            7 ngày
+          </button>
+          <button
+            onClick={() => setDays(30)}
+            className={cn(
+              'rounded-full px-3 py-1 font-medium transition-all',
+              days === 30
+                ? 'bg-primary text-primary-foreground shadow-sm'
+                : 'text-muted-foreground hover:text-foreground'
+            )}
+          >
+            30 ngày
+          </button>
+        </div>
+      </div>
     <motion.div
       initial={{ opacity: 0, y: 16 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: '-40px' }}
       transition={{ duration: 0.4 }}
-      className="mt-3 grid gap-3 lg:grid-cols-4"
+      className="grid gap-3 lg:grid-cols-4"
     >
       {trendCards.map((c) => {
         const Icon = c.icon
@@ -496,7 +526,7 @@ function TrendStrip() {
               </span>
             </div>
             <div className="mt-0.5 text-[10px] text-muted-foreground/80">
-              vs 7 ngày trước: {c.isCount ? c.previous : formatVND(c.previous)}
+              vs {days} ngày trước: {c.isCount ? c.previous : formatVND(c.previous)}
             </div>
           </Card>
         )
@@ -542,6 +572,7 @@ function TrendStrip() {
         </div>
       </Card>
     </motion.div>
+    </div>
   )
 }
 

@@ -94,7 +94,7 @@ export interface CategoryValue {
   count: number
 }
 
-export function useInventoryStats() {
+export function useInventoryStats(trendDays: number = 7) {
   const materials = useInventoryStore((s) => s.materials)
   const transactions = useInventoryStore((s) => s.transactions)
 
@@ -175,35 +175,35 @@ export function useInventoryStats() {
     }
   })
 
-  // trend: this 7 days vs previous 7 days
+  // trend: this N days vs previous N days
   const todayStart = new Date()
   todayStart.setHours(0, 0, 0, 0)
-  const period7Start = new Date(todayStart.getTime() - 6 * 86400000)
-  const prev7Start = new Date(todayStart.getTime() - 13 * 86400000)
-  const period7StartIso = period7Start.toISOString().slice(0, 10)
-  const prev7StartIso = prev7Start.toISOString().slice(0, 10)
+  const periodStart = new Date(todayStart.getTime() - (trendDays - 1) * 86400000)
+  const prevStart = new Date(todayStart.getTime() - (2 * trendDays - 1) * 86400000)
+  const periodStartIso = periodStart.toISOString().slice(0, 10)
+  const prevStartIso = prevStart.toISOString().slice(0, 10)
   const todayIso = todayStart.toISOString().slice(0, 10)
 
-  const txIn7 = transactions.filter(
-    (t) => t.date >= period7StartIso && t.date <= todayIso
+  const txInPeriod = transactions.filter(
+    (t) => t.date >= periodStartIso && t.date <= todayIso
   )
-  const txPrev7 = transactions.filter(
-    (t) => t.date >= prev7StartIso && t.date < period7StartIso
+  const txPrevPeriod = transactions.filter(
+    (t) => t.date >= prevStartIso && t.date < periodStartIso
   )
-  const receiptValue7 = txIn7
+  const receiptValuePeriod = txInPeriod
     .filter((t) => t.type === 'NHAP_HANG')
     .reduce((s, t) => s + t.amount, 0)
-  const receiptValuePrev7 = txPrev7
+  const receiptValuePrev = txPrevPeriod
     .filter((t) => t.type === 'NHAP_HANG')
     .reduce((s, t) => s + t.amount, 0)
-  const issueValue7 = txIn7
+  const issueValuePeriod = txInPeriod
     .filter((t) => t.type === 'XUAT_KHO_BAR')
     .reduce((s, t) => s + t.amount, 0)
-  const issueValuePrev7 = txPrev7
+  const issueValuePrev = txPrevPeriod
     .filter((t) => t.type === 'XUAT_KHO_BAR')
     .reduce((s, t) => s + t.amount, 0)
-  const receiptCount7 = txIn7.filter((t) => t.type === 'NHAP_HANG').length
-  const receiptCountPrev7 = txPrev7.filter((t) => t.type === 'NHAP_HANG').length
+  const receiptCountPeriod = txInPeriod.filter((t) => t.type === 'NHAP_HANG').length
+  const receiptCountPrev = txPrevPeriod.filter((t) => t.type === 'NHAP_HANG').length
 
   const pctDelta = (cur: number, prev: number) => {
     if (prev === 0) return cur === 0 ? 0 : 100
@@ -211,20 +211,21 @@ export function useInventoryStats() {
   }
 
   const trends = {
+    days: trendDays,
     receiptValue: {
-      current: receiptValue7,
-      previous: receiptValuePrev7,
-      delta: pctDelta(receiptValue7, receiptValuePrev7),
+      current: receiptValuePeriod,
+      previous: receiptValuePrev,
+      delta: pctDelta(receiptValuePeriod, receiptValuePrev),
     },
     issueValue: {
-      current: issueValue7,
-      previous: issueValuePrev7,
-      delta: pctDelta(issueValue7, issueValuePrev7),
+      current: issueValuePeriod,
+      previous: issueValuePrev,
+      delta: pctDelta(issueValuePeriod, issueValuePrev),
     },
     receiptCount: {
-      current: receiptCount7,
-      previous: receiptCountPrev7,
-      delta: pctDelta(receiptCount7, receiptCountPrev7),
+      current: receiptCountPeriod,
+      previous: receiptCountPrev,
+      delta: pctDelta(receiptCountPeriod, receiptCountPrev),
     },
   }
 

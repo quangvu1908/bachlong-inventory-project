@@ -36,13 +36,15 @@ interface InventoryState {
   /** add or update a material */
   upsertMaterial: (m: Omit<Material, 'id'> & { id?: string }) => string
   deleteMaterial: (id: string) => void
-  /** record a receipt: +stock */
+  /** record a receipt: +stock (optionally update expiry) */
   recordReceipt: (input: {
     materialId: string
     quantity: number
     unitPrice: number
     date: string
     note?: string
+    /** nếu có, cập nhật hạn sử dụng mới cho NVL */
+    expiryDate?: string
   }) => void
   /** issue from warehouse to bar: -stock, +barStock */
   recordIssue: (input: {
@@ -195,7 +197,7 @@ export const useInventoryStore = create<InventoryState>()(
           materials: state.materials.filter((m) => m.id !== id),
         })),
 
-      recordReceipt: ({ materialId, quantity, unitPrice, date, note }) => {
+      recordReceipt: ({ materialId, quantity, unitPrice, date, note, expiryDate }) => {
         const m = get().materials.find((x) => x.id === materialId)
         if (!m) return
         const before = m.stock
@@ -218,7 +220,12 @@ export const useInventoryStore = create<InventoryState>()(
         set((state) => ({
           materials: state.materials.map((x) =>
             x.id === materialId
-              ? { ...x, stock: after, unitPrice }
+              ? {
+                  ...x,
+                  stock: after,
+                  unitPrice,
+                  ...(expiryDate !== undefined ? { expiryDate } : {}),
+                }
               : x
           ),
           transactions: [tx, ...state.transactions],
