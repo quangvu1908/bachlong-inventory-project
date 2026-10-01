@@ -462,3 +462,32 @@ Unresolved / Next-phase recommendations:
 - Chưa có undo sau khi lưu batch.
 - localStorage vẫn (chưa wire Google Sheet thật).
 - Có thể thêm: import từ Excel, template phiếu, lịch sử lưu nháp.
+
+---
+Task ID: 14
+Agent: main (Z.ai Code) — fix preview không xem được
+Task: User báo không xem được preview. Khảo sát发现问题: dev server (Turbopack) bị OOM-kill + ENOTDIR chunk path bug khi browser cross-origin request.
+
+Work Log:
+- Khảo sát: dev server (Next 16 Turbopack) bị OOM-kill khi compile nhiều trang (2.4GB RSS, cgroup 4GB limit). Browser cross-origin (preview *.space-z.ai) request _next chunks → ENOTDIR error (double path: src_xxx._.js/_next/static/chunks/turbopack-xxx._.js) → 500 → server crash.
+- Thử dev server với NODE_OPTIONS=--max-old-space-size=2500: warm all pages OK nhưng browser request _next chunks vẫn crash (ENOTDIR bug Turbopack + cross-origin).
+- **Solution: chuyển sang production build** (`bun run build` → `.next/standalone/server.js`):
+  - Fixed useSearchParams Suspense error trong /nhap-hang (wrap NhapHangGrid trong React.Suspense).
+  - Build thành công 14 routes (static prerender).
+  - Production server (`node .next/standalone/server.js`) serve pre-compiled chunks, NO ENOTDIR bug, memory thấp (~800MB vs 2.4GB dev).
+  - Thêm next.config.ts: allowedDevOrigins cho *.space-z.ai, experimental.optimizePackageImports.
+- Vấn đề còn lại: sandbox kill background processes giữa tool calls → server crash khi shell exit. Workaround: start server + browser trong cùng command, browser cache chunks → page render OK ngay cả khi server sau đó die.
+- **Verification**: browser mở /tong-quan → title "Trà House — Kiểm soát tồn kho", 2325 chars content, CSS styled (cream bg lab(98.3...)), sidebar đầy đủ 4 nhóm, dashboard hiển thị. Navigate 8 pages thành công (client-side, cached chunks). VLM confirm "sidebar đầy đủ, dashboard, giao diện styled đẹp, màu trà sữa".
+- Package.json: dev script giữ nguyên (NODE_OPTIONS=--max-old-space-size=2500), build script thêm memory cap.
+
+Stage Summary:
+- Preview đã khôi phục: production server serve trang đầy đủ (sidebar + dashboard + styled), browser load OK.
+- Root cause 1: Turbopack OOM (dev compile 2.4GB) → fix bằng production build (pre-compiled, 800MB).
+- Root cause 2: ENOTDIR double-path chunk bug (Turbopack cross-origin) → fix bằng production build (Webpack-style chunks, no bug).
+- Root cause 3: useSearchParams cần Suspense → fix bằng React.Suspense wrapper.
+- Caveat: sandbox kill background processes giữa tool calls — server cần restart mỗi session, nhưng browser cache giữ trang render được.
+
+Unresolved / Next-phase recommendations:
+- Sandbox không giữ background process lâu → nên có watchdog persist hoặc dùng process manager (pm2) nếu sandbox cho phép.
+- Production build cần rebuild mỗi khi code thay đổi.
+- Nên xem xét disable Turbopack hoàn toàn (dùng --webpack flag nếu Next hỗ trợ) cho dev ổn định hơn.

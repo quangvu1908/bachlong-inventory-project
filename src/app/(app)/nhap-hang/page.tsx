@@ -22,6 +22,23 @@ interface ReceiptRow {
 }
 
 export default function NhapHangPage() {
+  return (
+    <PageContainer>
+      <PageHeader
+        icon={PackagePlus}
+        title="Nhập Hàng"
+        code="NHAP_HANG"
+        description="Ghi nhận lô hàng nhập kho từ nhà cung cấp. Chọn nhiều NVL, nhập số lượng & đơn giá, lưu cùng lúc."
+        accent="from-amber-500/15 to-amber-500/5 text-amber-700 dark:text-amber-300"
+      />
+      <React.Suspense fallback={<div className="py-8 text-center text-sm text-muted-foreground">Đang tải…</div>}>
+        <NhapHangGrid />
+      </React.Suspense>
+    </PageContainer>
+  )
+}
+
+function NhapHangGrid() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { toast } = useToast()
@@ -100,18 +117,9 @@ export default function NhapHangPage() {
   }
 
   return (
-    <PageContainer>
-      <PageHeader
-        icon={PackagePlus}
-        title="Nhập Hàng"
-        code="NHAP_HANG"
-        description="Ghi nhận lô hàng nhập kho từ nhà cung cấp. Chọn nhiều NVL, nhập số lượng & đơn giá, lưu cùng lúc."
-        accent="from-amber-500/15 to-amber-500/5 text-amber-700 dark:text-amber-300"
-      />
-
-      <OperationTable
-        title="Nhập Hàng"
-        dateLabel="Ngày nhận"
+    <OperationTable
+      title="Nhập Hàng"
+      dateLabel="Ngày nhận"
         date={date}
         onDateChange={setDate}
         note={note}
@@ -196,6 +204,5 @@ export default function NhapHangPage() {
           </>
         )}
       />
-    </PageContainer>
   )
 }
