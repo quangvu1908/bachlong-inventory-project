@@ -7,6 +7,7 @@ import {
   Search,
   Bell,
   ChevronDown,
+  Keyboard,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ThemeToggle } from '@/components/theme-toggle'
@@ -118,6 +119,22 @@ export function AppHeader({ onOpenSettings, lowStockCount }: AppHeaderProps) {
         </Button>
 
         <ThemeToggle />
+
+        {/* Keyboard shortcuts help */}
+        <Button
+          variant="ghost"
+          size="icon"
+          className="hidden rounded-full sm:inline-flex"
+          onClick={() =>
+            window.dispatchEvent(
+              new CustomEvent('tra-house:open-shortcuts')
+            )
+          }
+          aria-label="Phím tắt"
+          title="Phím tắt (Shift + ?)"
+        >
+          <Keyboard className="size-4" />
+        </Button>
 
         {/* Settings trigger */}
         <Button

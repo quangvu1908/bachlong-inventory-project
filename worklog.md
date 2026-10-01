@@ -353,3 +353,27 @@ Unresolved / Next-phase recommendations:
 - Excel export dùng SpreadsheetML 2003 (.xls) thay vì .xlsx mới — đủ cho F&B, nếu cần .xlsx thật phải thêm thư viện (xlsx/exceljs).
 - localStorage vẫn (chưa Prisma/API) — nếu multi-user cần backend.
 - Có thể thêm: lịch kiểm kê định kỳ (cron nhắc), drag-drop NVL, multi-receipt batch nhập.
+
+---
+Task ID: 11
+Agent: main (Z.ai Code) — webDevReview cron round 10
+Task: Đánh giá trạng thái, QA, thêm keyboard shortcuts help dialog (Shift+?) + nút header.
+
+Work Log:
+- Đọc worklog.md round 1-10 → app ổn định, không lỗi. QA agent-browser: render sạch, 0 console error.
+- **Build ShortcutsHelp** (`shortcuts-help.tsx`): Dialog hiển thị tất cả phím tắt chia 3 nhóm — Tổng quan (⌘K mở command palette, Shift+? mở help, Esc đóng), Trong bảng lệnh (↑↓ di chuyển, ↵ chọn), Điều hướng nhanh (Tab, Space). Mở bằng Shift+? hoặc nút icon Keyboard trong header. Wire custom event 'tra-house:open-shortcuts' để header button mở dialog. KBD styled (border + bg-card + shadow-sm).
+- Wire vào page.tsx (sau CommandPalette), thêm nút icon Keyboard trong app-header (next to ThemeToggle, hidden trên mobile, title="Phím tắt (Shift + ?)").
+- Lint sạch (0 error/warning). Dev log compile 200 OK.
+- Agent Browser QA end-to-end:
+  - **Shortcuts help VERIFIED**: click nút keyboard → dialog mở với 3 nhóm (TỔNG QUAN, TRONG BẢNG LỆNH, ĐIỀU HƯỚNG NHANH), liệt kê đầy đủ ⌘K, Shift+?, Esc, ↑↓, ↵, Tab, Space + mô tả. Footer "Mở nhanh bằng Shift ?".
+  - Không console error / runtime error toàn bộ phiên.
+
+Stage Summary:
+- Keyboard shortcuts help dialog: discoverability cho ⌘K và các phím tắt — người dùng mới dễ học cách dùng nhanh.
+- 2 cách mở: Shift+? (phím tắt) hoặc nút icon Keyboard trong header.
+- Artifacts mới: `shortcuts-help.tsx` + mở rộng `app-header.tsx` (nút keyboard), `page.tsx` (wire ShortcutsHelp).
+
+Unresolved / Next-phase recommendations:
+- Shift+? shortcut chưa test bằng agent-browser (cần eval keyboard event); đã verify nút header mở dialog.
+- localStorage vẫn (chưa Prisma/API) — nếu multi-user cần backend.
+- Có thể thêm: lịch kiểm kê định kỳ (cron nhắc), drag-drop NVL, multi-receipt batch nhập.

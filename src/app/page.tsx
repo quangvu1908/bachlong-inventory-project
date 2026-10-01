@@ -17,6 +17,7 @@ import {
   type ReceiptPrefill,
 } from '@/components/inventory/operation-dialogs'
 import { CommandPalette } from '@/components/inventory/command-palette'
+import { ShortcutsHelp } from '@/components/inventory/shortcuts-help'
 import { TransactionHistory } from '@/components/inventory/transaction-history'
 import { ReportsSection } from '@/components/inventory/reports-section'
 import { AppFooter } from '@/components/inventory/app-footer'
@@ -87,6 +88,7 @@ export default function Home() {
         onOpenSettings={() => setSettingsOpen(true)}
         onOpenOperation={openOperationById}
       />
+      <ShortcutsHelp />
     </div>
   )
 }
