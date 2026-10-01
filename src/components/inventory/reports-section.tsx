@@ -65,7 +65,7 @@ export function ReportsSection() {
 
 /* ---------- Tồn Kho report ---------- */
 
-function StockReport() {
+export function StockReport() {
   const { materials } = useInventoryStats()
   const { toast } = useToast()
   const [query, setQuery] = React.useState('')
@@ -257,7 +257,7 @@ function StockReport() {
 
 /* ---------- Giá Vốn report ---------- */
 
-function CostReport() {
+export function CostReport() {
   const transactions = useInventoryStore((s) => s.transactions)
   const materials = useInventoryStore((s) => s.materials)
   const { toast } = useToast()

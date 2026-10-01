@@ -377,3 +377,58 @@ Unresolved / Next-phase recommendations:
 - Shift+? shortcut chưa test bằng agent-browser (cần eval keyboard event); đã verify nút header mở dialog.
 - localStorage vẫn (chưa Prisma/API) — nếu multi-user cần backend.
 - Có thể thêm: lịch kiểm kê định kỳ (cron nhắc), drag-drop NVL, multi-receipt batch nhập.
+
+---
+Task ID: 12
+Agent: main (Z.ai Code) — refactor multipage theo yêu cầu user
+Task: Cấu trúc lại thành multipage app (mỗi nghiệp vụ 1 route), sidebar menu responsive (desktop cố định + mobile drawer), form nghiệp vụ inline, Google Sheet integration config.
+
+Work Log:
+- Đọc yêu cầu user: multipage (mỗi nghiệp vụ 1 đường dẫn), sidebar menu (không gộp landing), responsive desktop/mobile, dữ liệu lưu Google Sheet.
+- **Tạo nav config** (`nav-config.ts`): 10 nav items chia 4 nhóm (Tổng quan, Nghiệp vụ, Báo cáo, Hệ thống) — mỗi item có href, label, icon, code, group.
+- **Tạo AppShell** (`app-shell.tsx`): 
+  - Desktop (lg+): sidebar cố định bên trái (w-64) với brand logo, nav grouped, footer trạng thái (total materials + low stock badge).
+  - Mobile: sidebar ẩn, top bar có hamburger mở Sheet drawer (left) với cùng nav content.
+  - Top bar: current page label + icon, bell notification badge, ⌘K button, keyboard button, theme toggle.
+  - usePathname active route highlighting.
+  - Auto-close drawer on route change.
+- **Route group `(app)/`**: layout.tsx (client) dùng AppShell + CommandPalette + ShortcutsHelp + AppFooter. Redirect `/` → `/tong-quan`.
+- **10 route pages**:
+  - `/tong-quan` — InventoryFlow + DashboardSection + AlertsPanel (quick-receipt → /nhap-hang?mid&qty)
+  - `/nhap-hang` — ReceiptForm inline (đọc query params mid+qty cho prefill) + PageHeader
+  - `/xuat-kho-bar` — IssueForm inline
+  - `/kiem-kho` — WarehouseCountForm inline
+  - `/kiem-bar` — BarCountForm inline
+  - `/ton-kho` — StockReport
+  - `/gia-von` — CostReport
+  - `/nguyen-vat-lieu` — MaterialManagement
+  - `/lich-su` — TransactionHistory
+  - `/cai-dat` — Settings page inline (6 SettingCard: cửa hàng, đơn vị, nhắc nhở, giá vốn, Google Sheet, dữ liệu)
+- **Refactor operation-dialogs.tsx**: export ReceiptForm/IssueForm/WarehouseCountForm/BarCountForm. Bỏ OpHeader (dùng DialogHeader/DialogTitle gây lỗi "must be used within Dialog" khi render inline) → thay bằng plain h2/p. Bỏ OpHeader calls trong 4 forms (pages đã có PageHeader).
+- **Export StockReport/CostReport** từ reports-section.tsx.
+- **CommandPalette**: dùng useRouter().push() thay window.location.href (lint: "value cannot be modified"). Operations navigate trực tiếp tới routes.
+- **Google Sheet integration** (trong /cai-dat): GoogleSheetCard với Sheet ID + Apps Script Web App URL + nút Kết nối (simulate connect) + hướng dẫn thiết lập (details/summary). Khi kết nối, badge "Đã kết nối"; ngắt kết nối → quay localStorage.
+- Tạo `page-header.tsx` (PageHeader + PageContainer) cho consistent styling các page.
+- Lint sạch. Sửa lỗi: layout server component truyền function props → thêm 'use client'; OpHeader Dialog* context → plain elements.
+- Agent Browser QA end-to-end:
+  - `/` redirect → `/tong-quan` OK.
+  - Sidebar desktop: 4 nhóm nav hiển thị, active highlight, footer "12 NVL · 1 sắp hết".
+  - Click "Nhập Hàng" → navigate `/nhap-hang`, form inline hiển thị (combobox NVL, số lượng, đơn giá, hạn sử dụng toggle, nút Ghi nhận).
+  - Submit receipt (4 kg Trà đen) → redirect `/lich-su`, toast "Đã ghi nhận nhập hàng · +4 kg · 720.000 ₫", giao dịch xuất hiện đầu history.
+  - Mobile 390px: sidebar ẩn, hamburger hiện, click → drawer mở với đầy đủ nav. VLM confirm "không sidebar cố định, có hamburger, nội dung tốt".
+  - `/cai-dat`: 6 cards hiển thị, Google Sheet card có Sheet ID + Apps Script URL + Kết nối + hướng dẫn.
+  - Không runtime error.
+
+Stage Summary:
+- **Multipage app** hoàn chỉnh: 10 routes, mỗi nghiệp vụ 1 đường dẫn riêng (user yêu cầu).
+- **Sidebar menu** responsive: cố định desktop (w-64) + drawer mobile (hamburger).
+- **Form nghiệp vụ inline** (không dialog) — clean hơn vì đã ở page riêng.
+- **Google Sheet integration config**: UI cấu hình Sheet ID + Apps Script URL + hướng dẫn thiết lập (user yêu cầu lưu Google Sheet).
+- Command palette + shortcuts help + theme toggle hoạt động trên mọi page (qua layout).
+- Artifacts mới: `nav-config.ts`, `app-shell.tsx`, `page-header.tsx`, 10 route pages, `(app)/layout.tsx`.
+
+Unresolved / Next-phase recommendations:
+- Google Sheet integration hiện là UI config + simulate connect — chưa wire thật tới Apps Script API (cần user deploy Apps Script Web App, sau đó wire fetch POST/GET). Nên tạo `google-sheet-adapter.ts` gọi fetch tới Apps Script URL khi connected.
+- localStorage vẫn là fallback — khi Google Sheet connected, nên sync store actions tới Sheet.
+- OperationDialogs component giờ là dead code (operations dùng pages) — có thể xóa.
+- app-header.tsx, operations-grid.tsx, settings-panel.tsx (SettingsSheet/Overview) là dead code — có thể dọn.

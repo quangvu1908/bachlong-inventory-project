@@ -107,7 +107,7 @@ function OpHeader({
   description: string
 }) {
   return (
-    <DialogHeader>
+    <div className="op-header">
       <div className="flex items-start gap-3">
         <div
           className={cn(
@@ -119,15 +119,15 @@ function OpHeader({
         </div>
         <div className="flex-1">
           <div className="flex flex-wrap items-center gap-2">
-            <DialogTitle className="text-xl">{title}</DialogTitle>
+            <h2 className="text-xl font-semibold leading-none">{title}</h2>
             <Badge variant="secondary" className="font-mono text-[10px]">
               {code}
             </Badge>
           </div>
-          <DialogDescription className="mt-1">{description}</DialogDescription>
+          <p className="mt-1 text-sm text-muted-foreground">{description}</p>
         </div>
       </div>
-    </DialogHeader>
+    </div>
   )
 }
 
@@ -195,7 +195,7 @@ function MaterialSummary({ materialId }: { materialId: string }) {
 
 /* ---------- Nhập Hàng ---------- */
 
-function ReceiptForm({
+export function ReceiptForm({
   onDone,
   prefill,
 }: {
@@ -251,13 +251,6 @@ function ReceiptForm({
 
   return (
     <form onSubmit={submit} className="space-y-4">
-      <OpHeader
-        icon={PackagePlus}
-        accent="from-amber-500/15 to-amber-500/5 text-amber-700 dark:text-amber-300"
-        title="Nhập Hàng"
-        code="NHAP_HANG"
-        description="Ghi nhận lô hàng nhập kho từ nhà cung cấp."
-      />
       <div className="space-y-3">
         <Field label="Nguyên vật liệu">
           <MaterialCombobox
@@ -372,7 +365,7 @@ function ReceiptForm({
 
 /* ---------- Xuất Kho Ra Bar ---------- */
 
-function IssueForm({ onDone }: { onDone: () => void }) {
+export function IssueForm({ onDone }: { onDone: () => void }) {
   const { toast } = useToast()
   const materials = useMaterialOptions()
   const recordIssue = useInventoryStore((s) => s.recordIssue)
@@ -407,13 +400,6 @@ function IssueForm({ onDone }: { onDone: () => void }) {
 
   return (
     <form onSubmit={submit} className="space-y-4">
-      <OpHeader
-        icon={ArrowRightLeft}
-        accent="from-orange-500/15 to-orange-500/5 text-orange-700 dark:text-orange-300"
-        title="Xuất Kho Ra Bar"
-        code="XUAT_KHO_BAR"
-        description="Chuyển NVL từ Kho Dự Trữ sang Quầy Bar (nội bộ)."
-      />
       <div className="space-y-3">
         <Field label="Nguyên vật liệu">
           <MaterialCombobox
@@ -492,7 +478,7 @@ function IssueForm({ onDone }: { onDone: () => void }) {
 
 /* ---------- Kiểm Kho (warehouse count) ---------- */
 
-function WarehouseCountForm({ onDone }: { onDone: () => void }) {
+export function WarehouseCountForm({ onDone }: { onDone: () => void }) {
   const { toast } = useToast()
   const materials = useMaterialOptions()
   const recordWarehouseCount = useInventoryStore((s) => s.recordWarehouseCount)
@@ -522,13 +508,6 @@ function WarehouseCountForm({ onDone }: { onDone: () => void }) {
 
   return (
     <form onSubmit={submit} className="space-y-4">
-      <OpHeader
-        icon={ClipboardCheck}
-        accent="from-teal-500/15 to-teal-500/5 text-teal-700 dark:text-teal-300"
-        title="Kiểm Kho"
-        code="KIEM_KE"
-        description="Kiểm kê tồn Kho Dự Trữ — điều chỉnh số dư thực tế."
-      />
       <div className="space-y-3">
         <Field label="Nguyên vật liệu">
           <MaterialCombobox
@@ -606,7 +585,7 @@ function WarehouseCountForm({ onDone }: { onDone: () => void }) {
 
 /* ---------- Kiểm Bar (bar count) ---------- */
 
-function BarCountForm({ onDone }: { onDone: () => void }) {
+export function BarCountForm({ onDone }: { onDone: () => void }) {
   const { toast } = useToast()
   const materials = useMaterialOptions()
   const recordBarCount = useInventoryStore((s) => s.recordBarCount)
@@ -636,13 +615,6 @@ function BarCountForm({ onDone }: { onDone: () => void }) {
 
   return (
     <form onSubmit={submit} className="space-y-4">
-      <OpHeader
-        icon={Coffee}
-        accent="from-rose-500/15 to-rose-500/5 text-rose-700 dark:text-rose-300"
-        title="Kiểm Bar"
-        code="KIEM_KE_BAR"
-        description="Đếm thực tế tại Quầy Bar theo DVT Bar — ảnh hưởng Giá Vốn."
-      />
       <div className="space-y-3">
         <Field label="Nguyên vật liệu">
           <MaterialCombobox

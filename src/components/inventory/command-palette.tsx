@@ -1,6 +1,7 @@
 'use client'
 
 import * as React from 'react'
+import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Command as CommandPrimitive } from 'cmdk'
 import {
@@ -48,6 +49,7 @@ export function CommandPalette({
 }: CommandPaletteProps) {
   const [open, setOpen] = React.useState(false)
   const [query, setQuery] = React.useState('')
+  const router = useRouter()
   const { setTheme, resolvedTheme } = useTheme()
   const resetData = useInventoryStore((s) => s.resetData)
   const { toast } = useToast()
@@ -73,9 +75,7 @@ export function CommandPalette({
   const nav = (href: string) => {
     setOpen(false)
     setQuery('')
-    requestAnimationFrame(() => {
-      document.querySelector(href)?.scrollIntoView({ behavior: 'smooth' })
-    })
+    router.push(href)
   }
 
   const run = (fn: () => void) => () => {
@@ -92,7 +92,7 @@ export function CommandPalette({
       icon: LayoutDashboard,
       group: 'Điều hướng',
       keywords: 'dashboard tong quan',
-      run: () => nav('#tong-quan'),
+      run: () => nav('/tong-quan'),
     },
     {
       id: 'nav-ops',
@@ -100,7 +100,7 @@ export function CommandPalette({
       icon: ArrowUpRight,
       group: 'Điều hướng',
       keywords: 'nghiep vu operations',
-      run: () => nav('#nghiep-vu'),
+      run: () => nav('/nhap-hang'),
     },
     {
       id: 'nav-materials',
@@ -108,7 +108,7 @@ export function CommandPalette({
       icon: Boxes,
       group: 'Điều hướng',
       keywords: 'nguyen vat lieu materials kho',
-      run: () => nav('#nguyen-vat-lieu'),
+      run: () => nav('/nguyen-vat-lieu'),
     },
     {
       id: 'nav-history',
@@ -116,7 +116,7 @@ export function CommandPalette({
       icon: History,
       group: 'Điều hướng',
       keywords: 'lich su history giao dich',
-      run: () => nav('#lich-su'),
+      run: () => nav('/lich-su'),
     },
     {
       id: 'nav-reports',
@@ -124,18 +124,29 @@ export function CommandPalette({
       icon: Calculator,
       group: 'Điều hướng',
       keywords: 'bao cao reports ton kho gia von',
-      run: () => nav('#bao-cao'),
+      run: () => nav('/ton-kho'),
     },
     // Operations
-    ...inventoryOperations.map((op) => ({
-      id: `op-${op.id}`,
-      label: op.category === 'report' ? `Mở báo cáo ${op.title}` : `Thực hiện: ${op.title}`,
-      hint: op.code,
-      icon: op.icon,
-      group: 'Nghiệp vụ' as const,
-      keywords: `${op.title} ${op.code} ${op.shortName}`,
-      run: run(() => onOpenOperation(op.id)),
-    })),
+    ...inventoryOperations.map((op) => {
+      const routeMap: Record<string, string> = {
+        'nhap-hang': '/nhap-hang',
+        'xuat-kho-bar': '/xuat-kho-bar',
+        'kiem-kho': '/kiem-kho',
+        'kiem-bar': '/kiem-bar',
+        'ton-kho': '/ton-kho',
+        'gia-von': '/gia-von',
+      }
+      const href = routeMap[op.id]
+      return {
+        id: `op-${op.id}`,
+        label: op.category === 'report' ? `Mở báo cáo ${op.title}` : `Thực hiện: ${op.title}`,
+        hint: op.code,
+        icon: op.icon,
+        group: 'Nghiệp vụ' as const,
+        keywords: `${op.title} ${op.code} ${op.shortName}`,
+        run: href ? () => nav(href) : run(() => onOpenOperation(op.id)),
+      }
+    }),
     // Actions
     {
       id: 'add-material',
@@ -144,7 +155,7 @@ export function CommandPalette({
       group: 'Thao tác',
       keywords: 'them add material moi',
       run: run(() => {
-        nav('#nguyen-vat-lieu')
+        nav('/nguyen-vat-lieu')
         window.dispatchEvent(new CustomEvent('tra-house:add-material'))
       }),
     },
@@ -154,7 +165,7 @@ export function CommandPalette({
       icon: Settings2,
       group: 'Thao tác',
       keywords: 'cai dat settings',
-      run: run(onOpenSettings),
+      run: () => nav('/cai-dat'),
     },
     {
       id: 'reset-data',
