@@ -1,13 +1,15 @@
 import type { NextConfig } from "next";
 
-// GitHub Pages serves this repo under /bachlong-inventory-project/, so the
-// static export needs that base path baked in only for that build.
+// GitHub Pages serves this repo under /bachlong-inventory-project/ and can only
+// serve static files, so that build (GITHUB_PAGES=true) stays a static export.
+// Vercel runs the normal Next.js server, which the upcoming NextAuth work needs.
 const isGhPages = process.env.GITHUB_PAGES === "true";
 const basePath = "/bachlong-inventory-project";
 
 const nextConfig: NextConfig = {
-  output: "export",
-  ...(isGhPages ? { basePath, assetPrefix: basePath } : {}),
+  ...(isGhPages
+    ? { output: "export" as const, basePath, assetPrefix: basePath }
+    : {}),
   images: {
     unoptimized: true,
   },
