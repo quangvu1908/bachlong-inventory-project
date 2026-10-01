@@ -56,6 +56,8 @@ import {
 import { Separator } from '@/components/ui/separator'
 import { useToast } from '@/hooks/use-toast'
 import { useInventoryStore } from '@/lib/inventory-store'
+import { downloadCSV, csvFilename } from '@/lib/csv-export'
+import { categoryLabels } from '@/lib/inventory-data'
 import { cn } from '@/lib/utils'
 
 interface SettingsState {
@@ -92,12 +94,38 @@ interface SettingsSheetProps {
 export function SettingsSheet({ open, onOpenChange }: SettingsSheetProps) {
   const { toast } = useToast()
   const resetData = useInventoryStore((s) => s.resetData)
+  const materials = useInventoryStore((s) => s.materials)
+  const transactions = useInventoryStore((s) => s.transactions)
   const [settings, setSettings] = React.useState<SettingsState>(defaultSettings)
 
   const update = <K extends keyof SettingsState>(
     key: K,
     value: SettingsState[K]
   ) => setSettings((s) => ({ ...s, [key]: value }))
+
+  const handleExportAll = () => {
+    // Two sections: materials + transactions
+    const rows: (string | number)[][] = [
+      ['=== NGUYEN VAT LIEU ==='],
+      ['ID', 'Tên', 'Danh mục', 'ĐVT Kho', 'ĐVT Bar', 'Quy đổi', 'Đơn giá', 'Tồn Kho', 'Tồn Bar', 'Tối thiểu', 'Hạn sử dụng'],
+      ...materials.map((m) => [
+        m.id, m.name, categoryLabels[m.category], m.unit, m.unitBar ?? '',
+        m.convertFactor ?? '', m.unitPrice, m.stock, m.barStock, m.minStock, m.expiryDate ?? '',
+      ]),
+      [],
+      ['=== GIAO DICH ==='],
+      ['ID', 'Loại', 'Ngày', 'NVL', 'Số lượng', 'ĐVT', 'Đơn giá', 'Thành tiền', 'Trước', 'Sau', 'Ghi chú'],
+      ...transactions.map((t) => [
+        t.id, t.type, t.date, t.materialName, t.quantity, t.unit,
+        t.unitPrice, t.amount, t.before, t.after, t.note ?? '',
+      ]),
+    ]
+    downloadCSV(csvFilename('du-lieu-kho'), rows)
+    toast({
+      title: 'Đã xuất toàn bộ dữ liệu',
+      description: `${materials.length} NVL · ${transactions.length} giao dịch`,
+    })
+  }
 
   const handleSave = () => {
     toast({
@@ -257,7 +285,11 @@ export function SettingsSheet({ open, onOpenChange }: SettingsSheetProps) {
 
           {/* Data */}
           <SettingGroup icon={Database} title="Dữ liệu & sao lưu">
-            <Button variant="outline" className="w-full justify-start gap-2">
+            <Button
+              variant="outline"
+              className="w-full justify-start gap-2"
+              onClick={handleExportAll}
+            >
               <Database className="size-4" />
               Xuất dữ liệu kho (CSV)
             </Button>

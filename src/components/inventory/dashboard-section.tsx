@@ -46,7 +46,8 @@ const CATEGORY_COLORS: Record<string, string> = {
 }
 
 export function DashboardSection() {
-  const stats = useInventoryStats()
+  const [days, setDays] = React.useState<7 | 30>(7)
+  const stats = useInventoryStats(days)
 
   const kpis = [
     {
@@ -89,7 +90,7 @@ export function DashboardSection() {
     },
   ]
 
-  const trendData = stats.last7Days.map((d) => ({
+  const trendData = stats.lastNDays.map((d) => ({
     name: d.label,
     Nhập: d.receipt,
     'Xuất Bar': d.issue,
@@ -169,7 +170,7 @@ export function DashboardSection() {
       </div>
 
       {/* Trend strip + expiry summary */}
-      <TrendStrip />
+      <TrendStrip days={days} onDaysChange={setDays} />
 
       {/* Charts row */}
       <div className="mt-4 grid gap-4 lg:grid-cols-5">
@@ -314,7 +315,7 @@ export function DashboardSection() {
         <CardHeader className="pb-2">
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle className="text-base">Xu hướng giao dịch 7 ngày</CardTitle>
+              <CardTitle className="text-base">Xu hướng giao dịch {days} ngày</CardTitle>
               <CardDescription className="text-xs">
                 Số lượng phiếu theo loại nghiệp vụ mỗi ngày
               </CardDescription>
@@ -400,8 +401,13 @@ export function DashboardSection() {
   )
 }
 
-function TrendStrip() {
-  const [days, setDays] = React.useState<7 | 30>(7)
+function TrendStrip({
+  days,
+  onDaysChange,
+}: {
+  days: 7 | 30
+  onDaysChange: (d: 7 | 30) => void
+}) {
   const stats = useInventoryStats(days)
   const { trends, expiringMaterials } = stats
 
@@ -445,7 +451,7 @@ function TrendStrip() {
       <div className="mb-2 flex items-center justify-end">
         <div className="inline-flex items-center gap-0.5 rounded-full border border-border/60 bg-card/60 p-0.5 text-xs">
           <button
-            onClick={() => setDays(7)}
+            onClick={() => onDaysChange(7)}
             className={cn(
               'rounded-full px-3 py-1 font-medium transition-all',
               days === 7
@@ -456,7 +462,7 @@ function TrendStrip() {
             7 ngày
           </button>
           <button
-            onClick={() => setDays(30)}
+            onClick={() => onDaysChange(30)}
             className={cn(
               'rounded-full px-3 py-1 font-medium transition-all',
               days === 30

@@ -28,6 +28,7 @@ import {
   formatNum,
 } from '@/lib/inventory-stats'
 import { categoryLabels, categoryStyles } from '@/lib/inventory-data'
+import { downloadCSV, csvFilename } from '@/lib/csv-export'
 import { useToast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
 
@@ -76,6 +77,30 @@ function StockReport() {
     return s + (m.unitPrice / factor) * m.barStock
   }, 0)
 
+  const handleExport = () => {
+    const rows: (string | number)[][] = [
+      ['NVL', 'Danh mục', 'ĐVT Kho', 'ĐVT Bar', 'Quy đổi', 'Đơn giá', 'Tồn Kho', 'Tồn Bar', 'Hạn sử dụng', 'Giá trị'],
+      ...filtered.map((m) => [
+        m.name,
+        categoryLabels[m.category],
+        m.unit,
+        m.unitBar ?? '',
+        m.convertFactor ?? '',
+        m.unitPrice,
+        m.stock,
+        m.barStock,
+        m.expiryDate ?? '',
+        m.unitPrice * m.stock,
+      ]),
+      ['', '', '', '', '', '', '', '', 'Tổng giá trị kho', totalKho],
+    ]
+    downloadCSV(csvFilename('ton-kho'), rows)
+    toast({
+      title: 'Đã xuất CSV',
+      description: `${filtered.length} nguyên vật liệu — file ton-kho-*.csv`,
+    })
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 18 }}
@@ -101,12 +126,7 @@ function StockReport() {
               variant="outline"
               size="sm"
               className="gap-1.5"
-              onClick={() =>
-                toast({
-                  title: 'Đã xuất CSV',
-                  description: 'File tồn-kho.csv đã sẵn sàng tải về.',
-                })
-              }
+              onClick={handleExport}
             >
               <Download className="size-3.5" />
               CSV
@@ -259,6 +279,31 @@ function CostReport() {
   const totalReceiptValue = rows.reduce((s, r) => s + r.nhapValue, 0)
   const totalIssued = rows.reduce((s, r) => s + r.xuatQty * r.material.unitPrice, 0)
 
+  const handleExport = () => {
+    const exportRows = rows.filter(
+      (r) => r.tieuThu > 0 || r.nhapQty > 0 || r.xuatQty > 0
+    )
+    const csvRows: (string | number)[][] = [
+      ['NVL', 'Tồn đầu', 'Nhập', 'Xuất Bar', 'Tồn cuối', 'Tiêu thụ', 'Đơn giá', 'Giá vốn'],
+      ...exportRows.map((r) => [
+        r.material.name,
+        r.tonDau,
+        r.nhapQty,
+        r.xuatQty,
+        r.tonCuoi,
+        r.tieuThu,
+        r.material.unitPrice,
+        r.tieuThuValue,
+      ]),
+      ['', '', '', '', '', '', 'Tổng', totalConsumption],
+    ]
+    downloadCSV(csvFilename('gia-von'), csvRows)
+    toast({
+      title: 'Đã xuất CSV',
+      description: `${exportRows.length} NVL — file gia-von-*.csv`,
+    })
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 18 }}
@@ -284,12 +329,7 @@ function CostReport() {
               variant="outline"
               size="sm"
               className="gap-1.5"
-              onClick={() =>
-                toast({
-                  title: 'Đã xuất CSV',
-                  description: 'File gia-von.csv đã sẵn sàng tải về.',
-                })
-              }
+              onClick={handleExport}
             >
               <Download className="size-3.5" />
               CSV

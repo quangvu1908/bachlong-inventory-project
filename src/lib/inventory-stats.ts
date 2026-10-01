@@ -155,18 +155,24 @@ export function useInventoryStats(trendDays: number = 7) {
     })
     .sort((a, b) => a.m.stock / a.m.minStock - b.m.stock / b.m.minStock)
 
-  // last 7 days transaction counts by day
-  const last7Days = Array.from({ length: 7 }).map((_, i) => {
+  // last N days transaction counts by day (synced with trendDays)
+  const lastNDays = Array.from({ length: trendDays }).map((_, i) => {
     const d = new Date()
-    d.setDate(d.getDate() - (6 - i))
+    d.setDate(d.getDate() - (trendDays - 1 - i))
     const iso = d.toISOString().slice(0, 10)
     const dayTx = transactions.filter((t) => t.date === iso)
     return {
       date: iso,
-      label: new Intl.DateTimeFormat('vi-VN', {
-        day: '2-digit',
-        month: '2-digit',
-      }).format(d),
+      label:
+        trendDays <= 7
+          ? new Intl.DateTimeFormat('vi-VN', {
+              day: '2-digit',
+              month: '2-digit',
+            }).format(d)
+          : new Intl.DateTimeFormat('vi-VN', {
+              day: '2-digit',
+              month: '2-digit',
+            }).format(d),
       receipt: dayTx.filter((t) => t.type === 'NHAP_HANG').length,
       issue: dayTx.filter((t) => t.type === 'XUAT_KHO_BAR').length,
       check: dayTx.filter(
@@ -240,7 +246,7 @@ export function useInventoryStats(trendDays: number = 7) {
     byCategory,
     todayReceipts,
     todayReceiptValue,
-    last7Days,
+    lastNDays,
     expiringMaterials,
     restockSuggestions,
     trends,

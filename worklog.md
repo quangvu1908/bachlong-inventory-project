@@ -201,3 +201,38 @@ Unresolved / Next-phase recommendations:
 - localStorage vẫn (chưa Prisma/API) — nếu multi-user cần backend.
 - Có thể thêm: in PDF phiếu, lịch kiểm kê định kỳ (cron nhắc), so sánh kỳ tùy chọn (14/90 ngày), drag-drop NVL, export Excel đầy đủ.
 - Dashboard line chart vẫn cố định 7 ngày — có thể đồng bộ với period toggle.
+
+---
+Task ID: 6
+Agent: main (Z.ai Code) — webDevReview cron round 5
+Task: Đánh giá trạng thái, QA, real CSV export (Blob download), sync line chart với period toggle, wire Settings export toàn bộ dữ liệu.
+
+Work Log:
+- Đọc worklog.md round 1-5 → app ổn định, không lỗi. QA agent-browser: render sạch, 0 console error.
+- **Real CSV export** (`csv-export.ts`): tạo utility `downloadCSV(filename, rows)` — escape fields (quote/double-quote), prepend UTF-8 BOM (Excel đọc tiếng Việt đúng), tạo Blob, click temporary <a>, revoke URL. Helper `csvFilename(prefix)` tạo tên có ngày.
+- Wire CSV button Tồn Kho (`reports-section.tsx`): `handleExport` xuất bảng NVL đầy đủ (NVL, danh mục, ĐVT Kho/Bar, quy đổi, đơn giá, tồn, hạn, giá trị) + dòng tổng. Toast "12 nguyên vật liệu — file ton-kho-*.csv".
+- Wire CSV button Giá Vốn: `handleExport` xuất bảng NVL có hoạt động (Đầu/Nhập/XB/Cuối/Tiêu thụ/Đơn giá/Giá vốn) + dòng tổng.
+- **Wire Settings "Xuất dữ liệu kho (CSV)"** (`settings-panel.tsx`): `handleExportAll` xuất 2 section (=== NGUYEN VAT LIEU === + === GIAO DICH ===) với đầy đủ cột. Toast "12 NVL · 7 giao dịch".
+- **Sync line chart với period toggle** (unresolved round trước):
+  - Lift `days` state từ TrendStrip lên DashboardSection, pass xuống TrendStrip qua props.
+  - `useInventoryStats(days)` gọi 1 lần ở DashboardSection, cả trend strip + line chart + KPI dùng cùng stats.
+  - Đổi `last7Days` → `lastNDays` (parameter theo trendDays) trong inventory-stats.ts.
+  - Line chart title động "Xu hướng giao dịch {days} ngày", data points theo N ngày.
+- Polish: period toggle pill style, trend cards ring tone, sticky group headings.
+- Lint sạch (0 error/warning). Có 1 transient 500 trong lúc edit → tự phục hồi sau full reload.
+- Agent Browser QA end-to-end:
+  - **Line chart sync VERIFIED**: click "30 ngày" → title "Xu hướng giao dịch 30 ngày" + **28 data points** (03-09→01-10) thay vì 6; trend strip labels "TIỀN NHẬP 30 NGÀY", "vs 30 ngày trước".
+  - **CSV export Tồn Kho VERIFIED**: click CSV → toast "Đã xuất CSV · 12 nguyên vật liệu — file ton-kho-*.csv", download trigger (Blob URL tạo + click).
+  - Không console error / runtime error toàn bộ phiên.
+
+Stage Summary:
+- Real CSV export (Blob download) cho 3 nút: Tồn Kho, Giá Vốn, Settings toàn bộ — trước đây chỉ toast giả lập.
+- Sync line chart với period toggle (unresolved round trước): toggle 7/30 ngày cập nhật đồng thời trend strip + line chart (title + data points).
+- Wire Settings export toàn bộ dữ liệu (materials + transactions) ra 1 file CSV 2 section.
+- Artifacts mới: `csv-export.ts` + mở rộng `reports-section.tsx`, `settings-panel.tsx`, `inventory-stats.ts` (lastNDays), `dashboard-section.tsx` (lift days state).
+
+Unresolved / Next-phase recommendations:
+- CSV download không verify được file thực tế lưu về máy (giới hạn sandbox browser), nhưng Blob URL + click <a download> là API chuẩn, toast xác nhận data processed.
+- localStorage vẫn (chưa Prisma/API) — nếu multi-user cần backend.
+- Có thể thêm: in PDF phiếu, lịch kiểm kê định kỳ (cron nhắc), drag-drop NVL, export Excel (.xlsx).
+- Line chart 30 ngày hơi dày (28 labels) — có thể ẩn bớt ticks hoặc dùng brush zoom.
