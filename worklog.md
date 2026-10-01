@@ -84,3 +84,46 @@ Unresolved / Next-phase recommendations:
 - Data persistence dùng localStorage (client) — nếu cần multi-user/server nên chuyển sang Prisma + API routes (schema Material/Transaction đã sẵn sàng thiết kế).
 - Có thể thêm: in/xuất PDF phiếu, lịch kiểm kê định kỳ (cron nhắc), dashboard so sánh kỳ, cảnh báo hạn sử dụng NVL.
 - Nút "Reset data" trong settings chưa wire tới store.resetData — nên nối.
+
+---
+Task ID: 3
+Agent: main (Z.ai Code) — webDevReview cron round 2
+Task: Đánh giá trạng thái, QA, sửa bug Giá Vốn (Tiêu thụ=0), wire Reset data, thêm tracking hạn sử dụng, panel gợi ý nhập bổ sung, animated counters, polish styling.
+
+Work Log:
+- Đọc worklog.md round 1 + 2 → xác nhận app ổn định, không lỗi. QA agent-browser: trang render sạch, 0 console error.
+- **Sửa bug Giá Vốn** (HIGH): viết lại công thức trong `reports-section.tsx` — cân đối kho đúng: `stock_end = stock_start + receipts − issues_to_bar + kho_adjustments` → `tonDau = tonCuoi − receipts + issues − khoAdjust`, `tieuThu = tonDau + receipts − tonCuoi = issues − khoAdjust`. Thêm cột Xuất Bar (XB) + Tiêu thụ + Giá vốn vào bảng, thêm thẻ tổng "Xuất sang Bar". Kết quả: Giá vốn tiêu thụ = 408.000 ₫ (trước = 0), per-material đúng (Sữa tươi 6×32000=192.000 ₫, Sữa đặc 6×22000=132.000 ₫, Đường trắng 3×28000=84.000 ₫).
+- **Wire Reset data** trong `settings-panel.tsx`: nút "Đặt lại dữ liệu kho…" với AlertDialog xác nhận → gọi `store.resetData()`, toast xác nhận, đóng sheet. Đổi tên handleReset → handleResetSettings cho nút Khôi phục cài đặt.
+- **Tracking hạn sử dụng (expiry)**:
+  - Thêm field `expiryDate?: string` vào Material (inventory-data.ts), seed 7 NVL có hạn (Pudding 3 ngày, Sữa tươi 5, Trà xanh 8, Trân châu đen 12, Thạch 20, Trà đen 61, Sữa đặc 182).
+  - Thêm helpers `daysUntil`, `expiryLevel` (expired/critical/soon/ok/none), `expiryLevelMeta` trong inventory-stats.ts.
+  - Mở rộng `useInventoryStats`: `expiringMaterials` + `restockSuggestions` (with suggested qty = max(min*2−stock, deficit*2, min)).
+- **Build AlertsPanel** (`alerts-panel.tsx`): section "Cảnh báo & gợi ý" với 2 tab (Nhập bổ sung / Hạn sử dụng), badge tổng, animated transition. RestockList: stock bar visualization + gợi ý nhập + nút "Nhập" quick-receipt. ExpiryList: badge mức + ngày còn lại + chi tiết.
+- **AnimatedCounter** (`animated-counter.tsx`): count-up easeOutCubic với requestAnimationFrame, respects prefers-reduced-motion. Wire vào dashboard KPI cards (currency + count).
+- **Cột Hạn SD trong bảng NVL**: thêm column header + ExpiryCell (badge + tooltip ngày hết hạn) + ExpiryPreview trong dialog thêm/sửa, field date picker với nút xóa. Cập nhật colSpan 10→11.
+- **Quick-receipt prefill**: extend OperationDialogs với `prefill` prop → ReceiptForm khởi tạo materialId/quantity/note từ prefill. Wire AlertsPanel onQuickReceipt → mở dialog Nhập Hàng đã pre-fill.
+- Cập nhật `page.tsx`: thêm AlertsPanel giữa Dashboard và MaterialManagement, state prefill, handleQuickReceipt.
+- Polish styling: KPI cards hover shadow + icon scale-110, gradient blob trên operation cards, sticky table headers, scrollbar tùy chỉnh.
+- Lint sạch (0 error/warning). Có 2 transient 500 trong lúc edit (ExpiryCell/AlertDialog chưa import) → tự phục hồi sau full reload.
+- Agent Browser QA end-to-end:
+  - **Giá Vốn fix VERIFIED**: "GIÁ VỐN TIÊU THỤ: 408.000 ₫" (trước = 0), bảng per-material đúng (Sữa tươi Đầu 30/Nhập 0/XB 6/Cuối 24/Tiêu thụ 6/Giá vốn 192.000 ₫).
+  - **Expiry column VERIFIED**: bảng NVL có cột HẠN SD, hiển thị "3 ngày"/"5 ngày"/"8 ngày"/"12 ngày"/"182 ngày"/"—".
+  - **Alerts panel VERIFIED**: tab "Hạn sử dụng" (4) liệt kê 4 NVL sắp hết hạn sorted tăng dần, mỗi item có badge mức + "Hết hạn DD/MM/YYYY · còn X [unit] tại kho" + số ngày.
+  - **Reset data VERIFIED**: mở Settings → "Đặt lại dữ liệu kho…" → confirm dialog → "Đặt lại" → toast "Đã đặt lại dữ liệu kho" → data về seed (12 NVL, 7 giao dịch, 5.873.900 ₫).
+  - Không console error / runtime error toàn bộ phiên.
+
+Stage Summary:
+- Sửa bug logic Giá Vốn (HIGH): công thức cân đối kho đúng, Tiêu thụ = Xuất Bar − điều chỉnh kho, giờ khác 0 và chính xác.
+- Wire nút Reset data với xác nhận (unresolved round trước).
+- Thêm tracking hạn sử dụng: field + helpers + cột bảng + alert — phản ánh đúng đặc thù tiệm trà sữa (sữa/trân châu/pudding dễ hết hạn).
+- Build AlertsPanel 2-tab: gợi ý nhập bổ sung (restock) + cảnh báo hết hạn (expiry), với quick-receipt pre-fill sang dialog Nhập Hàng.
+- AnimatedCounter cho KPI cards (count-up mượt, giảm chuyển động).
+- Polish: hover effects, sticky headers, gradient, scrollbar.
+- Artifacts mới: `alerts-panel.tsx`, `animated-counter.tsx` + mở rộng `inventory-data.ts`, `inventory-stats.ts`, `reports-section.tsx`, `settings-panel.tsx`, `material-management.tsx`, `operation-dialogs.tsx`, `page.tsx`.
+
+Unresolved / Next-phase recommendations:
+- Quick-receipt từ AlertsPanel chưa test end-to-end (restock list đang rỗng vì không NVL dưới min). Để test: có thể chủ động tạo NVL thấp bằng cách xuất nhiều. Nên thêm NLV mẫu có stock < minStock để demo restock list.
+- Giá Vốn tính theo consumption = Xuất Bar (chưa track hao hụt thực tế tại Bar qua 2 lần Kiểm Bar). Có thể nâng cấp: tính tiêu thụ bar = issues − (bar_stock_end − bar_stock_start) + bar_adjustments, cho số liệu tinh hơn.
+- Chưa có backend/DB (vẫn localStorage). Nếu cần multi-user/server, dựng Prisma schema Material/Transaction + API routes.
+- Có thể thêm: xuất PDF phiếu, command palette (Cmd+K), so sánh kỳ, cảnh báo hạn sử dụng theo ngày cụ thể trên dashboard.
+- Chưa wire expiry vào operation dialogs (vd: khi nhập hàng có thể set lại hạn mới).
