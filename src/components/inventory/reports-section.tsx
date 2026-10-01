@@ -6,6 +6,7 @@ import {
   Boxes,
   Calculator,
   Download,
+  FileSpreadsheet,
   Lock,
   Info,
   TrendingUp,
@@ -29,6 +30,7 @@ import {
 } from '@/lib/inventory-stats'
 import { categoryLabels, categoryStyles } from '@/lib/inventory-data'
 import { downloadCSV, csvFilename } from '@/lib/csv-export'
+import { downloadXlsx, xlsxFilename } from '@/lib/xlsx-export'
 import { matchVi } from '@/lib/vi-search'
 import { useToast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
@@ -100,6 +102,29 @@ function StockReport() {
     })
   }
 
+  const handleExportXlsx = () => {
+    const rows: (string | number)[][] = [
+      ['NVL', 'Danh mục', 'ĐVT Kho', 'ĐVT Bar', 'Quy đổi', 'Đơn giá', 'Tồn Kho', 'Tồn Bar', 'Hạn sử dụng', 'Giá trị'],
+      ...filtered.map((m) => [
+        m.name,
+        categoryLabels[m.category],
+        m.unit,
+        m.unitBar ?? '',
+        m.convertFactor ?? '',
+        m.unitPrice,
+        m.stock,
+        m.barStock,
+        m.expiryDate ?? '',
+        m.unitPrice * m.stock,
+      ]),
+    ]
+    downloadXlsx(xlsxFilename('ton-kho'), [{ name: 'Tồn Kho', rows }])
+    toast({
+      title: 'Đã xuất Excel',
+      description: `${filtered.length} nguyên vật liệu — file ton-kho-*.xls`,
+    })
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 18 }}
@@ -121,15 +146,26 @@ function StockReport() {
                 Tra cứu tồn tại thời điểm hiện tại
               </CardDescription>
             </div>
-            <Button
-              variant="outline"
-              size="sm"
-              className="gap-1.5"
-              onClick={handleExport}
-            >
-              <Download className="size-3.5" />
-              CSV
-            </Button>
+            <div className="flex gap-1.5">
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-1.5"
+                onClick={handleExport}
+              >
+                <Download className="size-3.5" />
+                CSV
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-1.5"
+                onClick={handleExportXlsx}
+              >
+                <FileSpreadsheet className="size-3.5" />
+                Excel
+              </Button>
+            </div>
           </div>
         </CardHeader>
         <CardContent className="space-y-3">
@@ -303,6 +339,31 @@ function CostReport() {
     })
   }
 
+  const handleExportXlsx = () => {
+    const exportRows = rows.filter(
+      (r) => r.tieuThu > 0 || r.nhapQty > 0 || r.xuatQty > 0
+    )
+    const xlsxRows: (string | number)[][] = [
+      ['NVL', 'Tồn đầu', 'Nhập', 'Xuất Bar', 'Tồn cuối', 'Tiêu thụ', 'Đơn giá', 'Giá vốn'],
+      ...exportRows.map((r) => [
+        r.material.name,
+        r.tonDau,
+        r.nhapQty,
+        r.xuatQty,
+        r.tonCuoi,
+        r.tieuThu,
+        r.material.unitPrice,
+        r.tieuThuValue,
+      ]),
+      ['', '', '', '', '', '', 'Tổng', totalConsumption],
+    ]
+    downloadXlsx(xlsxFilename('gia-von'), [{ name: 'Giá Vốn', rows: xlsxRows }])
+    toast({
+      title: 'Đã xuất Excel',
+      description: `${exportRows.length} NVL — file gia-von-*.xls`,
+    })
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 18 }}
@@ -324,15 +385,26 @@ function CostReport() {
                 Chi phí NVL tiêu thụ theo khoảng ngày
               </CardDescription>
             </div>
-            <Button
-              variant="outline"
-              size="sm"
-              className="gap-1.5"
-              onClick={handleExport}
-            >
-              <Download className="size-3.5" />
-              CSV
-            </Button>
+            <div className="flex gap-1.5">
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-1.5"
+                onClick={handleExport}
+              >
+                <Download className="size-3.5" />
+                CSV
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-1.5"
+                onClick={handleExportXlsx}
+              >
+                <FileSpreadsheet className="size-3.5" />
+                Excel
+              </Button>
+            </div>
           </div>
         </CardHeader>
         <CardContent className="space-y-3">

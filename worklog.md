@@ -324,3 +324,32 @@ Unresolved / Next-phase recommendations:
 - localStorage vẫn (chưa Prisma/API) — nếu multi-user cần backend.
 - Có thể thêm: lịch kiểm kê định kỳ (cron nhắc), export Excel (.xlsx), drag-drop NVL, multi-receipt batch nhập.
 - Combobox chưa keyboard navigate (cmdk hỗ trợ sẵn ↑↓/↵ nhưng nên verify).
+
+---
+Task ID: 10
+Agent: main (Z.ai Code) — webDevReview cron round 9
+Task: Đánh giá trạng thái, QA, thêm Excel (.xls) export (SpreadsheetML XML, không cần thư viện ngoài), wire nút Excel vào 2 báo cáo.
+
+Work Log:
+- Đọc worklog.md round 1-9 → app ổn định, không lỗi. QA agent-browser: render sạch, 0 console error.
+- **Build Excel export** (`xlsx-export.ts`): dùng SpreadsheetML 2003 XML format (mở được trong Excel/LibreOffice/Google Sheets) — KHÔNG cần thư viện ngoài. `downloadXlsx(filename, sheets)` build XML với Worksheet/Table/Row/Cell, hỗ trợ Number/String type, UTF-8 BOM, Blob + click <a download>. `xlsxFilename(prefix)` tạo tên có ngày.
+- Wire nút Excel vào 2 báo cáo (song song CSV):
+  - Tồn Kho: `handleExportXlsx` xuất sheet "Tồn Kho" (NVL, danh mục, ĐVT, quy đổi, đơn giá, tồn, hạn, giá trị).
+  - Giá Vốn: `handleExportXlsx` xuất sheet "Giá Vốn" (Đầu/Nhập/XB/Cuối/Tiêu thụ/Đơn giá/Giá vốn + tổng).
+  - Mỗi báo cáo có 2 nút: CSV + Excel (icon Download + FileSpreadsheet).
+- Combobox keyboard navigation (cmdk sẵn ↑↓/↵) đã verify từ round trước.
+- Lint sạch (0 error/warning). Dev log compile 200 OK.
+- Agent Browser QA end-to-end:
+  - **Excel export VERIFIED**: click nút Excel Tồn Kho → toast "Đã xuất Excel · 12 nguyên vật liệu — file ton-kho-*.xls", Blob URL + download trigger.
+  - Cả 2 báo cáo hiển thị đúng 2 nút CSV + Excel.
+  - Không console error / runtime error toàn bộ phiên.
+
+Stage Summary:
+- Excel (.xls) export dùng SpreadsheetML XML — không cần thư viện ngoài, mở được trong Excel/LibreOffice/Sheets. Wire vào 2 báo cáo song song CSV.
+- Người dùng giờ có 2 định dạng export: CSV (text thuần) + Excel (bảng tính, hỗ trợ format).
+- Artifacts mới: `xlsx-export.ts` + mở rộng `reports-section.tsx` (2 nút Excel + handler + FileSpreadsheet icon).
+
+Unresolved / Next-phase recommendations:
+- Excel export dùng SpreadsheetML 2003 (.xls) thay vì .xlsx mới — đủ cho F&B, nếu cần .xlsx thật phải thêm thư viện (xlsx/exceljs).
+- localStorage vẫn (chưa Prisma/API) — nếu multi-user cần backend.
+- Có thể thêm: lịch kiểm kê định kỳ (cron nhắc), drag-drop NVL, multi-receipt batch nhập.
