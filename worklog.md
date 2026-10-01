@@ -432,3 +432,33 @@ Unresolved / Next-phase recommendations:
 - localStorage vẫn là fallback — khi Google Sheet connected, nên sync store actions tới Sheet.
 - OperationDialogs component giờ là dead code (operations dùng pages) — có thể xóa.
 - app-header.tsx, operations-grid.tsx, settings-panel.tsx (SettingsSheet/Overview) là dead code — có thể dọn.
+
+---
+Task ID: 13
+Agent: main (Z.ai Code) — rebuild operation pages theo ERP grid style
+Task: Thay đổi UX 4 trang nghiệp vụ (nhập/xuất/kiểm kho/kiểm bar) từ form dọc 1-NVL sang ERP-style data grid (bảng, mỗi NVL 1 hàng, nhập inline, batch save) theo gợi ý ảnh user.
+
+Work Log:
+- Phân tích ảnh gợi ý (VLM): ERP-style data grid — toolbar lọc trên, bảng dense với cột NVL/nhóm/ĐVT/SL, nút primary bên phải, footer phân trang. Compact, functional, data-heavy.
+- **Tạo `operation-table.tsx`**: shared `OperationTable` component — toolbar (date + note + search + category filter), editable grid (mỗi NVL 1 hàng, render cell tùy op), summary footer row, footer actions (Xóa lọc + Lưu). Helper `NumberCell` (input number right-aligned tabular-nums) + `InfoCell` (static value with tone).
+- **Rebuild `/nhap-hang`**: grid nhập batch — cột Chọn/Tồn hiện tại/SL nhập/Đơn giá/Thành tiền. Checkbox chọn nhiều NVL, auto-fill đơn giá từ unitPrice hiện tại, tính thành tiền inline, footer tổng SL + tổng tiền. Prefill từ query params (quick-receipt). Lưu → recordReceipt cho từng NVL đã chọn → redirect /lich-su.
+- **Rebuild `/xuat-kho-bar`**: grid xuất — cột Chọn/Tồn Kho/Tồn Bar/SL xuất/Thành tiền. Validate vượt tồn (border destructive, block save), footer tổng. Lưu → recordIssue batch.
+- **Rebuild `/kiem-kho`**: grid kiểm kê — cột Chọn/Sổ sách/Tối thiểu/Đếm thực tế/Chênh lệch. Auto-fill sổ sách khi tick, tính chênh lệch inline (tone primary/destructive/muted), footer tổng chênh lệch. Lưu → recordWarehouseCount batch.
+- **Rebuild `/kiem-bar`**: grid kiểm bar — cột Chọn/Sổ sách Bar/ĐVT Bar/Đếm thực tế/Chênh lệch. Tương tự kiểm kho nhưng theo DVT Bar. Lưu → recordBarCount batch.
+- Lint sạch. Sửa: OperationTable generic type, checkbox controlled state, disabled input khi chưa chọn.
+- Agent Browser QA end-to-end:
+  - `/nhap-hang`: grid 12 NVL hiển thị, toolbar (date/note/search/filter), tick Trà đen → qty input enabled, nhập 5 → đơn giá auto 180.000 → thành tiền 900.000 ₫, footer "1 NVL được chọn · 5 · 900.000 ₫", nút "Lưu 1 phiếu nhập" → click → redirect /lich-su + toast "Đã ghi nhận nhập hàng · 1 NVL · 5 tổng SL · 900.000 ₫" + giao dịch xuất hiện đầu history.
+  - `/kiem-bar`: grid 12 NVL với cột Sổ sách Bar (600g, 250g, 4.500ml...) + ĐVT Bar + Đếm thực tế + Chênh lệch, footer "+0".
+  - Không runtime error.
+
+Stage Summary:
+- 4 trang nghiệp vụ rebuild theo ERP grid style (theo gợi ý ảnh user): mỗi NVL 1 hàng, nhập inline, checkbox chọn nhiều, batch save, toolbar lọc, summary footer.
+- UX hiệu quả hơn nhiều cho F&B: nhập/xuất/kiểm nhiều NVL cùng lúc thay vì 1-lần như cũ.
+- Validate vượt tồn (xuất kho), chênh lệch inline (kiểm kê/kiểm bar), auto-fill thông minh (đơn giá, sổ sách).
+- Artifacts mới: `operation-table.tsx` + rebuild 4 operation pages.
+
+Unresolved / Next-phase recommendations:
+- Grid chưa có pagination (12 NVL đủ, nhưng nếu >50 nên thêm).
+- Chưa có undo sau khi lưu batch.
+- localStorage vẫn (chưa wire Google Sheet thật).
+- Có thể thêm: import từ Excel, template phiếu, lịch sử lưu nháp.
