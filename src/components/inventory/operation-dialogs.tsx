@@ -28,16 +28,10 @@ import { Textarea } from '@/components/ui/textarea'
 import { Switch } from '@/components/ui/switch'
 import { Badge } from '@/components/ui/badge'
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
-import {
   Card,
   CardContent,
 } from '@/components/ui/card'
+import { MaterialCombobox } from '@/components/inventory/material-combobox'
 import { useInventoryStore } from '@/lib/inventory-store'
 import { formatVND, formatNum, formatDate } from '@/lib/inventory-stats'
 import { useToast } from '@/hooks/use-toast'
@@ -266,16 +260,11 @@ function ReceiptForm({
       />
       <div className="space-y-3">
         <Field label="Nguyên vật liệu">
-          <Select value={materialId} onValueChange={setMaterialId}>
-            <SelectTrigger><SelectValue placeholder="Chọn NVL" /></SelectTrigger>
-            <SelectContent>
-              {materials.map((m) => (
-                <SelectItem key={m.id} value={m.id}>
-                  {m.name} · {formatNum(m.stock)} {m.unit}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <MaterialCombobox
+            materials={materials}
+            value={materialId}
+            onChange={setMaterialId}
+          />
         </Field>
         {materialId && <MaterialSummary materialId={materialId} />}
         <div className="grid grid-cols-2 gap-3">
@@ -427,16 +416,11 @@ function IssueForm({ onDone }: { onDone: () => void }) {
       />
       <div className="space-y-3">
         <Field label="Nguyên vật liệu">
-          <Select value={materialId} onValueChange={setMaterialId}>
-            <SelectTrigger><SelectValue placeholder="Chọn NVL" /></SelectTrigger>
-            <SelectContent>
-              {materials.map((m) => (
-                <SelectItem key={m.id} value={m.id}>
-                  {m.name} · tồn kho {formatNum(m.stock)} {m.unit}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <MaterialCombobox
+            materials={materials}
+            value={materialId}
+            onChange={setMaterialId}
+          />
         </Field>
         {materialId && <MaterialSummary materialId={materialId} />}
         <div className="grid grid-cols-2 gap-3">
@@ -547,16 +531,11 @@ function WarehouseCountForm({ onDone }: { onDone: () => void }) {
       />
       <div className="space-y-3">
         <Field label="Nguyên vật liệu">
-          <Select value={materialId} onValueChange={setMaterialId}>
-            <SelectTrigger><SelectValue placeholder="Chọn NVL" /></SelectTrigger>
-            <SelectContent>
-              {materials.map((m) => (
-                <SelectItem key={m.id} value={m.id}>
-                  {m.name} · sổ sách {formatNum(m.stock)} {m.unit}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <MaterialCombobox
+            materials={materials}
+            value={materialId}
+            onChange={setMaterialId}
+          />
         </Field>
         {materialId && <MaterialSummary materialId={materialId} />}
         <div className="grid grid-cols-2 gap-3">
@@ -666,16 +645,11 @@ function BarCountForm({ onDone }: { onDone: () => void }) {
       />
       <div className="space-y-3">
         <Field label="Nguyên vật liệu">
-          <Select value={materialId} onValueChange={setMaterialId}>
-            <SelectTrigger><SelectValue placeholder="Chọn NVL" /></SelectTrigger>
-            <SelectContent>
-              {materials.map((m) => (
-                <SelectItem key={m.id} value={m.id}>
-                  {m.name} · bar {formatNum(m.barStock)} {m.unitBar ?? m.unit}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <MaterialCombobox
+            materials={materials}
+            value={materialId}
+            onChange={setMaterialId}
+          />
         </Field>
         {materialId && <MaterialSummary materialId={materialId} />}
         <div className="grid grid-cols-2 gap-3">

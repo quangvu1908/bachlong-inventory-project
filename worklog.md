@@ -270,3 +270,29 @@ Unresolved / Next-phase recommendations:
 - Print window không verify được file PDF vật lý (giới hạn sandbox), nhưng HTML render + window.print() API chuẩn.
 - localStorage vẫn (chưa Prisma/API) — nếu multi-user cần backend.
 - Có thể thêm: lịch kiểm kê định kỳ (cron nhắc), export Excel (.xlsx), drag-drop NVL, multi-receipt batch nhập.
+
+---
+Task ID: 8
+Agent: main (Z.ai Code) — webDevReview cron round 7
+Task: Đánh giá trạng thái, QA, thay Select dropdown NVL bằng searchable combobox (Popover + Command) trong operation dialogs.
+
+Work Log:
+- Đọc worklog.md round 1-7 → app ổn định, không lỗi. QA agent-browser: render sạch, 0 console error.
+- **Build MaterialCombobox** (`material-combobox.tsx`): Popover + Command (cmdk) — trigger button hiển thị badge danh mục + tên + tồn kho, dropdown có ô search (tìm theo tên hoặc danh mục), list item có check icon + badge + tên + tồn, empty state "Không tìm thấy". `shouldFilter={false}` + filter thủ công để hỗ trợ tiếng Việt không dấu.
+- Wire MaterialCombobox vào 4 operation dialogs (Nhập Hàng, Xuất Kho Ra Bar, Kiểm Kho, Kiểm Bar) — thay thế 4 Select dropdown cũ. Xóa unused imports Select/SelectTrigger/SelectContent/SelectItem/SelectValue.
+- Lint sạch (0 error/warning). Dev log compile 200 OK.
+- Agent Browser QA end-to-end:
+  - **Combobox mở VERIFIED**: mở dialog Nhập Hàng → trigger hiển thị "Trà Trà đen Đài Loan · 8,5 kg" (badge + tên + tồn).
+  - **Search VERIFIED**: click mở → list 12 NVL với badge danh mục; gõ "sữa" → filter còn 2 NVL (Sữa tươi, Sữa đặc).
+  - **Selection VERIFIED**: chọn "Sữa tươi không đường" → trigger cập nhật "Sữa Sữa tươi không đường · 24 lít".
+  - Không console error / runtime error toàn bộ phiên.
+
+Stage Summary:
+- Searchable MaterialCombobox cho 4 operation dialogs: UX tốt hơn nhiều khi danh sách NVL dài — tìm nhanh theo tên/danh mục, badge danh mục + tồn kho hiển thị trực quan.
+- Thay thế Select dropdown đơn thuần (scroll dài) bằng combobox có search — giải quyết vấn đề UX khi số NVL tăng.
+- Artifacts mới: `material-combobox.tsx` + mở rộng `operation-dialogs.tsx` (4 chỗ thay Select → Combobox, xóa unused imports).
+
+Unresolved / Next-phase recommendations:
+- Combobox search chưa hỗ trợ gõ không dấu (vd "sua" thay "sữa") — có thể thêm normalize dấu tiếng Việt.
+- localStorage vẫn (chưa Prisma/API) — nếu multi-user cần backend.
+- Có thể thêm: lịch kiểm kê định kỳ (cron nhắc), export Excel (.xlsx), drag-drop NVL, multi-receipt batch nhập.
