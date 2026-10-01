@@ -122,7 +122,7 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-sans;
     background-image:
       radial-gradient(circle at 12% 18%, oklch(0.92 0.05 70 / 0.35), transparent 38%),
       radial-gradient(circle at 88% 12%, oklch(0.88 0.06 140 / 0.28), transparent 42%),
