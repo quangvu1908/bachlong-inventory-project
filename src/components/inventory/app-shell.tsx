@@ -10,13 +10,23 @@ import {
   Bell,
   Keyboard,
   ChevronLeft,
+  LogOut,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { navItems, navGroups } from '@/lib/nav-config'
 import { useInventoryStats } from '@/lib/inventory-stats'
+import { useAuth, ROLE_LABELS } from '@/lib/auth/auth-context'
 import { cn } from '@/lib/utils'
 
 export function AppShell({ children }: { children: React.ReactNode }) {
@@ -222,12 +232,73 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <span className="text-xs font-mono">⌘K</span>
           </Button>
           <ThemeToggle />
+          <UserMenu />
         </header>
 
         {/* Page content */}
         <main className="min-h-[calc(100vh-3.5rem)]">{children}</main>
       </div>
     </div>
+  )
+}
+
+function UserMenu() {
+  const { profile, signOut } = useAuth()
+  if (!profile) return null
+
+  const initial = (profile.full_name || profile.email).charAt(0).toUpperCase()
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant="ghost"
+          className="ml-1 flex items-center gap-2 rounded-full px-1.5 py-1 sm:pr-3"
+        >
+          {profile.avatar_url ? (
+            <img
+              src={profile.avatar_url}
+              alt=""
+              className="size-7 rounded-full"
+              referrerPolicy="no-referrer"
+            />
+          ) : (
+            <span className="grid size-7 place-items-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">
+              {initial}
+            </span>
+          )}
+          <span className="hidden flex-col items-start leading-none sm:flex">
+            <span className="text-xs font-medium">
+              {profile.full_name || profile.email}
+            </span>
+            {profile.role && (
+              <span className="text-[10px] text-muted-foreground">
+                {ROLE_LABELS[profile.role]}
+              </span>
+            )}
+          </span>
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-56">
+        <DropdownMenuLabel className="flex flex-col">
+          <span className="text-sm font-medium">
+            {profile.full_name || 'Người dùng'}
+          </span>
+          <span className="text-xs font-normal text-muted-foreground">
+            {profile.email}
+          </span>
+        </DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem
+          variant="destructive"
+          onClick={() => signOut()}
+          className="gap-2"
+        >
+          <LogOut className="size-4" />
+          Đăng xuất
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   )
 }
 

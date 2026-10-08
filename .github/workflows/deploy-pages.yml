@@ -27,6 +27,9 @@ jobs:
       - name: Build static export
         env:
           GITHUB_PAGES: "true"
+          # Khóa publishable của Supabase - thiết kế để công khai, bảo mật nằm ở RLS
+          NEXT_PUBLIC_SUPABASE_URL: "https://zuyhpvwrgsiyalsrigay.supabase.co"
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: "sb_publishable_ii8_N5uAYnEWM3sGZF5tFw_lQJN-MWY"
         run: npx next build
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3

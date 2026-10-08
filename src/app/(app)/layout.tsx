@@ -4,6 +4,7 @@ import { AppShell } from '@/components/inventory/app-shell'
 import { CommandPalette } from '@/components/inventory/command-palette'
 import { ShortcutsHelp } from '@/components/inventory/shortcuts-help'
 import { AppFooter } from '@/components/inventory/app-footer'
+import { AuthGuard } from '@/components/auth/auth-guard'
 
 export default function AppLayout({
   children,
@@ -11,12 +12,14 @@ export default function AppLayout({
   children: React.ReactNode
 }) {
   return (
-    <AppShell>
-      {children}
-      <AppFooter />
-      {/* Global overlays available on all pages */}
-      <CommandPalette onOpenSettings={() => {}} onOpenOperation={() => {}} />
-      <ShortcutsHelp />
-    </AppShell>
+    <AuthGuard>
+      <AppShell>
+        {children}
+        <AppFooter />
+        {/* Global overlays available on all pages */}
+        <CommandPalette onOpenSettings={() => {}} onOpenOperation={() => {}} />
+        <ShortcutsHelp />
+      </AppShell>
+    </AuthGuard>
   )
 }
