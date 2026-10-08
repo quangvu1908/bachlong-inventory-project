@@ -497,7 +497,50 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      transactions_view: {
+        Row: {
+          amount: number | null
+          bar_quantity: number | null
+          bar_stock_after: number | null
+          bar_stock_before: number | null
+          bar_unit_code: string | null
+          created_at: string | null
+          created_by: string | null
+          id: string | null
+          material_id: string | null
+          note: string | null
+          quantity: number | null
+          stock_after: number | null
+          stock_before: number | null
+          store_id: string | null
+          type: Database["public"]["Enums"]["transaction_type"] | null
+          unit_code: string | null
+          unit_price: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transactions_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "materials"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       assign_user_role: {

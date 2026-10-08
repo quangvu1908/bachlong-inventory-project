@@ -19,13 +19,9 @@ import {
   Plus,
   LayoutDashboard,
   History,
-  RotateCcw,
   CornerDownLeft,
 } from 'lucide-react'
 import { useTheme } from 'next-themes'
-import { inventoryOperations } from '@/lib/inventory-data'
-import { useInventoryStore } from '@/lib/inventory-store'
-import { useToast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
 
 export interface CommandAction {
@@ -38,21 +34,11 @@ export interface CommandAction {
   run: () => void
 }
 
-interface CommandPaletteProps {
-  onOpenSettings: () => void
-  onOpenOperation: (opId: string) => void
-}
-
-export function CommandPalette({
-  onOpenSettings,
-  onOpenOperation,
-}: CommandPaletteProps) {
+export function CommandPalette() {
   const [open, setOpen] = React.useState(false)
   const [query, setQuery] = React.useState('')
   const router = useRouter()
   const { setTheme, resolvedTheme } = useTheme()
-  const resetData = useInventoryStore((s) => s.resetData)
-  const { toast } = useToast()
 
   // Toggle the menu with Cmd/Ctrl + K
   React.useEffect(() => {
@@ -127,26 +113,58 @@ export function CommandPalette({
       run: () => nav('/ton-kho'),
     },
     // Operations
-    ...inventoryOperations.map((op) => {
-      const routeMap: Record<string, string> = {
-        'nhap-hang': '/nhap-hang',
-        'xuat-kho-bar': '/xuat-kho-bar',
-        'kiem-kho': '/kiem-kho',
-        'kiem-bar': '/kiem-bar',
-        'ton-kho': '/ton-kho',
-        'gia-von': '/gia-von',
-      }
-      const href = routeMap[op.id]
-      return {
-        id: `op-${op.id}`,
-        label: op.category === 'report' ? `Mở báo cáo ${op.title}` : `Thực hiện: ${op.title}`,
-        hint: op.code,
-        icon: op.icon,
-        group: 'Nghiệp vụ' as const,
-        keywords: `${op.title} ${op.code} ${op.shortName}`,
-        run: href ? () => nav(href) : run(() => onOpenOperation(op.id)),
-      }
-    }),
+    {
+      id: 'op-nhap-hang',
+      label: 'Thực hiện: Nhập Hàng',
+      hint: 'NHAP_HANG',
+      icon: PackagePlus,
+      group: 'Nghiệp vụ' as const,
+      keywords: 'nhap hang receipt',
+      run: () => nav('/nhap-hang'),
+    },
+    {
+      id: 'op-xuat-kho-bar',
+      label: 'Thực hiện: Xuất Kho Ra Bar',
+      hint: 'XUAT_KHO_BAR',
+      icon: ArrowRightLeft,
+      group: 'Nghiệp vụ' as const,
+      keywords: 'xuat kho bar issue',
+      run: () => nav('/xuat-kho-bar'),
+    },
+    {
+      id: 'op-kiem-kho',
+      label: 'Thực hiện: Kiểm Kho',
+      hint: 'KIEM_KE',
+      icon: ClipboardCheck,
+      group: 'Nghiệp vụ' as const,
+      keywords: 'kiem kho count',
+      run: () => nav('/kiem-kho'),
+    },
+    {
+      id: 'op-kiem-bar',
+      label: 'Thực hiện: Kiểm Bar',
+      hint: 'KIEM_KE_BAR',
+      icon: Coffee,
+      group: 'Nghiệp vụ' as const,
+      keywords: 'kiem bar count',
+      run: () => nav('/kiem-bar'),
+    },
+    {
+      id: 'op-ton-kho',
+      label: 'Mở báo cáo Tồn Kho',
+      icon: Boxes,
+      group: 'Nghiệp vụ' as const,
+      keywords: 'ton kho stock report',
+      run: () => nav('/ton-kho'),
+    },
+    {
+      id: 'op-gia-von',
+      label: 'Mở báo cáo Giá Vốn',
+      icon: Calculator,
+      group: 'Nghiệp vụ' as const,
+      keywords: 'gia von cost report',
+      run: () => nav('/gia-von'),
+    },
     // Actions
     {
       id: 'add-material',
@@ -154,10 +172,7 @@ export function CommandPalette({
       icon: Plus,
       group: 'Thao tác',
       keywords: 'them add material moi',
-      run: run(() => {
-        nav('/nguyen-vat-lieu')
-        window.dispatchEvent(new CustomEvent('tra-house:add-material'))
-      }),
+      run: () => nav('/nguyen-vat-lieu'),
     },
     {
       id: 'open-settings',
@@ -166,20 +181,6 @@ export function CommandPalette({
       group: 'Thao tác',
       keywords: 'cai dat settings',
       run: () => nav('/cai-dat'),
-    },
-    {
-      id: 'reset-data',
-      label: 'Đặt lại dữ liệu kho',
-      icon: RotateCcw,
-      group: 'Thao tác',
-      keywords: 'reset dat lai data',
-      run: run(() => {
-        resetData()
-        toast({
-          title: 'Đã đặt lại dữ liệu kho',
-          description: 'Nguyên vật liệu & giao dịch về trạng thái ban đầu.',
-        })
-      }),
     },
     // Appearance
     {

@@ -24,8 +24,10 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { ThemeToggle } from '@/components/theme-toggle'
+import { StoreSwitcher } from '@/components/inventory/store-switcher'
 import { navItems, navGroups } from '@/lib/nav-config'
-import { useInventoryStats } from '@/lib/inventory-stats'
+import { useOperationMaterials } from '@/lib/use-operation-materials'
+import { useStore } from '@/lib/store-context'
 import { useAuth, ROLE_LABELS } from '@/lib/auth/auth-context'
 import { cn } from '@/lib/utils'
 
@@ -33,8 +35,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   const [mobileOpen, setMobileOpen] = React.useState(false)
   const [scrolled, setScrolled] = React.useState(false)
-  const stats = useInventoryStats()
   const { profile } = useAuth()
+  const { selectedStore } = useStore()
+  const { materials } = useOperationMaterials(selectedStore?.id, selectedStore?.brand_id)
+  const stats = {
+    totalMaterials: materials.length,
+    lowStockCount: materials.filter((m) => m.khoStock <= m.minStock).length,
+  }
   const visibleNavItems = navItems.filter(
     (item) => !item.roles || (profile?.role && item.roles.includes(profile.role))
   )
@@ -192,6 +199,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <CurrentPageLabel pathname={pathname} />
 
           <div className="flex-1" />
+
+          <StoreSwitcher />
 
           {/* Quick actions */}
           <Button

@@ -1,13 +1,11 @@
 'use client'
 
 import * as React from 'react'
-import { motion } from 'framer-motion'
-import { Search, Save, RotateCcw, Inbox, Calendar } from 'lucide-react'
-import { Card, CardContent } from '@/components/ui/card'
+import { Search, Save, RotateCcw, Inbox, Calendar, Loader2 } from 'lucide-react'
+import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Badge } from '@/components/ui/badge'
 import {
   Select,
   SelectContent,
@@ -15,114 +13,95 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { useInventoryStore } from '@/lib/inventory-store'
-import {
-  categoryLabels,
-  categoryStyles,
-  type Material,
-  type MaterialCategory,
-} from '@/lib/inventory-data'
-import { formatVND, formatNum } from '@/lib/inventory-stats'
+import type { OperationMaterial } from '@/lib/use-operation-materials'
 import { matchVi } from '@/lib/vi-search'
-import { useToast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
 
-/* ============ Shared Operation Table ============ */
-
-export interface OperationRow<T> {
-  material: Material
-  data: T
-}
-
-interface OperationTableProps<T> {
-  /** page title shown in card header */
-  title: string
-  /** accent color for icon */
-  accent: string
-  /** date field label */
-  dateLabel: string
-  /** columns config (besides NVL info) */
-  columns: {
-    key: string
-    label: string
-    className?: string
-    width?: string
-  }[]
-  /** render editable cell per material */
-  renderCell: (m: Material, colKey: string) => React.ReactNode
-  /** render summary row (footer) */
-  renderSummary?: (rows: Material[]) => React.ReactNode
-  /** empty state text */
-  emptyText?: string
-  /** initial row data factory */
-  /** date value + setter (controlled externally) */
-  date: string
-  onDateChange: (d: string) => void
-  /** note value + setter */
+interface OperationTableProps {
+  dateLabel?: string
+  date?: string
+  onDateChange?: (d: string) => void
   note: string
   onNoteChange: (n: string) => void
-  /** save handler */
+  columns: { key: string; label: string; className?: string; width?: string }[]
+  renderCell: (m: OperationMaterial, colKey: string) => React.ReactNode
+  renderSummary?: (rows: OperationMaterial[]) => React.ReactNode
+  emptyText?: string
   onSave: () => void
   saveLabel: string
   saveDisabled?: boolean
-  /** materials filtered by query/category */
-  materials: Material[]
-  /** right-side header actions */
-  headerActions?: React.ReactNode
+  saving?: boolean
+  materials: OperationMaterial[]
+  loading?: boolean
 }
 
-export function OperationTable<T>({
-  title,
+export function OperationTable({
   dateLabel,
-  columns,
-  renderCell,
-  renderSummary,
-  emptyText = 'Không có nguyên vật liệu phù hợp.',
   date,
   onDateChange,
   note,
   onNoteChange,
+  columns,
+  renderCell,
+  renderSummary,
+  emptyText = 'Không có nguyên vật liệu phù hợp.',
   onSave,
   saveLabel,
   saveDisabled,
+  saving,
   materials,
-  headerActions,
-}: OperationTableProps<T>) {
+  loading,
+}: OperationTableProps) {
   const [query, setQuery] = React.useState('')
-  const [category, setCategory] = React.useState<MaterialCategory | 'all'>('all')
+  const [categoryId, setCategoryId] = React.useState<string>('all')
+
+  const categories = React.useMemo(() => {
+    const seen = new Map<string, string>()
+    materials.forEach((m) => seen.set(m.categoryId, m.categoryName))
+    return Array.from(seen, ([id, name]) => ({ id, name }))
+  }, [materials])
 
   const filtered = React.useMemo(() => {
     return materials.filter((m) => {
       const matchQuery = matchVi(m.name, query)
-      const matchCat = category === 'all' || m.category === category
+      const matchCat = categoryId === 'all' || m.categoryId === categoryId
       return matchQuery && matchCat
     })
-  }, [materials, query, category])
+  }, [materials, query, categoryId])
+
+  if (loading) {
+    return (
+      <Card className="grid place-items-center border-border/60 py-16">
+        <Loader2 className="size-6 animate-spin text-muted-foreground" />
+      </Card>
+    )
+  }
 
   return (
     <Card className="overflow-hidden border-border/60">
       {/* Toolbar */}
       <div className="border-b border-border/60 bg-muted/30 p-3 sm:p-4">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
-          {/* Left: date + note */}
           <div className="flex flex-1 flex-col gap-2 sm:flex-row sm:items-end">
-            <div className="space-y-1">
-              <Label className="text-[10px] uppercase tracking-wide text-muted-foreground">
-                {dateLabel}
-              </Label>
-              <div className="relative">
-                <Calendar className="pointer-events-none absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  type="date"
-                  value={date}
-                  onChange={(e) => onDateChange(e.target.value)}
-                  className="h-9 w-full pl-8 sm:w-[160px]"
-                />
+            {dateLabel && date !== undefined && onDateChange && (
+              <div className="space-y-1">
+                <Label className="text-[10px] uppercase tracking-wide text-muted-foreground">
+                  {dateLabel}
+                </Label>
+                <div className="relative">
+                  <Calendar className="pointer-events-none absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    type="date"
+                    value={date}
+                    onChange={(e) => onDateChange(e.target.value)}
+                    className="h-9 w-full pl-8 sm:w-[160px]"
+                  />
+                </div>
               </div>
-            </div>
+            )}
             <div className="flex-1 space-y-1">
               <Label className="text-[10px] uppercase tracking-wide text-muted-foreground">
-                Ghi chú chung
+                Ghi chú
               </Label>
               <Input
                 value={note}
@@ -132,7 +111,6 @@ export function OperationTable<T>({
               />
             </div>
           </div>
-          {/* Right: filters */}
           <div className="flex items-end gap-2">
             <div className="relative">
               <Search className="pointer-events-none absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
@@ -143,22 +121,15 @@ export function OperationTable<T>({
                 className="h-9 w-full pl-8 sm:w-[180px]"
               />
             </div>
-            <Select
-              value={category}
-              onValueChange={(v) => setCategory(v as MaterialCategory | 'all')}
-            >
+            <Select value={categoryId} onValueChange={setCategoryId}>
               <SelectTrigger className="h-9 w-[140px]">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Tất cả nhóm</SelectItem>
-                {(Object.keys(categoryLabels) as MaterialCategory[]).map(
-                  (cat) => (
-                    <SelectItem key={cat} value={cat}>
-                      {categoryLabels[cat]}
-                    </SelectItem>
-                  )
-                )}
+                {categories.map((c) => (
+                  <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
@@ -173,19 +144,11 @@ export function OperationTable<T>({
               <th className="px-3 py-2.5 font-medium" style={{ minWidth: 200 }}>
                 Nguyên vật liệu
               </th>
-              <th className="hidden px-3 py-2.5 font-medium sm:table-cell">
-                Nhóm
-              </th>
-              <th className="hidden px-3 py-2.5 font-medium md:table-cell">
-                ĐVT
-              </th>
+              <th className="hidden px-3 py-2.5 font-medium sm:table-cell">Nhóm</th>
               {columns.map((col) => (
                 <th
                   key={col.key}
-                  className={cn(
-                    'px-3 py-2.5 text-right font-medium',
-                    col.className
-                  )}
+                  className={cn('px-3 py-2.5 text-right font-medium', col.className)}
                   style={col.width ? { width: col.width } : undefined}
                 >
                   {col.label}
@@ -195,34 +158,14 @@ export function OperationTable<T>({
           </thead>
           <tbody>
             {filtered.map((m) => (
-              <tr
-                key={m.id}
-                className="border-b border-border/40 transition-colors hover:bg-muted/20"
-              >
+              <tr key={m.id} className="border-b border-border/40 transition-colors hover:bg-muted/20">
                 <td className="px-3 py-2">
                   <div className="font-medium">{m.name}</div>
-                  <div className="text-[10px] text-muted-foreground sm:hidden">
-                    {categoryLabels[m.category]} · {m.unit}
-                  </div>
+                  <div className="text-[10px] text-muted-foreground sm:hidden">{m.categoryName}</div>
                 </td>
-                <td className="hidden px-3 py-2 sm:table-cell">
-                  <span
-                    className={cn(
-                      'inline-flex items-center rounded border px-1.5 py-0.5 text-[10px] font-medium',
-                      categoryStyles[m.category]
-                    )}
-                  >
-                    {categoryLabels[m.category]}
-                  </span>
-                </td>
-                <td className="hidden px-3 py-2 text-muted-foreground md:table-cell">
-                  {m.unit}
-                </td>
+                <td className="hidden px-3 py-2 text-muted-foreground sm:table-cell">{m.categoryName}</td>
                 {columns.map((col) => (
-                  <td
-                    key={col.key}
-                    className={cn('px-2 py-2', col.className)}
-                  >
+                  <td key={col.key} className={cn('px-2 py-2', col.className)}>
                     {renderCell(m, col.key)}
                   </td>
                 ))}
@@ -230,10 +173,7 @@ export function OperationTable<T>({
             ))}
             {filtered.length === 0 && (
               <tr>
-                <td
-                  colSpan={4 + columns.length}
-                  className="px-3 py-12 text-center text-sm text-muted-foreground"
-                >
+                <td colSpan={2 + columns.length} className="px-3 py-12 text-center text-sm text-muted-foreground">
                   <div className="flex flex-col items-center gap-2">
                     <Inbox className="size-6 opacity-40" />
                     {emptyText}
@@ -261,22 +201,14 @@ export function OperationTable<T>({
           <Button
             variant="outline"
             size="sm"
-            onClick={() => {
-              setQuery('')
-              setCategory('all')
-            }}
+            onClick={() => { setQuery(''); setCategoryId('all') }}
             className="gap-1.5"
           >
             <RotateCcw className="size-3.5" />
             Xóa lọc
           </Button>
-          <Button
-            size="sm"
-            onClick={onSave}
-            disabled={saveDisabled}
-            className="gap-1.5"
-          >
-            <Save className="size-3.5" />
+          <Button size="sm" onClick={onSave} disabled={saveDisabled || saving} className="gap-1.5">
+            {saving ? <Loader2 className="size-3.5 animate-spin" /> : <Save className="size-3.5" />}
             {saveLabel}
           </Button>
         </div>
@@ -313,10 +245,7 @@ export function NumberCell({
       onChange={(e) => onChange(Number(e.target.value))}
       placeholder={placeholder ?? '0'}
       disabled={disabled}
-      className={cn(
-        'h-8 w-full text-right tabular-nums',
-        className
-      )}
+      className={cn('h-8 w-full text-right tabular-nums', className)}
     />
   )
 }
@@ -340,16 +269,8 @@ export function InfoCell({
     accent: 'text-accent-foreground font-semibold',
   }
   return (
-    <div
-      className={cn(
-        'px-1 text-right tabular-nums',
-        tones[tone ?? 'default'],
-        className
-      )}
-    >
+    <div className={cn('px-1 text-right tabular-nums', tones[tone ?? 'default'], className)}>
       {value}
     </div>
   )
 }
-
-export { formatVND, formatNum }

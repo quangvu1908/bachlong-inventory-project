@@ -7,12 +7,9 @@ import {
   Store,
   Bell,
   Scale,
-  Database,
   ShieldCheck,
   Save,
   RotateCcw,
-  Trash2,
-  FileSpreadsheet,
   Cloud,
   CheckCircle2,
   Loader2,
@@ -30,23 +27,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/components/ui/alert-dialog'
 import { Separator } from '@/components/ui/separator'
 import { PageHeader, PageContainer } from '@/components/inventory/page-header'
 import { useToast } from '@/hooks/use-toast'
-import { useInventoryStore } from '@/lib/inventory-store'
-import { downloadCSV, csvFilename } from '@/lib/csv-export'
-import { categoryLabels } from '@/lib/inventory-data'
 
 interface SettingsState {
   shopName: string
@@ -75,11 +58,7 @@ const defaultSettings: SettingsState = {
 }
 
 export default function CaiDatPage() {
-  const router = useRouter()
   const { toast } = useToast()
-  const resetData = useInventoryStore((s) => s.resetData)
-  const materials = useInventoryStore((s) => s.materials)
-  const transactions = useInventoryStore((s) => s.transactions)
   const [settings, setSettings] = React.useState<SettingsState>(defaultSettings)
 
   const update = <K extends keyof SettingsState>(
@@ -99,37 +78,6 @@ export default function CaiDatPage() {
     toast({
       title: 'Đã khôi phục mặc định',
       description: 'Tất cả cài đặt trở về giá trị ban đầu.',
-    })
-  }
-
-  const handleResetData = () => {
-    resetData()
-    toast({
-      title: 'Đã đặt lại dữ liệu kho',
-      description: 'Nguyên vật liệu & giao dịch về trạng thái ban đầu.',
-    })
-  }
-
-  const handleExportAll = () => {
-    const rows: (string | number)[][] = [
-      ['=== NGUYEN VAT LIEU ==='],
-      ['ID', 'Tên', 'Danh mục', 'ĐVT Kho', 'ĐVT Bar', 'Quy đổi', 'Đơn giá', 'Tồn Kho', 'Tồn Bar', 'Tối thiểu', 'Hạn sử dụng'],
-      ...materials.map((m) => [
-        m.id, m.name, categoryLabels[m.category], m.unit, m.unitBar ?? '',
-        m.convertFactor ?? '', m.unitPrice, m.stock, m.barStock, m.minStock, m.expiryDate ?? '',
-      ]),
-      [],
-      ['=== GIAO DICH ==='],
-      ['ID', 'Loại', 'Ngày', 'NVL', 'Số lượng', 'ĐVT', 'Đơn giá', 'Thành tiền', 'Trước', 'Sau', 'Ghi chú'],
-      ...transactions.map((t) => [
-        t.id, t.type, t.date, t.materialName, t.quantity, t.unit,
-        t.unitPrice, t.amount, t.before, t.after, t.note ?? '',
-      ]),
-    ]
-    downloadCSV(csvFilename('du-lieu-kho'), rows)
-    toast({
-      title: 'Đã xuất toàn bộ dữ liệu',
-      description: `${materials.length} NVL · ${transactions.length} giao dịch`,
     })
   }
 
@@ -273,42 +221,6 @@ export default function CaiDatPage() {
 
         {/* Google Sheet */}
         <GoogleSheetCard />
-
-        {/* Data */}
-        <SettingCard icon={Database} title="Dữ liệu & sao lưu">
-          <Button variant="outline" className="w-full justify-start gap-2" onClick={handleExportAll}>
-            <FileSpreadsheet className="size-4" />
-            Xuất toàn bộ dữ liệu (CSV)
-          </Button>
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button
-                variant="outline"
-                className="w-full justify-start gap-2 border-destructive/30 text-destructive hover:bg-destructive/5 hover:text-destructive"
-              >
-                <Trash2 className="size-4" />
-                Đặt lại dữ liệu kho…
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Đặt lại dữ liệu kho?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  Toàn bộ nguyên vật liệu và lịch sử giao dịch sẽ trở về trạng thái ban đầu. Hành động này không thể hoàn tác.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Hủy</AlertDialogCancel>
-                <AlertDialogAction
-                  onClick={handleResetData}
-                  className="bg-destructive text-white hover:bg-destructive/90"
-                >
-                  Đặt lại
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-        </SettingCard>
       </div>
     </PageContainer>
   )
