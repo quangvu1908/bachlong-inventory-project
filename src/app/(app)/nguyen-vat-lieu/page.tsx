@@ -42,6 +42,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { PageHeader, PageContainer } from '@/components/inventory/page-header'
+import { DeleteConfirmButton } from '@/components/inventory/delete-confirm-button'
 import { useToast } from '@/hooks/use-toast'
 import { useAuth } from '@/lib/auth/auth-context'
 import { supabase } from '@/lib/supabase/client'
@@ -240,6 +241,15 @@ function MaterialsBrandSection({
     else onChanged()
   }
 
+  const deleteMaterial = async (mat: Material) => {
+    const { error } = await supabase.from('materials').delete().eq('id', mat.id)
+    if (error) toast({ title: 'Không xóa được', description: error.message, variant: 'destructive' })
+    else {
+      toast({ title: `Đã xóa "${mat.name}"` })
+      onChanged()
+    }
+  }
+
   return (
     <Card className="border-border/60">
       <CardHeader className="flex-row items-center justify-between gap-3 pb-3">
@@ -306,15 +316,22 @@ function MaterialsBrandSection({
                     </div>
                   </TableCell>
                   <TableCell>
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      className="size-7"
-                      onClick={() => { setEditing(mat); setDialogOpen(true) }}
-                      aria-label="Sửa NVL"
-                    >
-                      <Pencil className="size-3.5" />
-                    </Button>
+                    <div className="flex items-center gap-1">
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="size-7"
+                        onClick={() => { setEditing(mat); setDialogOpen(true) }}
+                        aria-label="Sửa NVL"
+                      >
+                        <Pencil className="size-3.5" />
+                      </Button>
+                      <DeleteConfirmButton
+                        title={`Xóa nguyên vật liệu "${mat.name}"?`}
+                        description="Toàn bộ lịch sử giao dịch và tồn kho của NVL này ở mọi cửa hàng sẽ bị xóa vĩnh viễn. Không thể hoàn tác."
+                        onConfirm={() => deleteMaterial(mat)}
+                      />
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}
@@ -518,6 +535,15 @@ function CategoryBrandSection({
     else onChanged()
   }
 
+  const deleteCategory = async (cat: Category) => {
+    const { error } = await supabase.from('material_categories').delete().eq('id', cat.id)
+    if (error) toast({ title: 'Không xóa được', description: error.message, variant: 'destructive' })
+    else {
+      toast({ title: `Đã xóa danh mục "${cat.name}"` })
+      onChanged()
+    }
+  }
+
   return (
     <Card className="border-border/60">
       <CardHeader className="flex-row items-center justify-between gap-3 pb-3">
@@ -564,15 +590,22 @@ function CategoryBrandSection({
                     </div>
                   </TableCell>
                   <TableCell>
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      className="size-7"
-                      onClick={() => { setEditing(cat); setDialogOpen(true) }}
-                      aria-label="Sửa danh mục"
-                    >
-                      <Pencil className="size-3.5" />
-                    </Button>
+                    <div className="flex items-center gap-1">
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="size-7"
+                        onClick={() => { setEditing(cat); setDialogOpen(true) }}
+                        aria-label="Sửa danh mục"
+                      >
+                        <Pencil className="size-3.5" />
+                      </Button>
+                      <DeleteConfirmButton
+                        title={`Xóa danh mục "${cat.name}"?`}
+                        description="Mọi nguyên vật liệu thuộc danh mục này — cùng toàn bộ giao dịch và tồn kho của chúng — sẽ bị xóa vĩnh viễn. Không thể hoàn tác."
+                        onConfirm={() => deleteCategory(cat)}
+                      />
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}
@@ -689,6 +722,15 @@ function UnitsSection({
     else onChanged()
   }
 
+  const deleteUnit = async (unit: Unit) => {
+    const { error } = await supabase.from('units').delete().eq('id', unit.id)
+    if (error) toast({ title: 'Không xóa được', description: error.message, variant: 'destructive' })
+    else {
+      toast({ title: `Đã xóa đơn vị "${unit.name}"` })
+      onChanged()
+    }
+  }
+
   const byDimension = (['weight', 'volume', 'count'] as Dimension[]).map((dim) => ({
     dim,
     items: units.filter((u) => u.dimension === dim),
@@ -746,15 +788,22 @@ function UnitsSection({
                   </TableCell>
                   {canEdit && (
                     <TableCell>
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        className="size-7"
-                        onClick={() => { setEditing(unit); setDialogOpen(true) }}
-                        aria-label="Sửa đơn vị"
-                      >
-                        <Pencil className="size-3.5" />
-                      </Button>
+                      <div className="flex items-center gap-1">
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="size-7"
+                          onClick={() => { setEditing(unit); setDialogOpen(true) }}
+                          aria-label="Sửa đơn vị"
+                        >
+                          <Pencil className="size-3.5" />
+                        </Button>
+                        <DeleteConfirmButton
+                          title={`Xóa đơn vị "${unit.name}"?`}
+                          description="Mọi nguyên vật liệu đang dùng đơn vị này làm ĐVT Kho hoặc ĐVT Bar ở CẢ HAI thương hiệu — cùng toàn bộ giao dịch, tồn kho của chúng — sẽ bị xóa vĩnh viễn. Không thể hoàn tác."
+                          onConfirm={() => deleteUnit(unit)}
+                        />
+                      </div>
                     </TableCell>
                   )}
                 </TableRow>

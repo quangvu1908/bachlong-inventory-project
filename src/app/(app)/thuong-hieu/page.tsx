@@ -25,6 +25,7 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog'
 import { PageHeader, PageContainer } from '@/components/inventory/page-header'
+import { DeleteConfirmButton } from '@/components/inventory/delete-confirm-button'
 import { useToast } from '@/hooks/use-toast'
 import { useAuth } from '@/lib/auth/auth-context'
 import { supabase } from '@/lib/supabase/client'
@@ -179,6 +180,16 @@ function BrandSection({
     }
   }
 
+  const deleteStore = async (store: StoreRow) => {
+    const { error } = await supabase.from('stores').delete().eq('id', store.id)
+    if (error) {
+      toast({ title: 'Không xóa được', description: error.message, variant: 'destructive' })
+    } else {
+      toast({ title: `Đã xóa cửa hàng "${store.name}"` })
+      onChanged()
+    }
+  }
+
   return (
     <Card className="border-border/60">
       <CardHeader className="flex-row items-center justify-between gap-3 pb-3">
@@ -259,15 +270,22 @@ function BrandSection({
                     </div>
                   </TableCell>
                   <TableCell>
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      className="size-7"
-                      onClick={() => { setEditingStore(store); setStoreDialogOpen(true) }}
-                      aria-label="Sửa cửa hàng"
-                    >
-                      <Pencil className="size-3.5" />
-                    </Button>
+                    <div className="flex items-center gap-1">
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="size-7"
+                        onClick={() => { setEditingStore(store); setStoreDialogOpen(true) }}
+                        aria-label="Sửa cửa hàng"
+                      >
+                        <Pencil className="size-3.5" />
+                      </Button>
+                      <DeleteConfirmButton
+                        title={`Xóa cửa hàng "${store.name}"?`}
+                        description={`Toàn bộ lịch sử nhập hàng, xuất kho, kiểm kê và tồn kho của cửa hàng này sẽ bị xóa vĩnh viễn. Không thể hoàn tác.`}
+                        onConfirm={() => deleteStore(store)}
+                      />
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}
