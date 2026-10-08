@@ -34,6 +34,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const [mobileOpen, setMobileOpen] = React.useState(false)
   const [scrolled, setScrolled] = React.useState(false)
   const stats = useInventoryStats()
+  const { profile } = useAuth()
+  const visibleNavItems = navItems.filter(
+    (item) => !item.roles || (profile?.role && item.roles.includes(profile.role))
+  )
 
   React.useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8)
@@ -72,7 +76,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       {/* Nav */}
       <nav className="flex-1 overflow-y-auto scrollbar-cream px-3 py-4">
         {navGroups.map((group) => {
-          const items = navItems.filter((i) => i.group === group)
+          const items = visibleNavItems.filter((i) => i.group === group)
           if (items.length === 0) return null
           return (
             <div key={group} className="mb-4">

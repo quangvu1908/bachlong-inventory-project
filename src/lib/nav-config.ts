@@ -10,7 +10,12 @@ import {
   Package,
   History,
   Settings2,
+  Building2,
+  Users,
 } from 'lucide-react'
+import type { Database } from '@/lib/supabase/database.types'
+
+type Role = Database['public']['Enums']['user_role']
 
 export interface NavItem {
   href: string
@@ -23,6 +28,8 @@ export interface NavItem {
   code?: string
   /** mobile drawer label */
   description?: string
+  /** nếu có, chỉ các vai trò này mới thấy mục menu. Bỏ trống = ai cũng thấy */
+  roles?: Role[]
 }
 
 export const navItems: NavItem[] = [
@@ -101,6 +108,24 @@ export const navItems: NavItem[] = [
     icon: Calculator,
     group: 'Báo cáo',
     description: 'Báo cáo giá vốn (chỉ xem)',
+  },
+  {
+    href: '/thuong-hieu',
+    label: 'Thương hiệu & Cửa hàng',
+    shortLabel: 'Cửa hàng',
+    icon: Building2,
+    group: 'Hệ thống',
+    description: 'Quản lý thương hiệu, cửa hàng trực thuộc',
+    roles: ['admin', 'brand_manager'],
+  },
+  {
+    href: '/nguoi-dung',
+    label: 'Người dùng',
+    shortLabel: 'Người dùng',
+    icon: Users,
+    group: 'Hệ thống',
+    description: 'Gán vai trò & cửa hàng phụ trách',
+    roles: ['admin', 'brand_manager'],
   },
   {
     href: '/cai-dat',
