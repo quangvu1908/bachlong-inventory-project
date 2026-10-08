@@ -12,6 +12,8 @@ import {
   Settings2,
   Building2,
   Users,
+  Tags,
+  Ruler,
 } from 'lucide-react'
 import type { Database } from '@/lib/supabase/database.types'
 
@@ -126,6 +128,24 @@ export const navItems: NavItem[] = [
     group: 'Hệ thống',
     description: 'Gán vai trò & cửa hàng phụ trách',
     roles: ['admin', 'brand_manager'],
+  },
+  {
+    href: '/danh-muc-nvl',
+    label: 'Danh mục NVL',
+    shortLabel: 'Danh mục',
+    icon: Tags,
+    group: 'Hệ thống',
+    description: 'Phân loại NVL theo thương hiệu',
+    roles: ['admin', 'brand_manager'],
+  },
+  {
+    href: '/don-vi-do',
+    label: 'Đơn vị đo',
+    shortLabel: 'Đơn vị đo',
+    icon: Ruler,
+    group: 'Hệ thống',
+    description: 'Đơn vị đo dùng chung mọi thương hiệu',
+    roles: ['admin'],
   },
   {
     href: '/cai-dat',
