@@ -15,6 +15,7 @@ import { formatVND, formatNum } from '@/lib/format'
 import { matchVi } from '@/lib/vi-search'
 import { useToast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
+import { computeActualConsumption, type TxnLite } from '@/lib/actual-consumption'
 
 interface StockRow {
   id: string
@@ -203,14 +204,6 @@ export function StockReport() {
 
 /* ---------- Giá Vốn report ---------- */
 
-interface TxnLite {
-  material_id: string
-  type: string
-  quantity: number
-  amount: number | null
-  created_at: string
-}
-
 export function CostReport() {
   const { selectedStore } = useStore()
   const { profile } = useAuth()
@@ -260,26 +253,15 @@ export function CostReport() {
     })
   }, [selectedStore, canView, from, to])
 
-  // Ton_cuoi = ton_dau + nhap - xuat_bar - kho_adjust (dieu chinh ke ca am/duong)
-  // => tieu_thu (ra bar + hao hut) = xuat_bar - kho_adjust = ton_dau + nhap - ton_cuoi
+  const actual = computeActualConsumption(
+    materials.map((m) => m.id),
+    new Map(materials.map((m) => [m.id, m.khoStock])),
+    txns
+  )
+  const actualByMaterial = new Map(actual.map((r) => [r.materialId, r]))
   const rows = materials.map((m) => {
-    const period = txns.filter((t) => t.material_id === m.id)
-    const receipts = period.filter((t) => t.type === 'receipt')
-    const issues = period.filter((t) => t.type === 'issue_to_bar')
-    const khoChecks = period.filter((t) => t.type === 'warehouse_count')
-
-    const nhapQty = receipts.reduce((s, t) => s + t.quantity, 0)
-    const nhapValue = receipts.reduce((s, t) => s + (t.amount ?? 0), 0)
-    const xuatQty = issues.reduce((s, t) => s + t.quantity, 0)
-    const khoAdjust = khoChecks.reduce((s, t) => s + t.quantity, 0)
-
-    const tonCuoi = m.khoStock
-    const tonDau = Math.max(0, tonCuoi - nhapQty + xuatQty - khoAdjust)
-    const tieuThu = tonDau + nhapQty - tonCuoi
-    const avgPrice = nhapQty > 0 ? nhapValue / nhapQty : 0
-    const tieuThuValue = tieuThu * avgPrice
-
-    return { material: m, tonDau, nhapQty, xuatQty, nhapValue, tonCuoi, tieuThu, tieuThuValue }
+    const r = actualByMaterial.get(m.id)!
+    return { material: m, ...r }
   })
 
   const totalConsumption = rows.reduce((s, r) => s + r.tieuThuValue, 0)

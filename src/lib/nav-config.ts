@@ -12,6 +12,9 @@ import {
   Settings2,
   Building2,
   Users,
+  UtensilsCrossed,
+  FileUp,
+  Scale,
 } from 'lucide-react'
 import type { Database } from '@/lib/supabase/database.types'
 
@@ -86,6 +89,14 @@ export const navItems: NavItem[] = [
     description: 'Kiểm kê Quầy Bar',
   },
   {
+    href: '/nhap-doanh-thu',
+    label: 'Nhập Doanh Thu',
+    shortLabel: 'Doanh thu',
+    icon: FileUp,
+    group: 'Nghiệp vụ',
+    description: 'Upload file bán hàng từ phần mềm POS',
+  },
+  {
     href: '/ton-kho',
     label: 'Tồn Kho',
     shortLabel: 'Tồn Kho',
@@ -100,6 +111,15 @@ export const navItems: NavItem[] = [
     icon: Calculator,
     group: 'Báo cáo',
     description: 'Báo cáo giá vốn (chỉ xem)',
+  },
+  {
+    href: '/sai-lech-tieu-thu',
+    label: 'Sai Lệch Tiêu Thụ',
+    shortLabel: 'Sai lệch',
+    icon: Scale,
+    group: 'Báo cáo',
+    description: 'So sánh tiêu thụ lý thuyết vs thực tế',
+    roles: ['admin', 'brand_manager', 'store_manager'],
   },
   {
     href: '/thuong-hieu',
@@ -126,6 +146,15 @@ export const navItems: NavItem[] = [
     icon: Package,
     group: 'Hệ thống',
     description: 'Nguyên vật liệu, danh mục & đơn vị tính',
+    roles: ['admin', 'brand_manager'],
+  },
+  {
+    href: '/san-pham',
+    label: 'Sản Phẩm & Công Thức',
+    shortLabel: 'Sản phẩm',
+    icon: UtensilsCrossed,
+    group: 'Hệ thống',
+    description: 'Sản phẩm bán ra, công thức & công thức BTP',
     roles: ['admin', 'brand_manager'],
   },
   {
