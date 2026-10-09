@@ -10,6 +10,8 @@ export type Json =
   | Json[]
 
 export type Database = {
+  // Allows to automatically instantiate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "14.5"
   }
@@ -184,6 +186,61 @@ export type Database = {
           },
         ]
       }
+      material_recipes: {
+        Row: {
+          btp_material_id: string
+          created_at: string
+          created_by: string | null
+          effective_from: string
+          effective_to: string | null
+          id: string
+          input_material_id: string
+          quantity: number
+        }
+        Insert: {
+          btp_material_id: string
+          created_at?: string
+          created_by?: string | null
+          effective_from?: string
+          effective_to?: string | null
+          id?: string
+          input_material_id: string
+          quantity: number
+        }
+        Update: {
+          btp_material_id?: string
+          created_at?: string
+          created_by?: string | null
+          effective_from?: string
+          effective_to?: string | null
+          id?: string
+          input_material_id?: string
+          quantity?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "material_recipes_btp_material_id_fkey"
+            columns: ["btp_material_id"]
+            isOneToOne: false
+            referencedRelation: "materials"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "material_recipes_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "material_recipes_input_material_id_fkey"
+            columns: ["input_material_id"]
+            isOneToOne: false
+            referencedRelation: "materials"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       materials: {
         Row: {
           brand_id: string
@@ -252,6 +309,135 @@ export type Database = {
           },
         ]
       }
+      product_aliases: {
+        Row: {
+          brand_id: string
+          created_at: string
+          id: string
+          product_id: string
+          source_name: string
+        }
+        Insert: {
+          brand_id: string
+          created_at?: string
+          id?: string
+          product_id: string
+          source_name: string
+        }
+        Update: {
+          brand_id?: string
+          created_at?: string
+          id?: string
+          product_id?: string
+          source_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_aliases_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "brands"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_aliases_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      product_recipes: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          effective_from: string
+          effective_to: string | null
+          id: string
+          material_id: string
+          product_id: string
+          quantity: number
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          effective_from?: string
+          effective_to?: string | null
+          id?: string
+          material_id: string
+          product_id: string
+          quantity: number
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          effective_from?: string
+          effective_to?: string | null
+          id?: string
+          material_id?: string
+          product_id?: string
+          quantity?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_recipes_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_recipes_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "materials"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_recipes_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      products: {
+        Row: {
+          brand_id: string
+          code: string | null
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+        }
+        Insert: {
+          brand_id: string
+          code?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+        }
+        Update: {
+          brand_id?: string
+          code?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "products_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "brands"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -281,6 +467,106 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      sales_imports: {
+        Row: {
+          file_name: string
+          id: string
+          imported_at: string
+          imported_by: string
+          row_count: number
+          store_id: string
+        }
+        Insert: {
+          file_name: string
+          id?: string
+          imported_at?: string
+          imported_by: string
+          row_count?: number
+          store_id: string
+        }
+        Update: {
+          file_name?: string
+          id?: string
+          imported_at?: string
+          imported_by?: string
+          row_count?: number
+          store_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sales_imports_imported_by_fkey"
+            columns: ["imported_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sales_imports_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sales_records: {
+        Row: {
+          created_at: string
+          id: string
+          import_id: string
+          product_id: string
+          quantity: number
+          revenue: number | null
+          sold_date: string
+          source_name: string
+          store_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          import_id: string
+          product_id: string
+          quantity: number
+          revenue?: number | null
+          sold_date: string
+          source_name: string
+          store_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          import_id?: string
+          product_id?: string
+          quantity?: number
+          revenue?: number | null
+          sold_date?: string
+          source_name?: string
+          store_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sales_records_import_id_fkey"
+            columns: ["import_id"]
+            isOneToOne: false
+            referencedRelation: "sales_imports"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sales_records_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sales_records_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       stores: {
         Row: {
