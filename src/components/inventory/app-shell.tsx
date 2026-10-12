@@ -64,9 +64,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <CupSoda className="size-4.5" />
         </div>
         <div className="flex flex-col leading-none">
-          <span className="text-sm font-bold tracking-tight text-white">Trà House</span>
+          <span className="text-sm font-bold tracking-tight text-white">Bạch Long</span>
           <span className="text-[11px] text-sidebar-foreground/70">
-            Vận hành kho · Quầy bar
+            Quản Lý Kho - Nguyên Vật Liệu
           </span>
         </div>
       </Link>
@@ -310,7 +310,7 @@ function CurrentPageLabel({ pathname }: { pathname: string | null }) {
   if (!current) {
     return (
       <span className="text-sm font-medium text-muted-foreground">
-        Trà House
+        Bạch Long
       </span>
     )
   }

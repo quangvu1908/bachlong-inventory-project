@@ -20,9 +20,9 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Trà House — Kiểm soát tồn kho",
+  title: "Bạch Long — Quản Lý Kho Nguyên Vật Liệu",
   description:
-    "Hệ thống vận hành kho & quầy bar cho cửa hàng trà sữa: nhập hàng, xuất kho ra bar, kiểm kê, tồn kho và giá vốn.",
+    "Hệ thống vận hành kho & quầy bar cho chuỗi đồ uống Bạch Long: nhập hàng, xuất kho ra bar, điều chuyển, kiểm kê, tồn kho và giá vốn.",
   keywords: [
     "trà sữa",
     "kiểm soát tồn kho",

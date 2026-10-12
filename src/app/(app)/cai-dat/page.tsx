@@ -45,7 +45,7 @@ interface SettingsState {
 }
 
 const defaultSettings: SettingsState = {
-  shopName: 'Trà House',
+  shopName: 'Bạch Long',
   currency: 'VND',
   timezone: 'Asia/Ho_Chi_Minh',
   lowStockAlert: true,
