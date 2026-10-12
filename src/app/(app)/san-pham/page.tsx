@@ -248,7 +248,7 @@ function ProductsBrandSection({
 
   return (
     <Card className="border-border/60">
-      <CardHeader className="flex-row items-center justify-between gap-3 pb-3">
+      <CardHeader className="flex-col items-start gap-3 pb-3 sm:flex-row sm:items-center sm:justify-between">
         <CardTitle className="flex items-center gap-2 text-base">
           <span className="grid size-8 place-items-center rounded-lg bg-primary/10 text-primary ring-1 ring-primary/20">
             <UtensilsCrossed className="size-4" />
@@ -444,7 +444,7 @@ function ProductRecipeBrandSection({
 
   return (
     <Card className="border-border/60">
-      <CardHeader className="flex-row items-center justify-between gap-3 pb-3">
+      <CardHeader className="flex-col items-start gap-3 pb-3 sm:flex-row sm:items-center sm:justify-between">
         <CardTitle className="flex items-center gap-2 text-base">
           <span className="grid size-8 place-items-center rounded-lg bg-primary/10 text-primary ring-1 ring-primary/20">
             <FlaskConical className="size-4" />
@@ -452,7 +452,7 @@ function ProductRecipeBrandSection({
           {brand.name}
         </CardTitle>
         <Select value={selectedProductId} onValueChange={setSelectedProductId}>
-          <SelectTrigger className="w-64"><SelectValue placeholder="Chọn sản phẩm" /></SelectTrigger>
+          <SelectTrigger className="w-full sm:w-64"><SelectValue placeholder="Chọn sản phẩm" /></SelectTrigger>
           <SelectContent>
             {products.map((p) => (
               <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
@@ -551,7 +551,7 @@ function MaterialRecipeBrandSection({
   return (
     <Card className="border-border/60">
       <CardHeader className="gap-3 pb-3">
-        <div className="flex items-center justify-between gap-3">
+        <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
           <CardTitle className="flex items-center gap-2 text-base">
             <span className="grid size-8 place-items-center rounded-lg bg-primary/10 text-primary ring-1 ring-primary/20">
               <Beaker className="size-4" />
@@ -559,7 +559,7 @@ function MaterialRecipeBrandSection({
             {brand.name}
           </CardTitle>
           <Select value={selectedMaterialId} onValueChange={setSelectedMaterialId}>
-            <SelectTrigger className="w-64"><SelectValue placeholder="Chọn NVL / BTP" /></SelectTrigger>
+            <SelectTrigger className="w-full sm:w-64"><SelectValue placeholder="Chọn NVL / BTP" /></SelectTrigger>
             <SelectContent>
               {materials.map((m) => (
                 <SelectItem key={m.id} value={m.id}>{m.name}</SelectItem>
@@ -670,11 +670,11 @@ function RecipeTable({
 
   return (
     <div className="space-y-3">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <span className="text-xs text-muted-foreground">
           Số lượng tính theo đơn vị ĐVT Kho của NVL, {quantityHint}.
         </span>
-        <Button size="sm" className="gap-1.5" onClick={() => { setEditing(null); setDialogOpen(true) }}>
+        <Button size="sm" className="gap-1.5 self-start" onClick={() => { setEditing(null); setDialogOpen(true) }}>
           <Plus className="size-4" />
           Thêm dòng công thức
         </Button>

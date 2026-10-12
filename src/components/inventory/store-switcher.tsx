@@ -22,14 +22,16 @@ export function StoreSwitcher() {
 
   if (stores.length === 0) {
     return (
-      <span className="text-xs text-muted-foreground">Chưa có cửa hàng nào</span>
+      <span className="max-w-[140px] truncate text-xs text-muted-foreground sm:max-w-none">
+        Chưa có cửa hàng nào
+      </span>
     )
   }
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="sm" className="h-8 max-w-[220px] justify-between gap-1.5 px-2.5">
+        <Button variant="outline" size="sm" className="h-8 max-w-[150px] justify-between gap-1.5 px-2.5 sm:max-w-[220px]">
           <StoreIcon className="size-3.5 shrink-0 text-muted-foreground" />
           <span className="truncate text-xs font-medium">
             {selectedStore ? `${selectedStore.brand.name} · ${selectedStore.name}` : 'Chọn cửa hàng'}

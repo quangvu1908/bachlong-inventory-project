@@ -47,10 +47,10 @@ export function AlertsPanel({ restockSuggestions, expiringMaterials, canViewPric
     <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <Card className="overflow-hidden border-border/60">
         <CardHeader className="pb-3">
-          <div className="flex items-center justify-between gap-2">
-            <div>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="min-w-0">
               <CardTitle className="flex items-center gap-2 text-base">
-                <span className="relative grid size-8 place-items-center rounded-lg bg-amber-500/10 text-amber-600 ring-1 ring-amber-500/20">
+                <span className="relative grid size-8 shrink-0 place-items-center rounded-lg bg-amber-500/10 text-amber-600 ring-1 ring-amber-500/20">
                   <AlertTriangle className="size-4" />
                   {totalAlerts > 0 && (
                     <span className="absolute -right-1 -top-1 grid size-4 place-items-center rounded-full bg-destructive text-[9px] font-bold text-white">
@@ -62,7 +62,7 @@ export function AlertsPanel({ restockSuggestions, expiringMaterials, canViewPric
               </CardTitle>
               <CardDescription className="mt-1 text-xs">NVL sắp hết hàng cần nhập bổ sung và hạn sử dụng sắp đến</CardDescription>
             </div>
-            <div className="flex shrink-0 gap-1 rounded-full bg-muted/60 p-1 text-xs">
+            <div className="flex gap-1 rounded-full bg-muted/60 p-1 text-xs sm:shrink-0">
               <TabButton active={tab === 'restock'} onClick={() => setTab('restock')} count={restockCount} tone="amber">
                 <ShoppingCart className="size-3.5" />Nhập bổ sung
               </TabButton>
@@ -95,7 +95,7 @@ function TabButton({ active, onClick, count, tone, children }: { active: boolean
   return (
     <button
       onClick={onClick}
-      className={cn('inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 font-medium transition-all', active ? tones[tone] : 'text-muted-foreground hover:text-foreground')}
+      className={cn('inline-flex flex-1 items-center justify-center gap-1.5 whitespace-nowrap rounded-full px-2.5 py-1.5 font-medium transition-all sm:flex-none sm:px-3', active ? tones[tone] : 'text-muted-foreground hover:text-foreground')}
     >
       {children}
       {count > 0 && (
@@ -114,7 +114,7 @@ function RestockList({ items, canViewPrice, onQuickReceipt }: { items: RestockIt
 
   return (
     <div>
-      <div className="flex items-center justify-between border-b border-border/50 bg-muted/30 px-4 py-2 text-xs text-muted-foreground">
+      <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 border-b border-border/50 bg-muted/30 px-4 py-2 text-xs text-muted-foreground">
         <span>{items.length} NVL cần nhập bổ sung</span>
         {canViewPrice && (
           <span>Tổng giá trị dự kiến: <span className="font-bold text-amber-700 dark:text-amber-300">{formatVND(totalSuggestedValue)}</span></span>
@@ -124,33 +124,37 @@ function RestockList({ items, canViewPrice, onQuickReceipt }: { items: RestockIt
         {items.map(({ m, suggested }) => {
           const ratio = m.minStock > 0 ? m.khoStock / m.minStock : 1
           return (
-            <div key={m.id} className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-muted/30">
+            <div key={m.id} className="flex flex-col gap-2.5 px-4 py-3 transition-colors hover:bg-muted/30 sm:flex-row sm:items-center sm:gap-3">
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
                   <span className="truncate text-sm font-semibold">{m.name}</span>
                   <span className="shrink-0 rounded border border-border/60 bg-muted/40 px-1.5 py-0.5 text-[10px] font-medium">{m.categoryName}</span>
                 </div>
-                <div className="mt-1 flex items-center gap-2 text-[11px] text-muted-foreground">
-                  <span className="text-destructive">{formatNum(m.khoStock)} {m.unitKhoCode}</span>
-                  <span>/ tối thiểu {formatNum(m.minStock)} {m.unitKhoCode}</span>
-                  <div className="relative h-1.5 w-24 overflow-hidden rounded-full bg-muted">
+                <div className="mt-1.5 flex items-center gap-2 text-[11px] text-muted-foreground">
+                  <div className="relative h-1.5 w-16 shrink-0 overflow-hidden rounded-full bg-muted">
                     <div
                       className={cn('absolute inset-y-0 left-0 rounded-full transition-all', ratio <= 0.5 ? 'bg-destructive' : ratio <= 1 ? 'bg-amber-500' : 'bg-emerald-500')}
                       style={{ width: `${Math.min(ratio * 100, 100)}%` }}
                     />
                   </div>
+                  <span className="truncate">
+                    <span className="text-destructive">{formatNum(m.khoStock)} {m.unitKhoCode}</span>
+                    {' '}/ tối thiểu {formatNum(m.minStock)} {m.unitKhoCode}
+                  </span>
                 </div>
               </div>
-              <div className="shrink-0 text-right">
-                <div className="text-[10px] uppercase tracking-wide text-muted-foreground">Gợi ý nhập</div>
-                <div className="text-sm font-bold text-amber-700 dark:text-amber-300">+{formatNum(suggested)} {m.unitKhoCode}</div>
-                {canViewPrice && <div className="text-[10px] text-muted-foreground">≈ {formatVND(suggested * (m.price ?? 0))}</div>}
+              <div className="flex shrink-0 items-center justify-between gap-3 sm:justify-end">
+                <div className="text-right">
+                  <div className="text-[10px] uppercase tracking-wide text-muted-foreground">Gợi ý nhập</div>
+                  <div className="text-sm font-bold text-amber-700 dark:text-amber-300">+{formatNum(suggested)} {m.unitKhoCode}</div>
+                  {canViewPrice && <div className="text-[10px] text-muted-foreground">≈ {formatVND(suggested * (m.price ?? 0))}</div>}
+                </div>
+                {onQuickReceipt && (
+                  <Button size="sm" className="shrink-0 gap-1.5 rounded-full" onClick={() => onQuickReceipt(m.id, suggested)}>
+                    <PackagePlus className="size-3.5" />Nhập
+                  </Button>
+                )}
               </div>
-              {onQuickReceipt && (
-                <Button size="sm" className="shrink-0 gap-1.5 rounded-full" onClick={() => onQuickReceipt(m.id, suggested)}>
-                  <PackagePlus className="size-3.5" />Nhập
-                </Button>
-              )}
             </div>
           )
         })}

@@ -181,8 +181,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             </SheetContent>
           </Sheet>
 
-          {/* Breadcrumb / current page */}
-          <CurrentPageLabel pathname={pathname} />
+          {/* Breadcrumb / current page — ẩn trên mobile để nhường chỗ cho bộ chọn cửa hàng */}
+          <div className="hidden min-w-0 sm:block">
+            <CurrentPageLabel pathname={pathname} />
+          </div>
 
           <div className="flex-1" />
 

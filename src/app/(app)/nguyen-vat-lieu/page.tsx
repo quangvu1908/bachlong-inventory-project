@@ -257,7 +257,7 @@ function MaterialsBrandSection({
 
   return (
     <Card className="border-border/60">
-      <CardHeader className="flex-row items-center justify-between gap-3 pb-3">
+      <CardHeader className="flex-col items-start gap-3 pb-3 sm:flex-row sm:items-center sm:justify-between">
         <CardTitle className="flex items-center gap-2 text-base">
           <span className="grid size-8 place-items-center rounded-lg bg-primary/10 text-primary ring-1 ring-primary/20">
             <Package className="size-4" />
@@ -290,32 +290,37 @@ function MaterialsBrandSection({
             <TableHeader>
               <TableRow>
                 <TableHead>Tên NVL</TableHead>
-                <TableHead>Danh mục</TableHead>
-                <TableHead>ĐVT Kho</TableHead>
-                <TableHead>ĐVT Bar</TableHead>
-                <TableHead>Quy đổi</TableHead>
-                <TableHead>Đơn giá</TableHead>
-                <TableHead className="w-28">Trạng thái</TableHead>
+                <TableHead className="hidden sm:table-cell">Danh mục</TableHead>
+                <TableHead className="hidden md:table-cell">ĐVT Kho</TableHead>
+                <TableHead className="hidden md:table-cell">ĐVT Bar</TableHead>
+                <TableHead className="hidden lg:table-cell">Quy đổi</TableHead>
+                <TableHead className="hidden sm:table-cell">Đơn giá</TableHead>
+                <TableHead className="w-16 sm:w-28">Trạng thái</TableHead>
                 <TableHead className="w-10" />
               </TableRow>
             </TableHeader>
             <TableBody>
               {materials.map((mat) => (
                 <TableRow key={mat.id}>
-                  <TableCell className="font-medium">{mat.name}</TableCell>
-                  <TableCell>
+                  <TableCell className="font-medium">
+                    {mat.name}
+                    <div className="mt-0.5 text-[10px] font-normal text-muted-foreground sm:hidden">
+                      {categoryName(mat.category_id)} · {formatVND(prices[mat.id]?.unit_price ?? 0)}
+                    </div>
+                  </TableCell>
+                  <TableCell className="hidden sm:table-cell">
                     <Badge variant="secondary">{categoryName(mat.category_id)}</Badge>
                   </TableCell>
-                  <TableCell><Badge variant="outline">{unitLabel(mat.unit_kho_id)}</Badge></TableCell>
-                  <TableCell><Badge variant="outline">{unitLabel(mat.unit_bar_id)}</Badge></TableCell>
-                  <TableCell className="text-muted-foreground">1 : {mat.convert_factor}</TableCell>
-                  <TableCell className="text-muted-foreground">
+                  <TableCell className="hidden md:table-cell"><Badge variant="outline">{unitLabel(mat.unit_kho_id)}</Badge></TableCell>
+                  <TableCell className="hidden md:table-cell"><Badge variant="outline">{unitLabel(mat.unit_bar_id)}</Badge></TableCell>
+                  <TableCell className="hidden text-muted-foreground lg:table-cell">1 : {mat.convert_factor}</TableCell>
+                  <TableCell className="hidden text-muted-foreground sm:table-cell">
                     {formatVND(prices[mat.id]?.unit_price ?? 0)}
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
                       <Switch checked={mat.is_active} onCheckedChange={(v) => toggleActive(mat, v)} />
-                      <span className="text-xs text-muted-foreground">
+                      <span className="hidden text-xs text-muted-foreground sm:inline">
                         {mat.is_active ? 'Đang dùng' : 'Đã tắt'}
                       </span>
                     </div>
@@ -548,7 +553,7 @@ function CategoryBrandSection({
 
   return (
     <Card className="border-border/60">
-      <CardHeader className="flex-row items-center justify-between gap-3 pb-3">
+      <CardHeader className="flex-col items-start gap-3 pb-3 sm:flex-row sm:items-center sm:justify-between">
         <CardTitle className="flex items-center gap-2 text-base">
           <span className="grid size-8 place-items-center rounded-lg bg-primary/10 text-primary ring-1 ring-primary/20">
             <FolderTree className="size-4" />
@@ -742,7 +747,7 @@ function UnitsSection({
 
   return (
     <Card className="border-border/60">
-      <CardHeader className="flex-row items-center justify-between gap-3 pb-3">
+      <CardHeader className="flex-col items-start gap-3 pb-3 sm:flex-row sm:items-center sm:justify-between">
         <CardTitle className="flex items-center gap-2 text-base">
           <span className="grid size-8 place-items-center rounded-lg bg-primary/10 text-primary ring-1 ring-primary/20">
             <Ruler className="size-4" />

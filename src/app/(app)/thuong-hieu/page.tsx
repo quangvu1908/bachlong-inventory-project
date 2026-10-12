@@ -192,7 +192,7 @@ function BrandSection({
 
   return (
     <Card className="border-border/60">
-      <CardHeader className="flex-row items-center justify-between gap-3 pb-3">
+      <CardHeader className="flex-col items-start gap-3 pb-3 sm:flex-row sm:items-center sm:justify-between">
         <CardTitle className="flex items-center gap-2 text-base">
           <span className="grid size-8 place-items-center rounded-lg bg-primary/10 text-primary ring-1 ring-primary/20">
             <Building2 className="size-4" />

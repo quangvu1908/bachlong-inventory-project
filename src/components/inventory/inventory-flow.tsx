@@ -57,12 +57,12 @@ export function InventoryFlow({ storeName }: InventoryFlowProps) {
       </div>
 
       <Card className="overflow-hidden border-border/60 p-3">
-        <div className="flex items-center gap-2 overflow-x-auto">
+        <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-2">
           {stages.map((stage, idx) => {
             const Icon = stage.icon
             return (
               <React.Fragment key={stage.id}>
-                <div className="flex shrink-0 items-center gap-2.5 rounded-lg px-2.5 py-1.5">
+                <div className="flex items-center gap-2.5 rounded-lg px-2.5 py-1.5">
                   <span className={cn('grid size-8 shrink-0 place-items-center rounded-lg', stage.bg)}>
                     <Icon className={cn('size-4', stage.color)} />
                   </span>
@@ -74,7 +74,7 @@ export function InventoryFlow({ storeName }: InventoryFlowProps) {
                   </div>
                 </div>
                 {idx < stages.length - 1 && (
-                  <ArrowRight className="size-3.5 shrink-0 text-muted-foreground/50" />
+                  <ArrowRight className="size-3.5 shrink-0 rotate-90 text-muted-foreground/50 sm:rotate-0" />
                 )}
               </React.Fragment>
             )
