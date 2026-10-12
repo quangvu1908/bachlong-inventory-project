@@ -66,7 +66,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <div className="flex flex-col leading-none">
           <span className="text-sm font-bold tracking-tight text-white">Bạch Long</span>
           <span className="text-[11px] text-sidebar-foreground/70">
-            Quản Lý Kho - Nguyên Vật Liệu
+            Vận Hành - Quản Lý Kho
           </span>
         </div>
       </Link>
