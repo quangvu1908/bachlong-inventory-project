@@ -43,6 +43,7 @@ interface TxnRow extends Omit<TxnViewRow, 'unit_price' | 'amount' | 'id' | 'stor
   unit_price: number | null
   amount: number | null
   material_name: string
+  related_store_name: string | null
 }
 
 type FilterType = 'all' | TxnType
@@ -52,6 +53,8 @@ const filterOptions: { value: FilterType; label: string }[] = [
   { value: 'all', label: 'Tất cả nghiệp vụ' },
   { value: 'receipt', label: 'Nhập hàng' },
   { value: 'issue_to_bar', label: 'Xuất ra Bar' },
+  { value: 'transfer_out', label: 'Điều chuyển đi' },
+  { value: 'transfer_in', label: 'Điều chuyển đến' },
   { value: 'warehouse_count', label: 'Kiểm kho' },
   { value: 'bar_count', label: 'Kiểm bar' },
 ]
@@ -59,6 +62,8 @@ const filterOptions: { value: FilterType; label: string }[] = [
 const typeMeta: Record<TxnType, { label: string; color: string; dot: string }> = {
   receipt: { label: 'Nhập hàng', color: 'border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-300', dot: 'bg-amber-500' },
   issue_to_bar: { label: 'Xuất ra Bar', color: 'border-orange-500/30 bg-orange-500/10 text-orange-700 dark:text-orange-300', dot: 'bg-orange-500' },
+  transfer_out: { label: 'Điều chuyển đi', color: 'border-sky-500/30 bg-sky-500/10 text-sky-700 dark:text-sky-300', dot: 'bg-sky-500' },
+  transfer_in: { label: 'Điều chuyển đến', color: 'border-indigo-500/30 bg-indigo-500/10 text-indigo-700 dark:text-indigo-300', dot: 'bg-indigo-500' },
   warehouse_count: { label: 'Kiểm kho', color: 'border-teal-500/30 bg-teal-500/10 text-teal-700 dark:text-teal-300', dot: 'bg-teal-500' },
   bar_count: { label: 'Kiểm bar', color: 'border-rose-500/30 bg-rose-500/10 text-rose-700 dark:text-rose-300', dot: 'bg-rose-500' },
 }
@@ -87,13 +92,21 @@ export function TransactionHistory() {
       .then(async ({ data }) => {
         const txns = data ?? []
         const materialIds = Array.from(new Set(txns.map((t) => t.material_id).filter((id): id is string => !!id)))
-        const { data: mats } = materialIds.length
-          ? await supabase.from('materials').select('id, name').in('id', materialIds)
-          : { data: [] as { id: string; name: string }[] }
+        const storeIds = Array.from(new Set(txns.map((t) => t.related_store_id).filter((id): id is string => !!id)))
+        const [{ data: mats }, { data: relatedStores }] = await Promise.all([
+          materialIds.length
+            ? supabase.from('materials').select('id, name').in('id', materialIds)
+            : Promise.resolve({ data: [] as { id: string; name: string }[] }),
+          storeIds.length
+            ? supabase.from('stores').select('id, name').in('id', storeIds)
+            : Promise.resolve({ data: [] as { id: string; name: string }[] }),
+        ])
         const nameById = new Map((mats ?? []).map((m) => [m.id, m.name]))
+        const storeNameById = new Map((relatedStores ?? []).map((s) => [s.id, s.name]))
         const rows: TxnRow[] = txns.map((t) => ({
           ...t,
           material_name: nameById.get(t.material_id ?? '') ?? '—',
+          related_store_name: t.related_store_id ? storeNameById.get(t.related_store_id) ?? '—' : null,
         })) as TxnRow[]
         setTransactions(rows)
         setLoading(false)
@@ -195,6 +208,14 @@ export function TransactionHistory() {
                       </div>
                       <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] text-muted-foreground">
                         <span>{formatDateTime(tx.created_at)}</span>
+                        {tx.related_store_name && (
+                          <>
+                            <span>·</span>
+                            <span className="truncate">
+                              {tx.type === 'transfer_out' ? `Đến ${tx.related_store_name}` : `Từ ${tx.related_store_name}`}
+                            </span>
+                          </>
+                        )}
                         {tx.note && (
                           <>
                             <span>·</span>
@@ -243,6 +264,7 @@ function TransactionDetailBody({ tx, onClose }: { tx: TxnRow; onClose: () => voi
   const meta = typeMeta[tx.type]
   const isCheck = tx.type === 'warehouse_count' || tx.type === 'bar_count'
   const isIssue = tx.type === 'issue_to_bar'
+  const isTransfer = tx.type === 'transfer_out' || tx.type === 'transfer_in'
 
   const handlePrint = () => {
     const amountLine = tx.amount && tx.amount > 0
@@ -254,6 +276,8 @@ function TransactionDetailBody({ tx, onClose }: { tx: TxnRow; onClose: () => voi
       : ''
     const issueLine = isIssue && tx.bar_quantity != null
       ? `<div class="row"><span>Nhận tại Bar</span><span>+${formatNum(tx.bar_quantity)} ${tx.bar_unit_code}</span></div>` : ''
+    const transferLine = isTransfer && tx.related_store_name
+      ? `<div class="row"><span>${tx.type === 'transfer_out' ? 'Cửa hàng nhận' : 'Cửa hàng gửi'}</span><span>${tx.related_store_name}</span></div>` : ''
     const html = `<!doctype html><html lang="vi"><head><meta charset="utf-8"><title>Phiếu ${meta.label} - ${tx.id}</title>
       <style>
         *{box-sizing:border-box} body{font-family:ui-sans-serif,system-ui,sans-serif;padding:32px;color:#1a1a1a;max-width:480px;margin:0 auto}
@@ -274,7 +298,7 @@ function TransactionDetailBody({ tx, onClose }: { tx: TxnRow; onClose: () => voi
       <div class="row"><span>Loại</span><span>${meta.label}</span></div>
       <div class="row"><span>Số lượng</span><strong>${tx.quantity >= 0 ? '+' : ''}${formatNum(tx.quantity)} ${tx.unit_code}</strong></div>
       ${tx.unit_price ? `<div class="row"><span>Đơn giá</span><span>${formatVND(tx.unit_price)}</span></div>` : ''}
-      ${amountLine}${checkLine}${issueLine}
+      ${amountLine}${checkLine}${issueLine}${transferLine}
       ${tx.note ? `<div class="note"><strong>Ghi chú:</strong> ${tx.note}</div>` : ''}
       <div class="footer">In lúc ${new Date().toLocaleString('vi-VN')} · BachLong Inventory</div>
       <script>window.onload=function(){window.print()}</script>
@@ -312,6 +336,16 @@ function TransactionDetailBody({ tx, onClose }: { tx: TxnRow; onClose: () => voi
           <>
             <div className="my-2 border-t border-border/60" />
             <DetailRow label="Nhận tại Bar" value={`+${formatNum(tx.bar_quantity)} ${tx.bar_unit_code}`} tone="text-teal-600 dark:text-teal-300" />
+          </>
+        )}
+        {isTransfer && tx.related_store_name && (
+          <>
+            <div className="my-2 border-t border-border/60" />
+            <DetailRow
+              label={tx.type === 'transfer_out' ? 'Cửa hàng nhận' : 'Cửa hàng gửi'}
+              value={tx.related_store_name}
+              tone="text-sky-600 dark:text-sky-300"
+            />
           </>
         )}
         {isCheck && (

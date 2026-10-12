@@ -619,6 +619,7 @@ export type Database = {
           material_id: string
           note: string | null
           quantity: number
+          related_store_id: string | null
           stock_after: number
           stock_before: number
           store_id: string
@@ -638,6 +639,7 @@ export type Database = {
           material_id: string
           note?: string | null
           quantity: number
+          related_store_id?: string | null
           stock_after: number
           stock_before: number
           store_id: string
@@ -657,6 +659,7 @@ export type Database = {
           material_id?: string
           note?: string | null
           quantity?: number
+          related_store_id?: string | null
           stock_after?: number
           stock_before?: number
           store_id?: string
@@ -677,6 +680,13 @@ export type Database = {
             columns: ["material_id"]
             isOneToOne: false
             referencedRelation: "materials"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_related_store_id_fkey"
+            columns: ["related_store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
             referencedColumns: ["id"]
           },
           {
@@ -796,12 +806,53 @@ export type Database = {
           material_id: string | null
           note: string | null
           quantity: number | null
+          related_store_id: string | null
           stock_after: number | null
           stock_before: number | null
           store_id: string | null
           type: Database["public"]["Enums"]["transaction_type"] | null
           unit_code: string | null
           unit_price: number | null
+        }
+        Insert: {
+          amount?: never
+          bar_quantity?: number | null
+          bar_stock_after?: number | null
+          bar_stock_before?: number | null
+          bar_unit_code?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          id?: string | null
+          material_id?: string | null
+          note?: string | null
+          quantity?: number | null
+          related_store_id?: string | null
+          stock_after?: number | null
+          stock_before?: number | null
+          store_id?: string | null
+          type?: Database["public"]["Enums"]["transaction_type"] | null
+          unit_code?: string | null
+          unit_price?: never
+        }
+        Update: {
+          amount?: never
+          bar_quantity?: number | null
+          bar_stock_after?: number | null
+          bar_stock_before?: number | null
+          bar_unit_code?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          id?: string | null
+          material_id?: string | null
+          note?: string | null
+          quantity?: number | null
+          related_store_id?: string | null
+          stock_after?: number | null
+          stock_before?: number | null
+          store_id?: string | null
+          type?: Database["public"]["Enums"]["transaction_type"] | null
+          unit_code?: string | null
+          unit_price?: never
         }
         Relationships: [
           {
@@ -816,6 +867,13 @@ export type Database = {
             columns: ["material_id"]
             isOneToOne: false
             referencedRelation: "materials"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_related_store_id_fkey"
+            columns: ["related_store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
             referencedColumns: ["id"]
           },
           {
@@ -846,14 +904,32 @@ export type Database = {
           updated_at: string
         }
       }
-      auth_accessible_store_ids: { Args: Record<string, never>; Returns: string[] }
-      auth_can_view_price: { Args: Record<string, never>; Returns: boolean }
-      auth_is_admin: { Args: Record<string, never>; Returns: boolean }
-      auth_is_approved: { Args: Record<string, never>; Returns: boolean }
-      auth_managed_brand_ids: { Args: Record<string, never>; Returns: string[] }
-      auth_readable_brand_ids: { Args: Record<string, never>; Returns: string[] }
+      auth_accessible_store_ids: {
+        Args: Record<PropertyKey, never>
+        Returns: string[]
+      }
+      auth_can_view_price: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
+      auth_is_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
+      auth_is_approved: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
+      auth_managed_brand_ids: {
+        Args: Record<PropertyKey, never>
+        Returns: string[]
+      }
+      auth_readable_brand_ids: {
+        Args: Record<PropertyKey, never>
+        Returns: string[]
+      }
       auth_role: {
-        Args: Record<string, never>
+        Args: Record<PropertyKey, never>
         Returns: Database["public"]["Enums"]["user_role"]
       }
       record_bar_count: {
@@ -863,7 +939,26 @@ export type Database = {
           p_note?: string
           p_store_id: string
         }
-        Returns: Database["public"]["Tables"]["transactions"]["Row"]
+        Returns: {
+          amount: number | null
+          bar_quantity: number | null
+          bar_stock_after: number | null
+          bar_stock_before: number | null
+          bar_unit_code: string | null
+          created_at: string
+          created_by: string
+          id: string
+          material_id: string
+          note: string | null
+          quantity: number
+          related_store_id: string | null
+          stock_after: number
+          stock_before: number
+          store_id: string
+          type: Database["public"]["Enums"]["transaction_type"]
+          unit_code: string
+          unit_price: number | null
+        }
       }
       record_issue_to_bar: {
         Args: {
@@ -872,7 +967,26 @@ export type Database = {
           p_quantity: number
           p_store_id: string
         }
-        Returns: Database["public"]["Tables"]["transactions"]["Row"]
+        Returns: {
+          amount: number | null
+          bar_quantity: number | null
+          bar_stock_after: number | null
+          bar_stock_before: number | null
+          bar_unit_code: string | null
+          created_at: string
+          created_by: string
+          id: string
+          material_id: string
+          note: string | null
+          quantity: number
+          related_store_id: string | null
+          stock_after: number
+          stock_before: number
+          store_id: string
+          type: Database["public"]["Enums"]["transaction_type"]
+          unit_code: string
+          unit_price: number | null
+        }
       }
       record_receipt: {
         Args: {
@@ -883,7 +997,55 @@ export type Database = {
           p_store_id: string
           p_unit_price: number
         }
-        Returns: Database["public"]["Tables"]["transactions"]["Row"]
+        Returns: {
+          amount: number | null
+          bar_quantity: number | null
+          bar_stock_after: number | null
+          bar_stock_before: number | null
+          bar_unit_code: string | null
+          created_at: string
+          created_by: string
+          id: string
+          material_id: string
+          note: string | null
+          quantity: number
+          related_store_id: string | null
+          stock_after: number
+          stock_before: number
+          store_id: string
+          type: Database["public"]["Enums"]["transaction_type"]
+          unit_code: string
+          unit_price: number | null
+        }
+      }
+      record_transfer: {
+        Args: {
+          p_dest_store_id: string
+          p_material_id: string
+          p_note?: string
+          p_quantity: number
+          p_store_id: string
+        }
+        Returns: {
+          amount: number | null
+          bar_quantity: number | null
+          bar_stock_after: number | null
+          bar_stock_before: number | null
+          bar_unit_code: string | null
+          created_at: string
+          created_by: string
+          id: string
+          material_id: string
+          note: string | null
+          quantity: number
+          related_store_id: string | null
+          stock_after: number
+          stock_before: number
+          store_id: string
+          type: Database["public"]["Enums"]["transaction_type"]
+          unit_code: string
+          unit_price: number | null
+        }
       }
       record_warehouse_count: {
         Args: {
@@ -892,7 +1054,26 @@ export type Database = {
           p_note?: string
           p_store_id: string
         }
-        Returns: Database["public"]["Tables"]["transactions"]["Row"]
+        Returns: {
+          amount: number | null
+          bar_quantity: number | null
+          bar_stock_after: number | null
+          bar_stock_before: number | null
+          bar_unit_code: string | null
+          created_at: string
+          created_by: string
+          id: string
+          material_id: string
+          note: string | null
+          quantity: number
+          related_store_id: string | null
+          stock_after: number
+          stock_before: number
+          store_id: string
+          type: Database["public"]["Enums"]["transaction_type"]
+          unit_code: string
+          unit_price: number | null
+        }
       }
     }
     Enums: {
@@ -901,6 +1082,8 @@ export type Database = {
         | "issue_to_bar"
         | "warehouse_count"
         | "bar_count"
+        | "transfer_out"
+        | "transfer_in"
       unit_dimension: "weight" | "volume" | "count"
       user_role: "admin" | "brand_manager" | "store_manager" | "staff"
     }
@@ -909,3 +1092,137 @@ export type Database = {
     }
   }
 }
+
+type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
+
+type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
+
+export type Tables<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
+    : never) = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+      Row: infer R
+    }
+    ? R
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])
+    ? (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
+        Row: infer R
+      }
+      ? R
+      : never
+    : never
+
+export type TablesInsert<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    : never) = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Insert: infer I
+    }
+    ? I
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+        Insert: infer I
+      }
+      ? I
+      : never
+    : never
+
+export type TablesUpdate<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    : never) = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Update: infer U
+    }
+    ? U
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+        Update: infer U
+      }
+      ? U
+      : never
+    : never
+
+export type Enums<
+  DefaultSchemaEnumNameOrOptions extends
+    | keyof DefaultSchema["Enums"]
+    | { schema: keyof DatabaseWithoutInternals },
+  EnumName extends (DefaultSchemaEnumNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
+    : never) = never,
+> = DefaultSchemaEnumNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
+  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
+    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
+    : never
+
+export type CompositeTypes<
+  PublicCompositeTypeNameOrOptions extends
+    | keyof DefaultSchema["CompositeTypes"]
+    | { schema: keyof DatabaseWithoutInternals },
+  CompositeTypeName extends (PublicCompositeTypeNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    : never) = never,
+> = PublicCompositeTypeNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
+    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+    : never
+
+export const Constants = {
+  public: {
+    Enums: {
+      transaction_type: [
+        "receipt",
+        "issue_to_bar",
+        "warehouse_count",
+        "bar_count",
+        "transfer_out",
+        "transfer_in",
+      ],
+      unit_dimension: ["weight", "volume", "count"],
+      user_role: ["admin", "brand_manager", "store_manager", "staff"],
+    },
+  },
+} as const

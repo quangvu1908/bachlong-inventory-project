@@ -61,7 +61,7 @@ export default function SaiLechTieuThuPage() {
         .from('transactions_view')
         .select('material_id, type, quantity, amount, created_at')
         .eq('store_id', selectedStore.id)
-        .in('type', ['receipt', 'issue_to_bar', 'warehouse_count'])
+        .in('type', ['receipt', 'issue_to_bar', 'warehouse_count', 'transfer_out'])
         .gte('created_at', fromIso)
         .lte('created_at', toIso),
       supabase

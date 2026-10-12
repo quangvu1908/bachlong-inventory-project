@@ -15,6 +15,7 @@ import {
   UtensilsCrossed,
   FileUp,
   Scale,
+  Truck,
 } from 'lucide-react'
 import type { Database } from '@/lib/supabase/database.types'
 
@@ -69,6 +70,15 @@ export const navItems: NavItem[] = [
     group: 'Nghiệp vụ',
     code: 'XUAT_KHO_BAR',
     description: 'Chuyển NVL Kho → Bar',
+  },
+  {
+    href: '/dieu-chuyen',
+    label: 'Điều Chuyển',
+    shortLabel: 'Điều chuyển',
+    icon: Truck,
+    group: 'Nghiệp vụ',
+    code: 'DIEU_CHUYEN',
+    description: 'Chuyển NVL sang cửa hàng khác cùng thương hiệu',
   },
   {
     href: '/kiem-kho',
