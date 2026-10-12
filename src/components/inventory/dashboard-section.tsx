@@ -23,37 +23,33 @@ export function DashboardKpis({ totalKhoValue, totalBarValue, lowStockCount, tod
       <div className="grid grid-cols-2 gap-3 pb-6 lg:grid-cols-4">
         {canViewPrice && (
           <>
-            <KpiCard icon={Wallet} label="Giá trị Kho Dự Trữ" value={formatVND(totalKhoValue)} tone="amber" />
-            <KpiCard icon={Coffee} label="Giá trị Quầy Bar" value={formatVND(totalBarValue)} tone="rose" />
+            <KpiCard icon={Wallet} label="Giá trị Kho Dự Trữ" value={formatVND(totalKhoValue)} tone="slate" />
+            <KpiCard icon={Coffee} label="Giá trị Quầy Bar" value={formatVND(totalBarValue)} tone="violet" />
           </>
         )}
-        <KpiCard icon={AlertTriangle} label="Sắp hết hàng" value={String(lowStockCount)} tone={lowStockCount > 0 ? 'destructive' : 'emerald'} />
-        <KpiCard icon={PackagePlus} label="Phiếu nhập hôm nay" value={String(todayReceipts)} tone="teal" />
+        <KpiCard icon={AlertTriangle} label="Sắp hết hàng" value={String(lowStockCount)} tone={lowStockCount > 0 ? 'red' : 'emerald'} />
+        <KpiCard icon={PackagePlus} label="Phiếu nhập hôm nay" value={String(todayReceipts)} tone="blue" />
       </div>
     </section>
   )
 }
 
-function KpiCard({ icon: Icon, label, value, tone }: { icon: React.ComponentType<{ className?: string }>; label: string; value: string; tone: 'amber' | 'rose' | 'destructive' | 'emerald' | 'teal' }) {
+function KpiCard({ icon: Icon, label, value, tone }: { icon: React.ComponentType<{ className?: string }>; label: string; value: string; tone: 'slate' | 'violet' | 'red' | 'emerald' | 'blue' }) {
   const tones = {
-    amber: 'bg-amber-500/10 text-amber-600 ring-amber-500/20',
-    rose: 'bg-rose-500/10 text-rose-600 ring-rose-500/20',
-    destructive: 'bg-destructive/10 text-destructive ring-destructive/20',
-    emerald: 'bg-emerald-500/10 text-emerald-600 ring-emerald-500/20',
-    teal: 'bg-teal-500/10 text-teal-600 ring-teal-500/20',
+    slate: 'bg-slate-500',
+    violet: 'bg-violet-600',
+    red: 'bg-red-600',
+    emerald: 'bg-emerald-600',
+    blue: 'bg-primary',
   }
   return (
-    <Card className="border-border/60">
-      <CardContent className="flex items-center gap-3 p-4">
-        <span className={cn('grid size-10 shrink-0 place-items-center rounded-xl ring-1', tones[tone])}>
-          <Icon className="size-5" />
-        </span>
-        <div className="min-w-0">
-          <div className="truncate text-lg font-bold tabular-nums">{value}</div>
-          <div className="truncate text-[11px] text-muted-foreground">{label}</div>
-        </div>
-      </CardContent>
-    </Card>
+    <div className={cn('flex flex-col gap-1.5 rounded-xl p-4 text-white', tones[tone])}>
+      <div className="flex items-start justify-between gap-2">
+        <div className="truncate text-xl font-extrabold tabular-nums tracking-tight sm:text-2xl">{value}</div>
+        <Icon className="size-6 shrink-0 text-white/55" />
+      </div>
+      <div className="truncate text-xs font-medium text-white/90">{label}</div>
+    </div>
   )
 }
 

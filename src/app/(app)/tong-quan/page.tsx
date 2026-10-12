@@ -19,7 +19,6 @@ export default function TongQuanPage() {
 
   const {
     loading,
-    materials,
     restockSuggestions,
     expiringMaterials,
     todayReceipts,
@@ -53,11 +52,7 @@ export default function TongQuanPage() {
 
   return (
     <div>
-      <InventoryFlow
-        totalMaterials={materials.length}
-        lowStockCount={restockSuggestions.length}
-        todayReceipts={todayReceipts}
-      />
+      <InventoryFlow storeName={selectedStore.name} />
       <div className="pb-8">
         {loading ? (
           <div className="grid place-items-center py-16">

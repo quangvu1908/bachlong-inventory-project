@@ -34,7 +34,6 @@ import { cn } from '@/lib/utils'
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   const [mobileOpen, setMobileOpen] = React.useState(false)
-  const [scrolled, setScrolled] = React.useState(false)
   const { profile } = useAuth()
   const { selectedStore } = useStore()
   const { materials } = useOperationMaterials(selectedStore?.id, selectedStore?.brand_id)
@@ -46,13 +45,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     (item) => !item.roles || (profile?.role && item.roles.includes(profile.role))
   )
 
-  React.useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 8)
-    onScroll()
-    window.addEventListener('scroll', onScroll, { passive: true })
-    return () => window.removeEventListener('scroll', onScroll)
-  }, [])
-
   // close mobile drawer on route change
   React.useEffect(() => {
     setMobileOpen(false)
@@ -62,32 +54,31 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     pathname === href || pathname?.startsWith(href + '/')
 
   const SidebarContent = (
-    <div className="flex h-full flex-col">
+    <div className="flex h-full flex-col bg-sidebar text-sidebar-foreground">
       {/* Brand */}
       <Link
         href="/tong-quan"
-        className="flex items-center gap-2.5 border-b border-border/60 px-5 py-4 transition-colors hover:bg-secondary/50"
+        className="flex items-center gap-2.5 border-b border-sidebar-border px-5 py-4 transition-colors hover:bg-sidebar-accent/40"
       >
-        <div className="relative grid size-10 place-items-center rounded-xl bg-gradient-to-br from-primary to-accent text-primary-foreground shadow-md">
-          <CupSoda className="size-5" />
-          <span className="absolute -right-0.5 -top-0.5 size-2.5 rounded-full bg-accent ring-2 ring-background" />
+        <div className="grid size-9 shrink-0 place-items-center rounded-lg bg-primary text-primary-foreground">
+          <CupSoda className="size-4.5" />
         </div>
         <div className="flex flex-col leading-none">
-          <span className="text-base font-bold tracking-tight">Trà House</span>
-          <span className="text-[11px] text-muted-foreground">
+          <span className="text-sm font-bold tracking-tight text-white">Trà House</span>
+          <span className="text-[11px] text-sidebar-foreground/70">
             Vận hành kho · Quầy bar
           </span>
         </div>
       </Link>
 
       {/* Nav */}
-      <nav className="flex-1 overflow-y-auto scrollbar-cream px-3 py-4">
+      <nav className="flex-1 overflow-y-auto scrollbar-cream px-2.5 py-4">
         {navGroups.map((group) => {
           const items = visibleNavItems.filter((i) => i.group === group)
           if (items.length === 0) return null
           return (
             <div key={group} className="mb-4">
-              <div className="mb-1.5 px-3 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/70">
+              <div className="mb-1.5 px-3.5 text-[10px] font-semibold uppercase tracking-wider text-sidebar-foreground/45">
                 {group}
               </div>
               <div className="space-y-0.5">
@@ -99,16 +90,16 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                       key={item.href}
                       href={item.href}
                       className={cn(
-                        'group flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-all',
+                        'group flex items-center gap-2.5 rounded-r-md border-l-2 py-1.5 pl-3 pr-3 text-[13px] font-medium transition-colors',
                         active
-                          ? 'bg-primary text-primary-foreground shadow-sm'
-                          : 'text-muted-foreground hover:bg-secondary hover:text-foreground'
+                          ? 'border-primary bg-sidebar-accent text-white'
+                          : 'border-transparent text-sidebar-foreground hover:bg-sidebar-accent/40 hover:text-white'
                       )}
                     >
                       <Icon
                         className={cn(
-                          'size-4 shrink-0 transition-transform group-hover:scale-110',
-                          active && 'text-primary-foreground'
+                          'size-4 shrink-0',
+                          active ? 'text-primary-foreground' : 'text-sidebar-foreground/80'
                         )}
                       />
                       <span className="flex-1 truncate">{item.label}</span>
@@ -117,8 +108,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                           className={cn(
                             'shrink-0 rounded px-1 py-0.5 font-mono text-[9px]',
                             active
-                              ? 'bg-primary-foreground/20 text-primary-foreground'
-                              : 'bg-muted text-muted-foreground'
+                              ? 'bg-white/15 text-white'
+                              : 'bg-white/5 text-sidebar-foreground/70'
                           )}
                         >
                           {item.code}
@@ -134,21 +125,19 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       </nav>
 
       {/* Footer info */}
-      <div className="border-t border-border/60 px-5 py-3 text-[11px] text-muted-foreground">
+      <div className="m-2.5 mt-0 rounded-lg bg-sidebar-accent/50 px-3.5 py-2.5 text-[11px]">
         <div className="flex items-center justify-between">
-          <span>{stats.totalMaterials} nguyên vật liệu</span>
+          <span className="text-sidebar-foreground/85">{stats.totalMaterials} nguyên vật liệu</span>
           <span
             className={cn(
               'inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 font-medium',
-              stats.lowStockCount > 0
-                ? 'bg-destructive/10 text-destructive'
-                : 'bg-emerald-500/10 text-emerald-600'
+              stats.lowStockCount > 0 ? 'text-amber-400' : 'text-emerald-400'
             )}
           >
             <span
               className={cn(
                 'size-1.5 rounded-full',
-                stats.lowStockCount > 0 ? 'bg-destructive' : 'bg-emerald-500'
+                stats.lowStockCount > 0 ? 'bg-amber-400' : 'bg-emerald-400'
               )}
             />
             {stats.lowStockCount > 0
@@ -163,19 +152,16 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-background">
       {/* Desktop sidebar */}
-      <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 border-r border-border/60 bg-card/50 backdrop-blur lg:block">
+      <aside className="fixed inset-y-0 left-0 z-30 hidden w-60 lg:block">
         {SidebarContent}
       </aside>
 
       {/* Main column */}
-      <div className="lg:pl-64">
+      <div className="lg:pl-60">
         {/* Top bar */}
         <header
           className={cn(
-            'sticky top-0 z-20 flex h-14 items-center gap-2 px-4 transition-all sm:px-6',
-            scrolled
-              ? 'glass-card border-b border-border/60'
-              : 'bg-transparent'
+            'sticky top-0 z-20 flex h-14 items-center gap-2 border-b border-border bg-card px-4 sm:px-6',
           )}
         >
           {/* Mobile menu */}
