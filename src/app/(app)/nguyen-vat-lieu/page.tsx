@@ -14,7 +14,6 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -29,9 +28,7 @@ import {
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
   DialogTitle,
-  DialogDescription,
   DialogFooter,
 } from '@/components/ui/dialog'
 import {
@@ -43,6 +40,14 @@ import {
 } from '@/components/ui/select'
 import { PageHeader, PageContainer } from '@/components/inventory/page-header'
 import { DeleteConfirmButton } from '@/components/inventory/delete-confirm-button'
+import {
+  FieldTable,
+  FieldRow,
+  Field,
+  FormDialogHeader,
+  cellInputClass,
+  cellSelectTriggerClass,
+} from '@/components/inventory/field-table'
 import { useToast } from '@/hooks/use-toast'
 import { useAuth } from '@/lib/auth/auth-context'
 import { supabase } from '@/lib/supabase/client'
@@ -439,70 +444,67 @@ function MaterialDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Package className="size-4" />
-            {material ? 'Sửa nguyên vật liệu' : 'Thêm nguyên vật liệu'}
-          </DialogTitle>
-          <DialogDescription>Quy đổi: 1 đơn vị Kho = bao nhiêu đơn vị Bar.</DialogDescription>
-        </DialogHeader>
-        <div className="space-y-3 py-2">
-          <div className="space-y-1.5">
-            <Label className="text-xs text-muted-foreground">Tên nguyên vật liệu</Label>
-            <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="VD: Trà đen Đài Loan" />
-          </div>
-          <div className="space-y-1.5">
-            <Label className="text-xs text-muted-foreground">Danh mục</Label>
-            <Select value={categoryId} onValueChange={setCategoryId}>
-              <SelectTrigger><SelectValue placeholder="Chọn danh mục" /></SelectTrigger>
-              <SelectContent>
-                {categories.map((c) => (
-                  <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1.5">
-              <Label className="text-xs text-muted-foreground">ĐVT Kho</Label>
-              <Select value={unitKhoId} onValueChange={setUnitKhoId}>
-                <SelectTrigger><SelectValue placeholder="Chọn đơn vị" /></SelectTrigger>
-                <SelectContent>
-                  {units.map((u) => (
-                    <SelectItem key={u.id} value={u.id}>{u.name} ({u.code})</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-1.5">
-              <Label className="text-xs text-muted-foreground">ĐVT Bar</Label>
-              <Select value={unitBarId} onValueChange={setUnitBarId}>
-                <SelectTrigger><SelectValue placeholder="Chọn đơn vị" /></SelectTrigger>
-                <SelectContent>
-                  {units.map((u) => (
-                    <SelectItem key={u.id} value={u.id}>{u.name} ({u.code})</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-          <div className="grid grid-cols-3 gap-3">
-            <div className="space-y-1.5">
-              <Label className="text-xs text-muted-foreground">Hệ số quy đổi</Label>
-              <Input type="number" min="0" step="any" value={convertFactor} onChange={(e) => setConvertFactor(e.target.value)} />
-            </div>
-            <div className="space-y-1.5">
-              <Label className="text-xs text-muted-foreground">Tồn tối thiểu</Label>
-              <Input type="number" min="0" step="any" value={minStock} onChange={(e) => setMinStock(e.target.value)} />
-            </div>
-            <div className="space-y-1.5">
-              <Label className="text-xs text-muted-foreground">Đơn giá (₫)</Label>
-              <Input type="number" min="0" step="any" value={unitPrice} onChange={(e) => setUnitPrice(e.target.value)} />
-            </div>
-          </div>
+      <DialogContent className="max-w-2xl gap-0 overflow-hidden p-0" showCloseButton>
+        <DialogTitle className="sr-only">
+          {material ? 'Sửa nguyên vật liệu' : 'Thêm nguyên vật liệu'}
+        </DialogTitle>
+        <FormDialogHeader>
+          {material ? 'Sửa nguyên vật liệu' : 'Thêm nguyên vật liệu'}
+        </FormDialogHeader>
+        <div className="space-y-3 p-6">
+          <div className="text-sm font-bold">Thông tin chung</div>
+          <FieldTable>
+            <Field label="Tên NVL" required>
+              <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="VD: Trà đen Đài Loan" className={cellInputClass} />
+            </Field>
+            <FieldRow>
+              <Field label="Danh mục" required>
+                <Select value={categoryId} onValueChange={setCategoryId}>
+                  <SelectTrigger className={cellSelectTriggerClass}><SelectValue placeholder="Chọn danh mục" /></SelectTrigger>
+                  <SelectContent>
+                    {categories.map((c) => (
+                      <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </Field>
+              <Field label="ĐVT Kho" required>
+                <Select value={unitKhoId} onValueChange={setUnitKhoId}>
+                  <SelectTrigger className={cellSelectTriggerClass}><SelectValue placeholder="Chọn đơn vị" /></SelectTrigger>
+                  <SelectContent>
+                    {units.map((u) => (
+                      <SelectItem key={u.id} value={u.id}>{u.name} ({u.code})</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </Field>
+            </FieldRow>
+            <FieldRow>
+              <Field label="ĐVT Bar" required>
+                <Select value={unitBarId} onValueChange={setUnitBarId}>
+                  <SelectTrigger className={cellSelectTriggerClass}><SelectValue placeholder="Chọn đơn vị" /></SelectTrigger>
+                  <SelectContent>
+                    {units.map((u) => (
+                      <SelectItem key={u.id} value={u.id}>{u.name} ({u.code})</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </Field>
+              <Field label="Quy đổi" required hint="1 đơn vị ĐVT Kho = bao nhiêu đơn vị ĐVT Bar.">
+                <Input type="number" min="0" step="any" value={convertFactor} onChange={(e) => setConvertFactor(e.target.value)} className={cellInputClass} />
+              </Field>
+            </FieldRow>
+            <FieldRow>
+              <Field label="Tồn tối thiểu">
+                <Input type="number" min="0" step="any" value={minStock} onChange={(e) => setMinStock(e.target.value)} className={cellInputClass} />
+              </Field>
+              <Field label="Đơn giá (₫)">
+                <Input type="number" min="0" step="any" value={unitPrice} onChange={(e) => setUnitPrice(e.target.value)} className={cellInputClass} />
+              </Field>
+            </FieldRow>
+          </FieldTable>
         </div>
-        <DialogFooter>
+        <DialogFooter className="border-t border-border px-6 py-4">
           <Button variant="outline" onClick={() => onOpenChange(false)}>Hủy</Button>
           <Button onClick={handleSave} disabled={saving} className="gap-2">
             {saving && <Loader2 className="size-4 animate-spin" />}
@@ -667,29 +669,31 @@ function CategoryDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Tags className="size-4" />
-            {category ? 'Sửa danh mục' : 'Thêm danh mục'}
-          </DialogTitle>
-          <DialogDescription>Danh mục chỉ thuộc một thương hiệu, không dùng chung.</DialogDescription>
-        </DialogHeader>
-        <div className="space-y-3 py-2">
-          <div className="space-y-1.5">
-            <Label className="text-xs text-muted-foreground">Mã danh mục</Label>
-            <Input value={code} onChange={(e) => setCode(e.target.value)} placeholder="VD: tra" />
-          </div>
-          <div className="space-y-1.5">
-            <Label className="text-xs text-muted-foreground">Tên danh mục</Label>
-            <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="VD: Trà" />
-          </div>
-          <div className="space-y-1.5">
-            <Label className="text-xs text-muted-foreground">Thứ tự hiển thị</Label>
-            <Input type="number" value={sortOrder} onChange={(e) => setSortOrder(e.target.value)} />
-          </div>
+      <DialogContent className="max-w-xl gap-0 overflow-hidden p-0" showCloseButton>
+        <DialogTitle className="sr-only">
+          {category ? 'Sửa danh mục' : 'Thêm danh mục'}
+        </DialogTitle>
+        <FormDialogHeader>
+          {category ? 'Sửa danh mục' : 'Thêm mới danh mục'}
+        </FormDialogHeader>
+        <div className="space-y-3 p-6">
+          <div className="text-sm font-bold">Thông tin chung</div>
+          <FieldTable>
+            <Field label="Tên danh mục" required>
+              <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="VD: Trà" className={cellInputClass} />
+            </Field>
+            <FieldRow>
+              <Field label="Mã danh mục" required hint="Mã riêng để phân biệt, không trùng trong cùng thương hiệu.">
+                <Input value={code} onChange={(e) => setCode(e.target.value)} placeholder="VD: tra" className={cellInputClass} />
+              </Field>
+              <Field label="Thứ tự hiển thị">
+                <Input type="number" value={sortOrder} onChange={(e) => setSortOrder(e.target.value)} className={cellInputClass} />
+              </Field>
+            </FieldRow>
+          </FieldTable>
+          <p className="text-xs text-muted-foreground">Danh mục chỉ thuộc một thương hiệu, không dùng chung.</p>
         </div>
-        <DialogFooter>
+        <DialogFooter className="border-t border-border px-6 py-4">
           <Button variant="outline" onClick={() => onOpenChange(false)}>Hủy</Button>
           <Button onClick={handleSave} disabled={saving} className="gap-2">
             {saving && <Loader2 className="size-4 animate-spin" />}
@@ -867,46 +871,42 @@ function UnitDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Ruler className="size-4" />
-            {unit ? 'Sửa đơn vị đo' : 'Thêm đơn vị đo'}
-          </DialogTitle>
-          <DialogDescription>
-            Cùng nhóm Khối lượng/Thể tích tự quy đổi qua lại (vd kg=1000, g=1). Nhóm Đếm để hệ số 1.
-          </DialogDescription>
-        </DialogHeader>
-        <div className="space-y-3 py-2">
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1.5">
-              <Label className="text-xs text-muted-foreground">Mã</Label>
-              <Input value={code} onChange={(e) => setCode(e.target.value)} placeholder="VD: kg" />
-            </div>
-            <div className="space-y-1.5">
-              <Label className="text-xs text-muted-foreground">Tên</Label>
-              <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="VD: Ki-lô-gam" />
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1.5">
-              <Label className="text-xs text-muted-foreground">Nhóm</Label>
-              <Select value={dimension} onValueChange={(v) => setDimension(v as Dimension)}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {(['weight', 'volume', 'count'] as Dimension[]).map((d) => (
-                    <SelectItem key={d} value={d}>{DIMENSION_LABELS[d]}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-1.5">
-              <Label className="text-xs text-muted-foreground">Hệ số quy đổi gốc</Label>
-              <Input type="number" min="0" step="any" value={baseFactor} onChange={(e) => setBaseFactor(e.target.value)} />
-            </div>
-          </div>
+      <DialogContent className="max-w-xl gap-0 overflow-hidden p-0" showCloseButton>
+        <DialogTitle className="sr-only">
+          {unit ? 'Sửa đơn vị đo' : 'Tạo mới đơn vị tính'}
+        </DialogTitle>
+        <FormDialogHeader>
+          {unit ? 'Sửa đơn vị đo' : 'Tạo mới đơn vị tính'}
+        </FormDialogHeader>
+        <div className="space-y-3 p-6">
+          <div className="text-sm font-bold">Thông tin chung</div>
+          <FieldTable>
+            <FieldRow>
+              <Field label="Mã đơn vị tính" required>
+                <Input value={code} onChange={(e) => setCode(e.target.value)} placeholder="VD: kg" className={cellInputClass} />
+              </Field>
+              <Field label="Tên đơn vị tính" required>
+                <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="VD: Ki-lô-gam" className={cellInputClass} />
+              </Field>
+            </FieldRow>
+            <FieldRow>
+              <Field label="Nhóm" required>
+                <Select value={dimension} onValueChange={(v) => setDimension(v as Dimension)}>
+                  <SelectTrigger className={cellSelectTriggerClass}><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {(['weight', 'volume', 'count'] as Dimension[]).map((d) => (
+                      <SelectItem key={d} value={d}>{DIMENSION_LABELS[d]}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </Field>
+              <Field label="Hệ số quy đổi" required hint="Cùng nhóm Khối lượng/Thể tích tự quy đổi qua lại (vd kg=1000, g=1). Nhóm Đếm để hệ số 1.">
+                <Input type="number" min="0" step="any" value={baseFactor} onChange={(e) => setBaseFactor(e.target.value)} className={cellInputClass} />
+              </Field>
+            </FieldRow>
+          </FieldTable>
         </div>
-        <DialogFooter>
+        <DialogFooter className="border-t border-border px-6 py-4">
           <Button variant="outline" onClick={() => onOpenChange(false)}>Hủy</Button>
           <Button onClick={handleSave} disabled={saving} className="gap-2">
             {saving && <Loader2 className="size-4 animate-spin" />}
