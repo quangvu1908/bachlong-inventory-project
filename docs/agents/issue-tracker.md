@@ -1,45 +1,45 @@
 # Issue tracker: GitHub
 
-Issues and specs for this repo live as GitHub issues. Use the `gh` CLI for all operations.
+Issue và spec của repo này lưu dưới dạng GitHub issue. Dùng `gh` CLI cho mọi thao tác.
 
-## Conventions
+## Quy ước
 
-- **Create an issue**: `gh issue create --title "..." --body "..."`. Use a heredoc for multi-line bodies.
-- **Read an issue**: `gh issue view <number> --comments`, filtering comments by `jq` and also fetching labels.
-- **List issues**: `gh issue list --state open --json number,title,body,labels,comments --jq '[.[] | {number, title, body, labels: [.labels[].name], comments: [.comments[].body]}]'` with appropriate `--label` and `--state` filters.
-- **Comment on an issue**: `gh issue comment <number> --body "..."`
-- **Apply / remove labels**: `gh issue edit <number> --add-label "..."` / `--remove-label "..."`
-- **Close**: `gh issue close <number> --comment "..."`
+- **Tạo issue**: `gh issue create --title "..." --body "..."`. Dùng heredoc cho nội dung nhiều dòng.
+- **Đọc issue**: `gh issue view <number> --comments`, lọc comment bằng `jq` và lấy luôn nhãn (label).
+- **Liệt kê issue**: `gh issue list --state open --json number,title,body,labels,comments --jq '[.[] | {number, title, body, labels: [.labels[].name], comments: [.comments[].body]}]'` kèm `--label`/`--state` phù hợp.
+- **Comment vào issue**: `gh issue comment <number> --body "..."`
+- **Gắn / gỡ nhãn**: `gh issue edit <number> --add-label "..."` / `--remove-label "..."`
+- **Đóng issue**: `gh issue close <number> --comment "..."`
 
-Infer the repo from `git remote -v`; `gh` does this automatically when run inside a clone. This repo's remote is `quangvu1908/bachlong-inventory-project`.
+Repo được suy ra từ `git remote -v`; `gh` tự làm việc này khi chạy trong một bản clone. Remote của repo này là `quangvu1908/bachlong-inventory-project`.
 
-## Pull requests as a triage surface
+## Pull request như một kênh triage
 
-**PRs as a request surface: no.** _(Set to `yes` if this repo treats external PRs as feature requests; `/triage` reads this flag.)_
+**PR như một kênh request: không.** _(Đổi thành `có` nếu repo này coi PR từ bên ngoài là feature request; `/triage` đọc cờ này.)_
 
-When set to `yes`, PRs run through the same labels and states as issues, using the `gh pr` equivalents:
+Khi bật `có`, PR chạy qua cùng bộ nhãn/trạng thái như issue, dùng các lệnh `gh pr` tương ứng:
 
-- **Read a PR**: `gh pr view <number> --comments` and `gh pr diff <number>` for the diff.
-- **List external PRs for triage**: `gh pr list --state open --json number,title,body,labels,author,authorAssociation,comments` then keep only `authorAssociation` of `CONTRIBUTOR`, `FIRST_TIME_CONTRIBUTOR`, or `NONE` (drop `OWNER`/`MEMBER`/`COLLABORATOR`).
-- **Comment / label / close**: `gh pr comment`, `gh pr edit --add-label`/`--remove-label`, `gh pr close`.
+- **Đọc PR**: `gh pr view <number> --comments` và `gh pr diff <number>` để xem diff.
+- **Liệt kê PR bên ngoài cần triage**: `gh pr list --state open --json number,title,body,labels,author,authorAssociation,comments` rồi chỉ giữ lại `authorAssociation` thuộc `CONTRIBUTOR`, `FIRST_TIME_CONTRIBUTOR`, hoặc `NONE` (bỏ `OWNER`/`MEMBER`/`COLLABORATOR`).
+- **Comment / gắn nhãn / đóng**: `gh pr comment`, `gh pr edit --add-label`/`--remove-label`, `gh pr close`.
 
-GitHub shares one number space across issues and PRs, so a bare `#42` may be either: resolve with `gh pr view 42` and fall back to `gh issue view 42`.
+GitHub dùng chung 1 dải số cho issue và PR, nên `#42` có thể là 1 trong 2 — thử `gh pr view 42` trước, không có thì fallback sang `gh issue view 42`.
 
-## When a skill says "publish to the issue tracker"
+## Khi một skill nói "publish lên issue tracker"
 
-Create a GitHub issue.
+Tạo một GitHub issue.
 
-## When a skill says "fetch the relevant ticket"
+## Khi một skill nói "lấy ticket liên quan"
 
-Run `gh issue view <number> --comments`.
+Chạy `gh issue view <number> --comments`.
 
-## Wayfinding operations
+## Thao tác cho Wayfinding
 
-Used by `/wayfinder`. The **map** is a single issue with **child** issues as tickets.
+Dùng bởi `/wayfinder`. **Map** là 1 issue duy nhất, có các issue **con** là ticket.
 
-- **Map**: a single issue labelled `wayfinder:map`, holding the Notes / Decisions-so-far / Fog body. `gh issue create --label wayfinder:map`.
-- **Child ticket**: an issue linked to the map as a GitHub sub-issue (`gh api` on the sub-issues endpoint). Where sub-issues aren't enabled, add the child to a task list in the map body and put `Part of #<map>` at the top of the child body. Labels: `wayfinder:<type>` (`research`/`prototype`/`grilling`/`task`). Once claimed, the ticket is assigned to the driving dev.
-- **Blocking**: GitHub's **native issue dependencies**, the canonical, UI-visible representation. Add an edge with `gh api --method POST repos/<owner>/<repo>/issues/<child>/dependencies/blocked_by -F issue_id=<blocker-db-id>`, where `<blocker-db-id>` is the blocker's numeric **database id** (`gh api repos/<owner>/<repo>/issues/<n> --jq .id`, _not_ the `#number` or `node_id`). GitHub reports `issue_dependencies_summary.blocked_by` (open blockers only, the live gate). Where dependencies aren't available, fall back to a `Blocked by: #<n>, #<n>` line at the top of the child body. A ticket is unblocked when every blocker is closed.
-- **Frontier query**: list the map's open children (`gh issue list --state open`, scoped to the map's sub-issues / task list), drop any with an open blocker (`issue_dependencies_summary.blocked_by > 0`, or an open issue in the `Blocked by` line) or an assignee; first in map order wins.
-- **Claim**: `gh issue edit <n> --add-assignee @me`, the session's first write.
-- **Resolve**: `gh issue comment <n> --body "<answer>"`, then `gh issue close <n>`, then append a context pointer (gist + link) to the map's Decisions-so-far.
+- **Map**: 1 issue gắn nhãn `wayfinder:map`, chứa nội dung Notes / Decisions-so-far / Fog. `gh issue create --label wayfinder:map`.
+- **Ticket con**: 1 issue được liên kết với map dưới dạng GitHub sub-issue (`gh api` trên endpoint sub-issues). Nếu repo chưa bật sub-issue, thêm ticket con vào task list trong body của map và ghi `Part of #<map>` ở đầu body của ticket con. Nhãn: `wayfinder:<type>` (`research`/`prototype`/`grilling`/`task`). Khi được nhận, ticket được gán (assign) cho dev đang thực hiện.
+- **Blocking (phụ thuộc)**: dùng **native issue dependencies** của GitHub, đây là biểu diễn chuẩn, hiển thị trên UI. Thêm một cạnh phụ thuộc bằng `gh api --method POST repos/<owner>/<repo>/issues/<child>/dependencies/blocked_by -F issue_id=<blocker-db-id>`, trong đó `<blocker-db-id>` là **database id** dạng số của issue chặn (`gh api repos/<owner>/<repo>/issues/<n> --jq .id`, **không phải** `#number` hay `node_id`). GitHub trả về `issue_dependencies_summary.blocked_by` (chỉ tính các blocker đang mở — đây là cổng chặn còn hiệu lực). Nếu dependencies không khả dụng, dùng cách dự phòng: dòng `Blocked by: #<n>, #<n>` ở đầu body ticket con. Một ticket hết bị chặn khi mọi blocker đã đóng.
+- **Frontier query (truy vấn hàng chờ)**: liệt kê các ticket con đang mở của map (`gh issue list --state open`, giới hạn trong sub-issue/task list của map), bỏ qua ticket nào còn blocker mở (`issue_dependencies_summary.blocked_by > 0`, hoặc có issue mở trong dòng `Blocked by`) hoặc đã có assignee; ticket đứng đầu theo thứ tự trong map được chọn.
+- **Claim (nhận việc)**: `gh issue edit <n> --add-assignee @me`, đây là thao tác ghi đầu tiên của phiên làm việc.
+- **Resolve (giải quyết)**: `gh issue comment <n> --body "<câu trả lời>"`, sau đó `gh issue close <n>`, rồi thêm một pointer ngữ cảnh (gist + link) vào mục Decisions-so-far của map.

@@ -1,15 +1,15 @@
-# Triage Labels
+# Nhãn Triage
 
-The skills speak in terms of five canonical triage roles. This file maps those roles to the actual label strings used in this repo's issue tracker.
+Các skill nói chuyện bằng 5 vai trò triage chuẩn. File này ánh xạ 5 vai trò đó sang chuỗi nhãn thực tế dùng trong issue tracker của repo.
 
-| Label in mattpocock/skills | Label in our tracker | Meaning                                  |
-| --------------------------- | --------------------- | ----------------------------------------- |
-| `needs-triage`               | `needs-triage`         | Maintainer needs to evaluate this issue   |
-| `needs-info`                 | `needs-info`           | Waiting on reporter for more information  |
-| `ready-for-agent`            | `ready-for-agent`      | Fully specified, ready for an AFK agent   |
-| `ready-for-human`            | `ready-for-human`      | Requires human implementation             |
-| `wontfix`                    | `wontfix`              | Will not be actioned                      |
+| Nhãn trong mattpocock/skills | Nhãn trong repo này | Ý nghĩa                                   |
+| ----------------------------- | --------------------- | ------------------------------------------ |
+| `needs-triage`                 | `needs-triage`         | Cần người phụ trách đánh giá issue này     |
+| `needs-info`                   | `needs-info`           | Đang chờ người báo cáo cung cấp thêm thông tin |
+| `ready-for-agent`              | `ready-for-agent`      | Đã mô tả đầy đủ, agent có thể làm độc lập (AFK) |
+| `ready-for-human`              | `ready-for-human`      | Cần con người trực tiếp triển khai         |
+| `wontfix`                      | `wontfix`              | Sẽ không xử lý                             |
 
-When a skill mentions a role (e.g. "apply the AFK-ready triage label"), use the corresponding label string from this table.
+Khi một skill nhắc tới một vai trò (vd: "gắn nhãn AFK-ready"), dùng đúng chuỗi nhãn tương ứng trong bảng này.
 
-Edit the right-hand column to match whatever vocabulary you actually use.
+Sửa cột bên phải nếu bạn đang dùng bộ từ vựng nhãn khác trong repo.

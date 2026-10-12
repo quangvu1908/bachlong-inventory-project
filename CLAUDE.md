@@ -4,12 +4,12 @@
 
 ### Issue tracker
 
-GitHub Issues on `quangvu1908/bachlong-inventory-project`, via the `gh` CLI. See `docs/agents/issue-tracker.md`.
+GitHub Issues trên `quangvu1908/bachlong-inventory-project`, dùng qua `gh` CLI. Xem `docs/agents/issue-tracker.md`.
 
-### Triage labels
+### Nhãn triage
 
-Default five-label vocabulary (`needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`). See `docs/agents/triage-labels.md`.
+Bộ 5 nhãn mặc định (`needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`). Xem `docs/agents/triage-labels.md`.
 
-### Domain docs
+### Tài liệu domain
 
-Single-context: `CONTEXT.md` + `docs/adr/` at the repo root. See `docs/agents/domain.md`.
+Single-context: `CONTEXT.md` + `docs/adr/` ở thư mục gốc. Xem `docs/agents/domain.md`.

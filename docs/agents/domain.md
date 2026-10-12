@@ -1,18 +1,18 @@
-# Domain Docs
+# Tài liệu Domain
 
-How the engineering skills should consume this repo's domain documentation when exploring the codebase.
+Các skill nghiệp vụ nên đọc tài liệu domain của repo này như thế nào khi khám phá codebase.
 
-## Before exploring, read these
+## Đọc các file này trước khi khám phá
 
-- **`CONTEXT.md`** at the repo root, or
-- **`CONTEXT-MAP.md`** at the repo root if it exists: it points at one `CONTEXT.md` per context. Read each one relevant to the topic.
-- **`docs/adr/`**: read ADRs that touch the area you're about to work in. In multi-context repos, also check `src/<context>/docs/adr/` for context-scoped decisions.
+- **`CONTEXT.md`** ở thư mục gốc, hoặc
+- **`CONTEXT-MAP.md`** ở thư mục gốc nếu có: file này trỏ tới từng `CONTEXT.md` theo mỗi context. Đọc file nào liên quan đến chủ đề đang làm.
+- **`docs/adr/`**: đọc các ADR liên quan đến phần bạn sắp động vào. Với repo multi-context, kiểm tra thêm `src/<context>/docs/adr/` cho các quyết định riêng của context đó.
 
-If any of these files don't exist, **proceed silently**. Don't flag their absence; don't suggest creating them upfront. The `/domain-modeling` skill (reached via `/grill-with-docs` and `/improve-codebase-architecture`) creates them lazily when terms or decisions actually get resolved.
+Nếu các file trên chưa tồn tại, **cứ tiếp tục, đừng báo lỗi**. Đừng nhắc việc chúng thiếu; đừng đề xuất tạo trước. Skill `/domain-modeling` (được gọi qua `/grill-with-docs` và `/improve-codebase-architecture`) sẽ tạo các file này một cách lazily, khi có thuật ngữ hoặc quyết định thực sự cần ghi lại.
 
-## File structure
+## Cấu trúc thư mục
 
-This repo is single-context:
+Repo này là single-context:
 
 ```
 /
@@ -26,14 +26,14 @@ This repo is single-context:
 └── src/
 ```
 
-## Use the glossary's vocabulary
+## Dùng đúng thuật ngữ trong glossary
 
-When your output names a domain concept (in an issue title, a refactor proposal, a hypothesis, a test name), use the term as defined in `CONTEXT.md`. Don't drift to synonyms the glossary explicitly avoids.
+Khi output của bạn nhắc tới một khái niệm domain (trong tiêu đề issue, đề xuất refactor, giả thuyết, tên test), dùng đúng thuật ngữ đã định nghĩa trong `CONTEXT.md`. Đừng trôi sang từ đồng nghĩa mà glossary đã liệt kê là nên tránh (`_Avoid_`).
 
-If the concept you need isn't in the glossary yet, that's a signal: either you're inventing language the project doesn't use (reconsider) or there's a real gap (note it for `/domain-modeling`).
+Nếu khái niệm bạn cần chưa có trong glossary, đó là một tín hiệu: hoặc bạn đang bịa ra thuật ngữ mà dự án không dùng (nên xem lại), hoặc đây là một khoảng trống thật sự (ghi chú lại để dùng `/domain-modeling`).
 
-## Flag ADR conflicts
+## Báo xung đột với ADR
 
-If your output contradicts an existing ADR, surface it explicitly rather than silently overriding:
+Nếu output của bạn mâu thuẫn với một ADR đã có, hãy nêu rõ ra thay vì âm thầm ghi đè:
 
-> _Contradicts ADR-0001 (bar stock is count-only), but worth reopening because…_
+> _Mâu thuẫn với ADR-0001 (tồn bar chỉ đổi qua kiểm kê), nhưng đáng cân nhắc lại vì…_
