@@ -1,17 +1,16 @@
 import type { NextConfig } from "next";
 
-// GitHub Pages serves this repo under /bachlong-inventory-project/ and can only
-// serve static files, so that build (GITHUB_PAGES=true) stays a static export.
-// Vercel runs the normal Next.js server, which the upcoming NextAuth work needs.
+// GitHub Pages is the only deploy target now: it serves this repo under
+// /bachlong-inventory-project/ and can only serve static files, so the build
+// is always a static export. basePath/assetPrefix only apply to the CI build
+// (GITHUB_PAGES=true, set in .github/workflows/deploy-pages.yml) so `next dev`
+// and a plain local `next build` keep running at the site root.
 const isGhPages = process.env.GITHUB_PAGES === "true";
 const basePath = "/bachlong-inventory-project";
 
 const nextConfig: NextConfig = {
-  ...(isGhPages
-    ? { output: "export" as const, basePath, assetPrefix: basePath }
-    // "standalone" is what the repo's `npm run build` script expects (it copies
-    // into .next/standalone for self-hosting); Vercel also builds fine from it.
-    : { output: "standalone" as const }),
+  output: "export",
+  ...(isGhPages ? { basePath, assetPrefix: basePath } : {}),
   images: {
     unoptimized: true,
   },
