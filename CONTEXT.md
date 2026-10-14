@@ -41,7 +41,7 @@ Tồn Kho Dự Trữ + Tồn Quầy Bar của một NVL tại một cửa hàng.
 ### Nghiệp vụ
 
 **Nhập Hàng**:
-Ghi nhận NVL mua từ nhà cung cấp vào Tồn Kho Dự Trữ, kèm đơn giá nhập (đơn giá này được hoà vào Giá bình quân gia quyền theo tỷ trọng số lượng, không ghi đè thẳng).
+Ghi nhận NVL mua từ nhà cung cấp vào Tồn Kho Dự Trữ. Chỉ cần nhập số lượng — Đơn giá lấy sẵn từ danh mục NVL, không nhập tay mỗi lần và không làm đổi Đơn giá.
 
 **Xuất Kho Ra Bar**:
 Chuyển NVL từ Tồn Kho Dự Trữ sang quầy bar. Chỉ làm giảm Tồn Kho Dự Trữ — không làm tăng Tồn Quầy Bar (xem định nghĩa Tồn Quầy Bar).
@@ -58,9 +58,9 @@ _Avoid_: Chuyển kho, xuất điều chuyển
 
 ### Giá vốn & tiêu thụ
 
-**Giá bình quân gia quyền**:
-Một đơn giá duy nhất cho mỗi NVL, dùng chung cho mọi cửa hàng cùng thương hiệu, tự tính lại mỗi lần Nhập Hàng theo tỷ trọng số lượng (tồn cũ × giá cũ + SL nhập × giá nhập, chia cho tổng số lượng) — không phải giá thực tế của riêng lần nhập gần nhất. Dùng để định giá Tồn Kho và tính Giá Vốn.
-_Avoid_: Giá chuẩn hiện hành, giá vốn trung bình, giá lịch sử
+**Đơn giá**:
+Một giá cố định cho mỗi NVL, dùng chung cho mọi cửa hàng cùng thương hiệu, thiết lập thủ công trong trang Quản Lý Nguyên Vật Liệu. Nghiệp vụ Nhập Hàng không tự đổi giá này — chỉ đọc để tính Giá trị nhập và Giá Vốn. Dùng để định giá Tồn Kho.
+_Avoid_: Giá chuẩn hiện hành, giá bình quân gia quyền, giá vốn trung bình, giá lịch sử
 
 **Tiêu thụ thực tế**:
 Lượng NVL đã dùng/hao hụt trong một khoảng thời gian, suy ra từ cân đối tồn kho: Tồn đầu kỳ + Nhập − Tồn cuối kỳ − Điều chuyển. Không tách được giữa "dùng đúng công thức" và "hao hụt" — chỉ tổng thực tế.
@@ -72,7 +72,7 @@ Lượng NVL lẽ ra phải dùng, suy từ số lượng bán của Sản phẩ
 % chênh lệch giữa Tiêu thụ thực tế và Tiêu thụ lý thuyết của một NVL. Dương = dùng nhiều hơn công thức (hao hụt, rơi vãi, thất thoát); âm = dùng ít hơn (đếm sai, hoặc pha "tiết kiệm" hơn công thức).
 
 **Giá Vốn**:
-Tiêu thụ thực tế × Giá bình quân gia quyền, trong một khoảng thời gian. Không bao giờ âm (Tiêu thụ âm → Giá Vốn = 0).
+Tiêu thụ thực tế × Đơn giá, trong một khoảng thời gian. Không bao giờ âm (Tiêu thụ âm → Giá Vốn = 0).
 
 ### Tổ chức
 

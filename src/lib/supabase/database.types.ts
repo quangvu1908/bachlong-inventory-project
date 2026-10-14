@@ -995,7 +995,6 @@ export type Database = {
           p_note?: string
           p_quantity: number
           p_store_id: string
-          p_unit_price: number
         }
         Returns: {
           amount: number | null

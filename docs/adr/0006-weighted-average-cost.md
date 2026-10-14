@@ -6,7 +6,9 @@ Bình quân tính trên **tổng tồn kho toàn thương hiệu** (mọi cửa 
 
 ## Status
 
-accepted
+superseded by ADR-0007 — BachLong muốn quay lại giá cố định thiết lập thủ
+công thay vì tự tính bình quân; `record_receipt` không còn nhận/ghi đơn giá
+nữa.
 
 ## Consequences
 

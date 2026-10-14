@@ -23,7 +23,8 @@ Repo này là single-context:
 │   ├── 0003-single-current-standard-price.md
 │   ├── 0004-btp-recipe-single-tier.md
 │   ├── 0005-transactions-are-append-only-via-rpc.md
-│   └── 0006-weighted-average-cost.md
+│   ├── 0006-weighted-average-cost.md
+│   └── 0007-fixed-manual-price.md
 └── src/
 ```
 
