@@ -88,7 +88,7 @@ export function StockReport() {
 
   const buildExportRows = (): (string | number)[][] => [
     canViewPrice
-      ? ['NVL', 'Danh mục', 'ĐVT Kho', 'ĐVT Bar', 'Quy đổi', 'Đơn giá', 'Tồn Kho', 'Tồn Bar', 'Giá trị']
+      ? ['NVL', 'Danh mục', 'ĐVT Kho', 'ĐVT Bar', 'Quy đổi', 'Giá BQ', 'Tồn Kho', 'Tồn Bar', 'Giá trị']
       : ['NVL', 'Danh mục', 'ĐVT Kho', 'ĐVT Bar', 'Quy đổi', 'Tồn Kho', 'Tồn Bar'],
     ...filtered.map((m) =>
       canViewPrice

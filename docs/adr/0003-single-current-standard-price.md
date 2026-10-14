@@ -4,7 +4,9 @@
 
 ## Status
 
-accepted
+superseded by ADR-0006 — `material_prices` vẫn chỉ 1 dòng giá/NVL (đúng như
+mô tả ở đây), nhưng giá đó giờ là bình quân gia quyền tự tính lại mỗi lần
+Nhập Hàng, không còn là "ghi đè thẳng bằng giá lần nhập gần nhất" nữa.
 
 ## Consequences
 

@@ -294,7 +294,7 @@ function MaterialsBrandSection({
                 <TableHead className="hidden md:table-cell">ĐVT Kho</TableHead>
                 <TableHead className="hidden md:table-cell">ĐVT Bar</TableHead>
                 <TableHead className="hidden lg:table-cell">Quy đổi</TableHead>
-                <TableHead className="hidden sm:table-cell">Đơn giá</TableHead>
+                <TableHead className="hidden sm:table-cell">Giá BQ</TableHead>
                 <TableHead className="w-16 sm:w-28">Trạng thái</TableHead>
                 <TableHead className="w-10" />
               </TableRow>
@@ -503,7 +503,7 @@ function MaterialDialog({
               <Field label="Tồn tối thiểu">
                 <Input type="number" min="0" step="any" value={minStock} onChange={(e) => setMinStock(e.target.value)} className={cellInputClass} />
               </Field>
-              <Field label="Đơn giá (₫)">
+              <Field label="Giá BQ (₫)" hint="Giá bình quân gia quyền, tự tính lại mỗi lần Nhập Hàng. Sửa tay ở đây sẽ ghi đè, dùng khi cần chỉnh lại số liệu sai.">
                 <Input type="number" min="0" step="any" value={unitPrice} onChange={(e) => setUnitPrice(e.target.value)} className={cellInputClass} />
               </Field>
             </FieldRow>
