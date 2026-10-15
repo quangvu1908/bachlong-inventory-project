@@ -4,7 +4,7 @@ import * as React from 'react'
 import { useRouter } from 'next/navigation'
 import { Truck } from 'lucide-react'
 import { PageHeader, PageContainer } from '@/components/inventory/page-header'
-import { OperationTable, NumberCell, InfoCell } from '@/components/inventory/operation-table'
+import { OperationTable, NumberCell, InfoCell, CheckboxCell } from '@/components/inventory/operation-table'
 import {
   Select,
   SelectContent,
@@ -171,13 +171,15 @@ function DieuChuyenGrid({
           const r = getRow(m.id)
           if (colKey === 'select') {
             return (
-              <input
-                type="checkbox"
-                checked={r.selected}
-                onChange={(e) => updateRow(m.id, { selected: e.target.checked })}
-                className="size-4 cursor-pointer rounded border-border accent-primary"
-                aria-label={`Chọn ${m.name}`}
-              />
+              <CheckboxCell>
+                <input
+                  type="checkbox"
+                  checked={r.selected}
+                  onChange={(e) => updateRow(m.id, { selected: e.target.checked })}
+                  className="size-4 cursor-pointer rounded border-border accent-primary"
+                  aria-label={`Chọn ${m.name}`}
+                />
+              </CheckboxCell>
             )
           }
           if (colKey === 'kho') return <InfoCell value={`${formatNum(m.khoStock)} ${m.unitKhoCode}`} tone="muted" />

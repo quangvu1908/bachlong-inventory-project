@@ -4,7 +4,7 @@ import * as React from 'react'
 import { useRouter } from 'next/navigation'
 import { ClipboardCheck } from 'lucide-react'
 import { PageHeader, PageContainer } from '@/components/inventory/page-header'
-import { OperationTable, NumberCell, InfoCell } from '@/components/inventory/operation-table'
+import { OperationTable, NumberCell, InfoCell, CheckboxCell } from '@/components/inventory/operation-table'
 import { useStore } from '@/lib/store-context'
 import { useOperationMaterials } from '@/lib/use-operation-materials'
 import { formatNum } from '@/lib/format'
@@ -122,16 +122,18 @@ function KiemKhoGrid({ storeId, brandId }: { storeId: string; brandId: string })
         const r = getRow(m.id)
         if (colKey === 'select') {
           return (
-            <input
-              type="checkbox"
-              checked={r.selected}
-              onChange={(e) => {
-                updateRow(m.id, { selected: e.target.checked })
-                if (e.target.checked && r.counted < 0) updateRow(m.id, { counted: m.khoStock })
-              }}
-              className="size-4 cursor-pointer rounded border-border accent-primary"
-              aria-label={`Chọn ${m.name}`}
-            />
+            <CheckboxCell>
+              <input
+                type="checkbox"
+                checked={r.selected}
+                onChange={(e) => {
+                  updateRow(m.id, { selected: e.target.checked })
+                  if (e.target.checked && r.counted < 0) updateRow(m.id, { counted: m.khoStock })
+                }}
+                className="size-4 cursor-pointer rounded border-border accent-primary"
+                aria-label={`Chọn ${m.name}`}
+              />
+            </CheckboxCell>
           )
         }
         if (colKey === 'book') return <InfoCell value={`${formatNum(m.khoStock)} ${m.unitKhoCode}`} tone="muted" />

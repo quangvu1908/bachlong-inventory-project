@@ -274,3 +274,14 @@ export function InfoCell({
     </div>
   )
 }
+
+/* ============ Checkbox with a comfortable tap area ============ */
+
+/**
+ * Bọc 1 checkbox 16px (size-4) trong vùng bấm rộng hơn — nhấn vào đâu trong
+ * label cũng tick được, không bắt buộc trúng ô vuông nhỏ. Giữ nguyên style/
+ * onChange của checkbox gốc; chỉ truyền checkbox vào làm children.
+ */
+export function CheckboxCell({ children }: { children: React.ReactNode }) {
+  return <label className="flex h-9 w-full cursor-pointer items-center justify-center">{children}</label>
+}

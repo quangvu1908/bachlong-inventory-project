@@ -194,7 +194,7 @@ export function TransactionHistory() {
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ duration: 0.25, delay: Math.min(idx * 0.02, 0.3) }}
                     onClick={() => setDetailTx(tx)}
-                    className="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-muted/40 focus:bg-muted/40 focus:outline-none sm:px-5"
+                    className="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-muted/40 focus-visible:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset sm:px-5"
                   >
                     <div className={cn('relative grid size-10 shrink-0 place-items-center rounded-xl border', meta.color)}>
                       <span className={cn('size-2 rounded-full', meta.dot)} />
