@@ -27,16 +27,19 @@ export function Field({
   label,
   required,
   hint,
+  error,
   children,
 }: {
   label: string
   required?: boolean
   hint?: string
+  /** Lỗi cho riêng trường này — hiện dòng chữ đỏ dưới input + tô đỏ nhãn, thay vì chỉ báo chung qua toast. */
+  error?: string
   children: React.ReactNode
 }) {
   return (
     <div className="grid grid-cols-[120px_1fr] items-stretch sm:grid-cols-[150px_1fr]">
-      <div className="flex items-center gap-1.5 bg-muted/40 px-3 py-2 text-[13px] font-semibold">
+      <div className={cn('flex items-center gap-1.5 px-3 py-2 text-[13px] font-semibold', error ? 'bg-destructive/10' : 'bg-muted/40')}>
         <span className="truncate">{label}</span>
         {required && <span className="text-destructive">*</span>}
         {hint && (
@@ -48,9 +51,18 @@ export function Field({
           </Tooltip>
         )}
       </div>
-      <div className="flex min-w-0 items-center">{children}</div>
+      <div className="flex min-w-0 flex-col justify-center">
+        <div className="flex min-w-0 items-center">{children}</div>
+        {error && <p className="px-3 pb-1.5 text-[11px] text-destructive">{error}</p>}
+      </div>
     </div>
   )
+}
+
+/** Dòng lỗi dùng cho form Label+Input kiểu cũ (không qua FieldTable) — vd dialog Thương hiệu/Cửa hàng, Sản phẩm. */
+export function FieldError({ message }: { message?: string }) {
+  if (!message) return null
+  return <p className="mt-1 text-[11px] text-destructive">{message}</p>
 }
 
 /** Class dùng cho Input/Select/Textarea đặt bên trong Field — bỏ viền/bóng riêng để hòa vào bảng. */

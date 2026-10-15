@@ -396,19 +396,25 @@ function MaterialDialog({
   const [minStock, setMinStock] = React.useState(String(material?.min_stock ?? 0))
   const [unitPrice, setUnitPrice] = React.useState(String(price ?? 0))
   const [saving, setSaving] = React.useState(false)
+  const [errors, setErrors] = React.useState<Record<string, string>>({})
 
   const handleSave = async () => {
     const factor = Number(convertFactor)
     const min = Number(minStock)
     const priceVal = Number(unitPrice)
-    if (!name.trim() || !categoryId || !unitKhoId || !unitBarId) {
-      toast({ title: 'Thiếu thông tin', description: 'Nhập tên và chọn đủ danh mục, đơn vị.', variant: 'destructive' })
+
+    const nextErrors: Record<string, string> = {}
+    if (!name.trim()) nextErrors.name = 'Bắt buộc nhập'
+    if (!categoryId) nextErrors.categoryId = 'Chọn danh mục'
+    if (!unitKhoId) nextErrors.unitKhoId = 'Chọn đơn vị'
+    if (!unitBarId) nextErrors.unitBarId = 'Chọn đơn vị'
+    if (!Number.isFinite(factor) || factor <= 0) nextErrors.convertFactor = 'Phải lớn hơn 0'
+    if (Object.keys(nextErrors).length > 0) {
+      setErrors(nextErrors)
+      toast({ title: 'Thiếu thông tin', description: 'Kiểm tra lại các trường được đánh dấu đỏ.', variant: 'destructive' })
       return
     }
-    if (!Number.isFinite(factor) || factor <= 0) {
-      toast({ title: 'Hệ số quy đổi không hợp lệ', variant: 'destructive' })
-      return
-    }
+    setErrors({})
     setSaving(true)
     const payload = {
       brand_id: brandId,
@@ -459,12 +465,17 @@ function MaterialDialog({
         <div className="space-y-3 p-6">
           <div className="text-sm font-bold">Thông tin chung</div>
           <FieldTable>
-            <Field label="Tên NVL" required>
-              <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="VD: Trà đen Đài Loan" className={cellInputClass} />
+            <Field label="Tên NVL" required error={errors.name}>
+              <Input
+                value={name}
+                onChange={(e) => { setName(e.target.value); if (errors.name) setErrors((p) => ({ ...p, name: '' })) }}
+                placeholder="VD: Trà đen Đài Loan"
+                className={cellInputClass}
+              />
             </Field>
             <FieldRow>
-              <Field label="Danh mục" required>
-                <Select value={categoryId} onValueChange={setCategoryId}>
+              <Field label="Danh mục" required error={errors.categoryId}>
+                <Select value={categoryId} onValueChange={(v) => { setCategoryId(v); if (errors.categoryId) setErrors((p) => ({ ...p, categoryId: '' })) }}>
                   <SelectTrigger className={cellSelectTriggerClass}><SelectValue placeholder="Chọn danh mục" /></SelectTrigger>
                   <SelectContent>
                     {categories.map((c) => (
@@ -473,8 +484,8 @@ function MaterialDialog({
                   </SelectContent>
                 </Select>
               </Field>
-              <Field label="ĐVT Kho" required>
-                <Select value={unitKhoId} onValueChange={setUnitKhoId}>
+              <Field label="ĐVT Kho" required error={errors.unitKhoId}>
+                <Select value={unitKhoId} onValueChange={(v) => { setUnitKhoId(v); if (errors.unitKhoId) setErrors((p) => ({ ...p, unitKhoId: '' })) }}>
                   <SelectTrigger className={cellSelectTriggerClass}><SelectValue placeholder="Chọn đơn vị" /></SelectTrigger>
                   <SelectContent>
                     {units.map((u) => (
@@ -485,8 +496,8 @@ function MaterialDialog({
               </Field>
             </FieldRow>
             <FieldRow>
-              <Field label="ĐVT Bar" required>
-                <Select value={unitBarId} onValueChange={setUnitBarId}>
+              <Field label="ĐVT Bar" required error={errors.unitBarId}>
+                <Select value={unitBarId} onValueChange={(v) => { setUnitBarId(v); if (errors.unitBarId) setErrors((p) => ({ ...p, unitBarId: '' })) }}>
                   <SelectTrigger className={cellSelectTriggerClass}><SelectValue placeholder="Chọn đơn vị" /></SelectTrigger>
                   <SelectContent>
                     {units.map((u) => (
@@ -495,8 +506,15 @@ function MaterialDialog({
                   </SelectContent>
                 </Select>
               </Field>
-              <Field label="Quy đổi" required hint="1 đơn vị ĐVT Kho = bao nhiêu đơn vị ĐVT Bar.">
-                <Input type="number" min="0" step="any" value={convertFactor} onChange={(e) => setConvertFactor(e.target.value)} className={cellInputClass} />
+              <Field label="Quy đổi" required hint="1 đơn vị ĐVT Kho = bao nhiêu đơn vị ĐVT Bar." error={errors.convertFactor}>
+                <Input
+                  type="number"
+                  min="0"
+                  step="any"
+                  value={convertFactor}
+                  onChange={(e) => { setConvertFactor(e.target.value); if (errors.convertFactor) setErrors((p) => ({ ...p, convertFactor: '' })) }}
+                  className={cellInputClass}
+                />
               </Field>
             </FieldRow>
             <FieldRow>
@@ -651,12 +669,18 @@ function CategoryDialog({
   const [name, setName] = React.useState(category?.name ?? '')
   const [sortOrder, setSortOrder] = React.useState(String(category?.sort_order ?? 0))
   const [saving, setSaving] = React.useState(false)
+  const [errors, setErrors] = React.useState<Record<string, string>>({})
 
   const handleSave = async () => {
-    if (!code.trim() || !name.trim()) {
-      toast({ title: 'Thiếu thông tin', description: 'Nhập đủ mã và tên danh mục.', variant: 'destructive' })
+    const nextErrors: Record<string, string> = {}
+    if (!name.trim()) nextErrors.name = 'Bắt buộc nhập'
+    if (!code.trim()) nextErrors.code = 'Bắt buộc nhập'
+    if (Object.keys(nextErrors).length > 0) {
+      setErrors(nextErrors)
+      toast({ title: 'Thiếu thông tin', description: 'Kiểm tra lại các trường được đánh dấu đỏ.', variant: 'destructive' })
       return
     }
+    setErrors({})
     setSaving(true)
     const payload = { brand_id: brandId, code: code.trim(), name: name.trim(), sort_order: Number(sortOrder) || 0 }
     const { error } = category
@@ -684,12 +708,22 @@ function CategoryDialog({
         <div className="space-y-3 p-6">
           <div className="text-sm font-bold">Thông tin chung</div>
           <FieldTable>
-            <Field label="Tên danh mục" required>
-              <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="VD: Trà" className={cellInputClass} />
+            <Field label="Tên danh mục" required error={errors.name}>
+              <Input
+                value={name}
+                onChange={(e) => { setName(e.target.value); if (errors.name) setErrors((p) => ({ ...p, name: '' })) }}
+                placeholder="VD: Trà"
+                className={cellInputClass}
+              />
             </Field>
             <FieldRow>
-              <Field label="Mã danh mục" required hint="Mã riêng để phân biệt, không trùng trong cùng thương hiệu.">
-                <Input value={code} onChange={(e) => setCode(e.target.value)} placeholder="VD: tra" className={cellInputClass} />
+              <Field label="Mã danh mục" required hint="Mã riêng để phân biệt, không trùng trong cùng thương hiệu." error={errors.code}>
+                <Input
+                  value={code}
+                  onChange={(e) => { setCode(e.target.value); if (errors.code) setErrors((p) => ({ ...p, code: '' })) }}
+                  placeholder="VD: tra"
+                  className={cellInputClass}
+                />
               </Field>
               <Field label="Thứ tự hiển thị">
                 <Input type="number" value={sortOrder} onChange={(e) => setSortOrder(e.target.value)} className={cellInputClass} />
@@ -852,13 +886,20 @@ function UnitDialog({
   const [dimension, setDimension] = React.useState<Dimension>(unit?.dimension ?? 'weight')
   const [baseFactor, setBaseFactor] = React.useState(String(unit?.base_factor ?? 1))
   const [saving, setSaving] = React.useState(false)
+  const [errors, setErrors] = React.useState<Record<string, string>>({})
 
   const handleSave = async () => {
     const factor = Number(baseFactor)
-    if (!code.trim() || !name.trim() || !Number.isFinite(factor) || factor <= 0) {
-      toast({ title: 'Thiếu thông tin', description: 'Nhập đủ mã, tên và hệ số hợp lệ (> 0).', variant: 'destructive' })
+    const nextErrors: Record<string, string> = {}
+    if (!code.trim()) nextErrors.code = 'Bắt buộc nhập'
+    if (!name.trim()) nextErrors.name = 'Bắt buộc nhập'
+    if (!Number.isFinite(factor) || factor <= 0) nextErrors.baseFactor = 'Phải lớn hơn 0'
+    if (Object.keys(nextErrors).length > 0) {
+      setErrors(nextErrors)
+      toast({ title: 'Thiếu thông tin', description: 'Kiểm tra lại các trường được đánh dấu đỏ.', variant: 'destructive' })
       return
     }
+    setErrors({})
     setSaving(true)
     const payload = { code: code.trim(), name: name.trim(), dimension, base_factor: factor }
     const { error } = unit
@@ -887,11 +928,21 @@ function UnitDialog({
           <div className="text-sm font-bold">Thông tin chung</div>
           <FieldTable>
             <FieldRow>
-              <Field label="Mã đơn vị tính" required>
-                <Input value={code} onChange={(e) => setCode(e.target.value)} placeholder="VD: kg" className={cellInputClass} />
+              <Field label="Mã đơn vị tính" required error={errors.code}>
+                <Input
+                  value={code}
+                  onChange={(e) => { setCode(e.target.value); if (errors.code) setErrors((p) => ({ ...p, code: '' })) }}
+                  placeholder="VD: kg"
+                  className={cellInputClass}
+                />
               </Field>
-              <Field label="Tên đơn vị tính" required>
-                <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="VD: Ki-lô-gam" className={cellInputClass} />
+              <Field label="Tên đơn vị tính" required error={errors.name}>
+                <Input
+                  value={name}
+                  onChange={(e) => { setName(e.target.value); if (errors.name) setErrors((p) => ({ ...p, name: '' })) }}
+                  placeholder="VD: Ki-lô-gam"
+                  className={cellInputClass}
+                />
               </Field>
             </FieldRow>
             <FieldRow>
@@ -905,8 +956,15 @@ function UnitDialog({
                   </SelectContent>
                 </Select>
               </Field>
-              <Field label="Hệ số quy đổi" required hint="Cùng nhóm Khối lượng/Thể tích tự quy đổi qua lại (vd kg=1000, g=1). Nhóm Đếm để hệ số 1.">
-                <Input type="number" min="0" step="any" value={baseFactor} onChange={(e) => setBaseFactor(e.target.value)} className={cellInputClass} />
+              <Field label="Hệ số quy đổi" required hint="Cùng nhóm Khối lượng/Thể tích tự quy đổi qua lại (vd kg=1000, g=1). Nhóm Đếm để hệ số 1." error={errors.baseFactor}>
+                <Input
+                  type="number"
+                  min="0"
+                  step="any"
+                  value={baseFactor}
+                  onChange={(e) => { setBaseFactor(e.target.value); if (errors.baseFactor) setErrors((p) => ({ ...p, baseFactor: '' })) }}
+                  className={cellInputClass}
+                />
               </Field>
             </FieldRow>
           </FieldTable>

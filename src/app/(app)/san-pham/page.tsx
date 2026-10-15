@@ -43,11 +43,13 @@ import {
 } from '@/components/ui/select'
 import { PageHeader, PageContainer } from '@/components/inventory/page-header'
 import { DeleteConfirmButton } from '@/components/inventory/delete-confirm-button'
+import { FieldError } from '@/components/inventory/field-table'
 import { useToast } from '@/hooks/use-toast'
 import { useAuth } from '@/lib/auth/auth-context'
 import { supabase } from '@/lib/supabase/client'
 import { formatDate, formatNum } from '@/lib/format'
 import type { Database } from '@/lib/supabase/database.types'
+import { cn } from '@/lib/utils'
 
 type Brand = Database['public']['Tables']['brands']['Row']
 type Product = Database['public']['Tables']['products']['Row']
@@ -343,12 +345,15 @@ function ProductDialog({
   const [name, setName] = React.useState(product?.name ?? '')
   const [code, setCode] = React.useState(product?.code ?? '')
   const [saving, setSaving] = React.useState(false)
+  const [nameError, setNameError] = React.useState('')
 
   const handleSave = async () => {
     if (!name.trim()) {
+      setNameError('Bắt buộc nhập')
       toast({ title: 'Thiếu thông tin', description: 'Nhập tên sản phẩm.', variant: 'destructive' })
       return
     }
+    setNameError('')
     setSaving(true)
     const payload = { brand_id: brandId, name: name.trim(), code: code.trim() || null }
     const { error } = product
@@ -379,7 +384,13 @@ function ProductDialog({
         <div className="space-y-3 py-2">
           <div className="space-y-1.5">
             <Label className="text-xs text-muted-foreground">Tên sản phẩm</Label>
-            <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="VD: Trà sữa Thái Xanh size M" />
+            <Input
+              value={name}
+              onChange={(e) => { setName(e.target.value); if (nameError) setNameError('') }}
+              placeholder="VD: Trà sữa Thái Xanh size M"
+              className={cn(nameError && 'border-destructive focus-visible:ring-destructive/40')}
+            />
+            <FieldError message={nameError} />
           </div>
           <div className="space-y-1.5">
             <Label className="text-xs text-muted-foreground">Mã (tùy chọn)</Label>
@@ -804,17 +815,24 @@ function RecipeLineDialog({
   const [quantity, setQuantity] = React.useState(String(editing?.quantity ?? ''))
   const [effectiveFrom, setEffectiveFrom] = React.useState(today)
   const [saving, setSaving] = React.useState(false)
+  const [errors, setErrors] = React.useState<Record<string, string>>({})
 
   const handleSave = async () => {
     const qty = Number(quantity)
-    if (!materialId || !Number.isFinite(qty) || qty <= 0) {
-      toast({ title: 'Thiếu thông tin', description: 'Chọn nguyên liệu và nhập số lượng > 0.', variant: 'destructive' })
+    const nextErrors: Record<string, string> = {}
+    if (!materialId) nextErrors.materialId = 'Chọn nguyên liệu'
+    if (!Number.isFinite(qty) || qty <= 0) nextErrors.quantity = 'Phải lớn hơn 0'
+    if (Object.keys(nextErrors).length > 0) {
+      setErrors(nextErrors)
+      toast({ title: 'Thiếu thông tin', description: 'Kiểm tra lại các trường được đánh dấu đỏ.', variant: 'destructive' })
       return
     }
     if (!editing && existingMaterialIds.has(materialId)) {
+      setErrors({ materialId: 'Đã có trong công thức' })
       toast({ title: 'Nguyên liệu đã có trong công thức', description: 'Dùng nút Sửa để đổi định lượng.', variant: 'destructive' })
       return
     }
+    setErrors({})
     setSaving(true)
     const err = editing
       ? await onRevise(editing, qty, effectiveFrom)
@@ -846,8 +864,14 @@ function RecipeLineDialog({
         <div className="space-y-3 py-2">
           <div className="space-y-1.5">
             <Label className="text-xs text-muted-foreground">Nguyên liệu</Label>
-            <Select value={materialId} onValueChange={setMaterialId} disabled={!!editing}>
-              <SelectTrigger><SelectValue placeholder="Chọn nguyên liệu" /></SelectTrigger>
+            <Select
+              value={materialId}
+              onValueChange={(v) => { setMaterialId(v); if (errors.materialId) setErrors((p) => ({ ...p, materialId: '' })) }}
+              disabled={!!editing}
+            >
+              <SelectTrigger className={cn(errors.materialId && 'border-destructive focus-visible:ring-destructive/40')}>
+                <SelectValue placeholder="Chọn nguyên liệu" />
+              </SelectTrigger>
               <SelectContent>
                 {availableMaterials.map((m) => (
                   <SelectItem key={m.id} value={m.id}>
@@ -856,11 +880,20 @@ function RecipeLineDialog({
                 ))}
               </SelectContent>
             </Select>
+            <FieldError message={errors.materialId} />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <Label className="text-xs text-muted-foreground">Số lượng</Label>
-              <Input type="number" min="0" step="any" value={quantity} onChange={(e) => setQuantity(e.target.value)} />
+              <Input
+                type="number"
+                min="0"
+                step="any"
+                value={quantity}
+                onChange={(e) => { setQuantity(e.target.value); if (errors.quantity) setErrors((p) => ({ ...p, quantity: '' })) }}
+                className={cn(errors.quantity && 'border-destructive focus-visible:ring-destructive/40')}
+              />
+              <FieldError message={errors.quantity} />
             </div>
             <div className="space-y-1.5">
               <Label className="text-xs text-muted-foreground">Có hiệu lực từ</Label>

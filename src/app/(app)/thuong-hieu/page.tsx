@@ -26,10 +26,12 @@ import {
 } from '@/components/ui/dialog'
 import { PageHeader, PageContainer } from '@/components/inventory/page-header'
 import { DeleteConfirmButton } from '@/components/inventory/delete-confirm-button'
+import { FieldError } from '@/components/inventory/field-table'
 import { useToast } from '@/hooks/use-toast'
 import { useAuth } from '@/lib/auth/auth-context'
 import { supabase } from '@/lib/supabase/client'
 import type { Database } from '@/lib/supabase/database.types'
+import { cn } from '@/lib/utils'
 
 type Brand = Database['public']['Tables']['brands']['Row']
 type StoreRow = Database['public']['Tables']['stores']['Row']
@@ -324,12 +326,18 @@ function StoreDialog({
   const [name, setName] = React.useState(store?.name ?? '')
   const [address, setAddress] = React.useState(store?.address ?? '')
   const [saving, setSaving] = React.useState(false)
+  const [errors, setErrors] = React.useState<Record<string, string>>({})
 
   const handleSave = async () => {
-    if (!code.trim() || !name.trim()) {
-      toast({ title: 'Thiếu thông tin', description: 'Nhập đủ mã và tên cửa hàng.', variant: 'destructive' })
+    const nextErrors: Record<string, string> = {}
+    if (!code.trim()) nextErrors.code = 'Bắt buộc nhập'
+    if (!name.trim()) nextErrors.name = 'Bắt buộc nhập'
+    if (Object.keys(nextErrors).length > 0) {
+      setErrors(nextErrors)
+      toast({ title: 'Thiếu thông tin', description: 'Kiểm tra lại các trường được đánh dấu đỏ.', variant: 'destructive' })
       return
     }
+    setErrors({})
     setSaving(true)
     const payload = { brand_id: brandId, code: code.trim(), name: name.trim(), address: address.trim() || null }
     const { error } = store
@@ -360,11 +368,23 @@ function StoreDialog({
         <div className="space-y-3 py-2">
           <div className="space-y-1.5">
             <Label className="text-xs text-muted-foreground">Mã cửa hàng</Label>
-            <Input value={code} onChange={(e) => setCode(e.target.value)} placeholder="VD: mongo-tdinh" />
+            <Input
+              value={code}
+              onChange={(e) => { setCode(e.target.value); if (errors.code) setErrors((p) => ({ ...p, code: '' })) }}
+              placeholder="VD: mongo-tdinh"
+              className={cn(errors.code && 'border-destructive focus-visible:ring-destructive/40')}
+            />
+            <FieldError message={errors.code} />
           </div>
           <div className="space-y-1.5">
             <Label className="text-xs text-muted-foreground">Tên cửa hàng</Label>
-            <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="VD: Mongo 353 Trương Định" />
+            <Input
+              value={name}
+              onChange={(e) => { setName(e.target.value); if (errors.name) setErrors((p) => ({ ...p, name: '' })) }}
+              placeholder="VD: Mongo 353 Trương Định"
+              className={cn(errors.name && 'border-destructive focus-visible:ring-destructive/40')}
+            />
+            <FieldError message={errors.name} />
           </div>
           <div className="space-y-1.5">
             <Label className="text-xs text-muted-foreground">Địa chỉ</Label>
