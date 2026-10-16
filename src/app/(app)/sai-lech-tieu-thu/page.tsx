@@ -187,8 +187,8 @@ export default function SaiLechTieuThuPage() {
             </div>
           </div>
 
-          <div className="flex items-start gap-2 rounded-lg border border-sky-500/20 bg-sky-500/5 px-3 py-2 text-[11px] text-sky-700 dark:text-sky-300">
-            <Info className="size-3.5 shrink-0" />
+          <div className="flex items-start gap-2 rounded-lg border border-border bg-muted/60 px-3 py-2 text-[11px] text-foreground/75">
+            <Info className="size-3.5 shrink-0 text-muted-foreground" />
             <span>
               <strong>Sai lệch</strong> = (Thực tế − Lý thuyết) / Lý thuyết × 100%. Dương = dùng nhiều hơn công thức
               (hao hụt, rơi vãi, thất thoát); Âm = dùng ít hơn công thức.

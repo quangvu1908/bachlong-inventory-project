@@ -12,7 +12,7 @@ export default function GiaVonPage() {
         icon={Calculator}
         title="Báo cáo Giá Vốn"
         description="Chi phí NVL tiêu thụ theo khoảng ngày. Công thức: Tiêu thụ = Tồn đầu + Nhập − Tồn cuối. Báo cáo chỉ xem."
-        accent="from-violet-500/15 to-violet-500/5 text-violet-700 dark:text-violet-300"
+        accent="from-primary/15 to-accent/10 text-primary"
       />
       <CostReport />
     </PageContainer>

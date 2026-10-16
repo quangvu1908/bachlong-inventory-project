@@ -210,7 +210,7 @@ export default function SoSanhCuaHangPage() {
         icon={GitCompare}
         title="So Sánh Cửa Hàng"
         description="Đối chiếu doanh thu, giá vốn và sai lệch tiêu thụ giữa các cửa hàng trong kỳ đã chọn."
-        accent="from-blue-500/15 to-blue-500/5 text-blue-700 dark:text-blue-300"
+        accent="from-primary/15 to-accent/10 text-primary"
         actions={
           <div className="flex gap-1.5">
             <Button variant="outline" size="sm" className="gap-1.5" onClick={handleExport} disabled={stats.length === 0}>
@@ -242,8 +242,8 @@ export default function SoSanhCuaHangPage() {
             </div>
           </div>
 
-          <div className="flex items-start gap-2 rounded-lg border border-sky-500/20 bg-sky-500/5 px-3 py-2 text-[11px] text-sky-700 dark:text-sky-300">
-            <Info className="size-3.5 shrink-0" />
+          <div className="flex items-start gap-2 rounded-lg border border-border bg-muted/60 px-3 py-2 text-[11px] text-foreground/75">
+            <Info className="size-3.5 shrink-0 text-muted-foreground" />
             <span>
               <strong>Giá vốn/DT</strong> cao bất thường hoặc <strong>Sai lệch TB</strong> lớn ở một cửa hàng là dấu hiệu
               cần kiểm tra hao hụt, thất thoát hoặc nhập liệu sai so với các cửa hàng khác cùng thương hiệu.

@@ -309,7 +309,7 @@ export function CostReport() {
         <div className="flex items-start justify-between gap-2">
           <div>
             <CardTitle className="flex items-center gap-2 text-base">
-              <span className="grid size-8 place-items-center rounded-lg bg-violet-500/10 text-violet-600 ring-1 ring-violet-500/20">
+              <span className="grid size-8 place-items-center rounded-lg bg-primary/10 text-primary ring-1 ring-primary/20">
                 <Calculator className="size-4" />
               </span>
               Giá Vốn
@@ -338,8 +338,8 @@ export function CostReport() {
           </div>
         </div>
 
-        <div className="flex items-center gap-2 rounded-lg border border-violet-500/20 bg-violet-500/5 px-3 py-2 text-[11px] text-violet-700 dark:text-violet-300">
-          <Info className="size-3.5 shrink-0" />
+        <div className="flex items-center gap-2 rounded-lg border border-border bg-muted/60 px-3 py-2 text-[11px] text-foreground/75">
+          <Info className="size-3.5 shrink-0 text-muted-foreground" />
           <span><strong>Tiêu thụ</strong> = Tồn đầu + Nhập − Tồn cuối, định giá theo đơn giá nhập trung bình trong kỳ</span>
         </div>
 
@@ -348,15 +348,15 @@ export function CostReport() {
         ) : (
           <>
             <div className="grid grid-cols-2 gap-2">
-              <div className="rounded-lg border border-teal-500/20 bg-teal-500/5 px-3 py-2">
+              <div className="rounded-lg border border-border bg-primary/5 px-3 py-2">
                 <div className="text-[10px] uppercase tracking-wide text-muted-foreground">Tiền nhập trong kỳ</div>
-                <div className="text-sm font-bold text-teal-700 dark:text-teal-300">{formatVND(totalReceiptValue)}</div>
+                <div className="text-sm font-bold text-primary">{formatVND(totalReceiptValue)}</div>
               </div>
-              <div className="rounded-lg border border-violet-500/20 bg-violet-500/5 px-3 py-2">
+              <div className="rounded-lg border border-border bg-[#EAF0F5] px-3 py-2">
                 <div className="flex items-center gap-1 text-[10px] uppercase tracking-wide text-muted-foreground">
                   <TrendingUp className="size-3" />Giá vốn tiêu thụ
                 </div>
-                <div className="text-sm font-bold text-violet-700 dark:text-violet-300">{formatVND(totalConsumption)}</div>
+                <div className="text-sm font-bold text-[#5E7E96]">{formatVND(totalConsumption)}</div>
               </div>
             </div>
 
@@ -378,10 +378,10 @@ export function CostReport() {
                     <tr key={r.material.id} className="border-t border-border/30 hover:bg-muted/30">
                       <td className="px-2.5 py-2 truncate font-medium">{r.material.name}</td>
                       <td className="px-2.5 py-2 text-right tabular-nums text-muted-foreground">{formatNum(r.tonDau)}</td>
-                      <td className="px-2.5 py-2 text-right tabular-nums text-teal-600 dark:text-teal-300">{formatNum(r.nhapQty)}</td>
-                      <td className="px-2.5 py-2 text-right tabular-nums text-orange-600 dark:text-orange-300">{formatNum(r.xuatQty)}</td>
+                      <td className="px-2.5 py-2 text-right tabular-nums text-primary">{formatNum(r.nhapQty)}</td>
+                      <td className="px-2.5 py-2 text-right tabular-nums text-[#B48535]">{formatNum(r.xuatQty)}</td>
                       <td className="px-2.5 py-2 text-right tabular-nums text-muted-foreground">{formatNum(r.tonCuoi)}</td>
-                      <td className="px-2.5 py-2 text-right tabular-nums font-medium text-violet-700 dark:text-violet-300">{formatNum(r.tieuThu)}</td>
+                      <td className="px-2.5 py-2 text-right tabular-nums font-medium text-[#5E7E96]">{formatNum(r.tieuThu)}</td>
                       <td className="px-2.5 py-2 text-right font-medium tabular-nums">{formatVND(r.tieuThuValue)}</td>
                     </tr>
                   ))}
