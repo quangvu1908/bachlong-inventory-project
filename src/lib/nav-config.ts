@@ -16,6 +16,7 @@ import {
   FileUp,
   Scale,
   Truck,
+  GitCompare,
 } from 'lucide-react'
 import type { Database } from '@/lib/supabase/database.types'
 
@@ -130,6 +131,15 @@ export const navItems: NavItem[] = [
     group: 'Báo cáo',
     description: 'So sánh tiêu thụ lý thuyết vs thực tế',
     roles: ['admin', 'brand_manager', 'store_manager'],
+  },
+  {
+    href: '/so-sanh-cua-hang',
+    label: 'So Sánh Cửa Hàng',
+    shortLabel: 'So sánh',
+    icon: GitCompare,
+    group: 'Báo cáo',
+    description: 'Đối chiếu doanh thu, giá vốn giữa các cửa hàng',
+    roles: ['admin', 'brand_manager'],
   },
   {
     href: '/thuong-hieu',
