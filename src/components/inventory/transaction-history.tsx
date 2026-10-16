@@ -2,7 +2,7 @@
 
 import * as React from 'react'
 import { motion } from 'framer-motion'
-import { History, Filter, ArrowDownUp, Inbox, Printer, X, Loader2 } from 'lucide-react'
+import { History, Filter, ArrowDownUp, Inbox, Printer, X, Loader2, Store, Download, FileSpreadsheet } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -23,6 +23,8 @@ import {
 import { useStore } from '@/lib/store-context'
 import { supabase } from '@/lib/supabase/client'
 import type { Database } from '@/lib/supabase/database.types'
+import { downloadCSV, csvFilename } from '@/lib/csv-export'
+import { downloadXlsx, xlsxFilename } from '@/lib/xlsx-export'
 import { formatVND, formatNum, formatDate, formatDateTime } from '@/lib/format'
 import { cn } from '@/lib/utils'
 
@@ -125,6 +127,25 @@ export function TransactionHistory() {
 
   const totalReceipt = transactions.filter((t) => t.type === 'receipt').reduce((s, t) => s + (t.amount ?? 0), 0)
 
+  const buildExportRows = (): (string | number)[][] => [
+    ['Thời gian', 'Loại', 'NVL', 'Số lượng', 'ĐVT', 'Thành tiền', 'Ghi chú'],
+    ...filtered.map((t) => [
+      formatDateTime(t.created_at),
+      typeMeta[t.type].label,
+      t.material_name,
+      t.quantity,
+      t.unit_code,
+      t.amount ?? 0,
+      t.note ?? '',
+    ]),
+  ]
+  const handleExport = () => {
+    downloadCSV(csvFilename('lich-su-giao-dich'), buildExportRows())
+  }
+  const handleExportXlsx = () => {
+    downloadXlsx(xlsxFilename('lich-su-giao-dich'), [{ name: 'Lịch sử', rows: buildExportRows() }])
+  }
+
   return (
     <section className="mx-auto max-w-7xl scroll-mt-20 px-4 py-8 sm:px-6 lg:px-8">
       <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
@@ -134,12 +155,22 @@ export function TransactionHistory() {
             Lịch sử giao dịch
           </Badge>
           <h2 className="text-2xl font-bold tracking-tight sm:text-3xl">Dòng giao dịch gần đây</h2>
-          <p className="mt-1.5 max-w-2xl text-sm text-muted-foreground">
-            {selectedStore ? `Cửa hàng ${selectedStore.name} — ` : ''}
+          <p className="mt-1.5 flex max-w-2xl flex-wrap items-center gap-1.5 text-sm text-muted-foreground">
+            {selectedStore && (
+              <Badge variant="neutral" className="gap-1 font-normal">
+                <Store className="size-3" />{selectedStore.name}
+              </Badge>
+            )}
             200 giao dịch gần nhất. Mọi phiếu nhập, xuất kho ra bar và kiểm kê đều được ghi nhận đầy đủ.
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
+          <Button variant="outline" size="sm" className="h-9 gap-1.5" onClick={handleExport}>
+            <Download className="size-3.5" />CSV
+          </Button>
+          <Button variant="outline" size="sm" className="h-9 gap-1.5" onClick={handleExportXlsx}>
+            <FileSpreadsheet className="size-3.5" />Excel
+          </Button>
           <Select value={filter} onValueChange={(v) => setFilter(v as FilterType)}>
             <SelectTrigger className="h-9 w-[180px] gap-2 rounded-full">
               <Filter className="size-3.5 text-muted-foreground" />

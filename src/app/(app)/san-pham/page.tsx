@@ -47,7 +47,7 @@ import { FieldError } from '@/components/inventory/field-table'
 import { useToast } from '@/hooks/use-toast'
 import { useAuth } from '@/lib/auth/auth-context'
 import { supabase } from '@/lib/supabase/client'
-import { formatDate, formatNum } from '@/lib/format'
+import { formatDate, formatNum, formatVND } from '@/lib/format'
 import type { Database } from '@/lib/supabase/database.types'
 import { cn } from '@/lib/utils'
 
@@ -68,6 +68,7 @@ export default function SanPhamPage() {
   const [unitCodeByMaterial, setUnitCodeByMaterial] = React.useState<Record<string, string>>({})
   const [productRecipes, setProductRecipes] = React.useState<ProductRecipe[]>([])
   const [materialRecipes, setMaterialRecipes] = React.useState<MaterialRecipe[]>([])
+  const [materialPrices, setMaterialPrices] = React.useState<Record<string, number>>({})
   const [managedBrandIds, setManagedBrandIds] = React.useState<Set<string>>(new Set())
 
   const isAdmin = profile?.role === 'admin'
@@ -75,13 +76,14 @@ export default function SanPhamPage() {
   const canAccess = isAdmin || isBrandManager
 
   const load = React.useCallback(async () => {
-    const [brandsRes, prodRes, matsRes, unitsRes, prRes, mrRes] = await Promise.all([
+    const [brandsRes, prodRes, matsRes, unitsRes, prRes, mrRes, priceRes] = await Promise.all([
       supabase.from('brands').select('*').order('code'),
       supabase.from('products').select('*').order('name'),
       supabase.from('materials').select('*').eq('is_active', true).order('name'),
       supabase.from('units').select('id, code'),
       supabase.from('product_recipes').select('*').order('effective_from', { ascending: false }),
       supabase.from('material_recipes').select('*').order('effective_from', { ascending: false }),
+      supabase.from('material_prices').select('material_id, unit_price'),
     ])
     const firstErr = [brandsRes, prodRes, matsRes, unitsRes, prRes, mrRes].find((r) => r.error)
     if (firstErr?.error) {
@@ -97,6 +99,9 @@ export default function SanPhamPage() {
     )
     setProductRecipes(prRes.data ?? [])
     setMaterialRecipes(mrRes.data ?? [])
+    setMaterialPrices(
+      Object.fromEntries((priceRes.data ?? []).map((p) => [p.material_id, p.unit_price]))
+    )
 
     if (profile?.id) {
       const { data: ub } = await supabase.from('user_brands').select('brand_id').eq('user_id', profile.id)
@@ -180,6 +185,7 @@ export default function SanPhamPage() {
                 products={products.filter((p) => p.brand_id === brand.id)}
                 materials={materials.filter((m) => m.brand_id === brand.id)}
                 unitCodeByMaterial={unitCodeByMaterial}
+                materialPrices={materialPrices}
                 recipes={productRecipes}
                 userId={user?.id ?? ''}
                 onChanged={load}
@@ -195,6 +201,7 @@ export default function SanPhamPage() {
                 brand={brand}
                 materials={materials.filter((m) => m.brand_id === brand.id)}
                 unitCodeByMaterial={unitCodeByMaterial}
+                materialPrices={materialPrices}
                 recipes={materialRecipes}
                 userId={user?.id ?? ''}
                 onChanged={load}
@@ -416,6 +423,7 @@ function ProductRecipeBrandSection({
   products,
   materials,
   unitCodeByMaterial,
+  materialPrices,
   recipes,
   userId,
   onChanged,
@@ -424,6 +432,7 @@ function ProductRecipeBrandSection({
   products: Product[]
   materials: Material[]
   unitCodeByMaterial: Record<string, string>
+  materialPrices: Record<string, number>
   recipes: ProductRecipe[]
   userId: string
   onChanged: () => void
@@ -451,67 +460,149 @@ function ProductRecipeBrandSection({
     )
   }
 
+  const selectedProduct = products.find((p) => p.id === selectedProductId) ?? null
   const materialRows = recipes.filter((r) => r.product_id === selectedProductId)
 
   return (
-    <Card className="border-border/60">
-      <CardHeader className="flex-col items-start gap-3 pb-3 sm:flex-row sm:items-center sm:justify-between">
+    <Card className="overflow-hidden border-border/60 p-0">
+      <CardHeader className="border-b border-border/60 px-5 py-4">
         <CardTitle className="flex items-center gap-2 text-base">
           <span className="grid size-8 place-items-center rounded-lg bg-primary/10 text-primary ring-1 ring-primary/20">
             <FlaskConical className="size-4" />
           </span>
           {brand.name}
+          <Badge variant="outline" className="font-mono text-[10px]">{brand.code}</Badge>
         </CardTitle>
-        <Select value={selectedProductId} onValueChange={setSelectedProductId}>
-          <SelectTrigger className="w-full sm:w-64"><SelectValue placeholder="Chọn sản phẩm" /></SelectTrigger>
-          <SelectContent>
-            {products.map((p) => (
-              <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
       </CardHeader>
-      <CardContent>
-        <RecipeTable
-          rows={materialRows}
-          materials={materials}
-          unitCodeByMaterial={unitCodeByMaterial}
-          ownerLabel="sản phẩm"
-          quantityHint="cho 1 đơn vị bán ra"
-          userId={userId}
-          onAdd={async (materialId, quantity, effectiveFrom) => {
-            const { error } = await supabase.from('product_recipes').insert({
-              product_id: selectedProductId,
-              material_id: materialId,
-              quantity,
-              effective_from: effectiveFrom,
-              created_by: userId || null,
-            })
-            return error?.message ?? null
-          }}
-          onRevise={async (row, newQuantity, newEffectiveFrom) => {
-            const { error: closeErr } = await supabase
-              .from('product_recipes')
-              .update({ effective_to: newEffectiveFrom })
-              .eq('id', row.id)
-            if (closeErr) return closeErr.message
-            const { error: insertErr } = await supabase.from('product_recipes').insert({
-              product_id: selectedProductId,
-              material_id: row.material_id,
-              quantity: newQuantity,
-              effective_from: newEffectiveFrom,
-              created_by: userId || null,
-            })
-            return insertErr?.message ?? null
-          }}
-          onDelete={async (row) => {
-            const { error } = await supabase.from('product_recipes').delete().eq('id', row.id)
-            return error?.message ?? null
-          }}
-          onChanged={onChanged}
-        />
-      </CardContent>
+      <RecipeMasterDetail
+        items={products.map((p) => ({ id: p.id, label: p.name }))}
+        selectedId={selectedProductId}
+        onSelect={setSelectedProductId}
+      >
+        {selectedProduct && (
+          <>
+            <h3 className="text-lg font-bold tracking-tight">{selectedProduct.name}</h3>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Số lượng tính theo đơn vị ĐVT Kho của NVL, cho 1 đơn vị bán ra.
+            </p>
+
+            <RecipeCostBox rows={materialRows} materialPrices={materialPrices} />
+
+            <div className="mt-4">
+              <RecipeTable
+                rows={materialRows}
+                materials={materials}
+                unitCodeByMaterial={unitCodeByMaterial}
+                ownerLabel="sản phẩm"
+                userId={userId}
+                onAdd={async (materialId, quantity, effectiveFrom) => {
+                  const { error } = await supabase.from('product_recipes').insert({
+                    product_id: selectedProductId,
+                    material_id: materialId,
+                    quantity,
+                    effective_from: effectiveFrom,
+                    created_by: userId || null,
+                  })
+                  return error?.message ?? null
+                }}
+                onRevise={async (row, newQuantity, newEffectiveFrom) => {
+                  const { error: closeErr } = await supabase
+                    .from('product_recipes')
+                    .update({ effective_to: newEffectiveFrom })
+                    .eq('id', row.id)
+                  if (closeErr) return closeErr.message
+                  const { error: insertErr } = await supabase.from('product_recipes').insert({
+                    product_id: selectedProductId,
+                    material_id: row.material_id,
+                    quantity: newQuantity,
+                    effective_from: newEffectiveFrom,
+                    created_by: userId || null,
+                  })
+                  return insertErr?.message ?? null
+                }}
+                onDelete={async (row) => {
+                  const { error } = await supabase.from('product_recipes').delete().eq('id', row.id)
+                  return error?.message ?? null
+                }}
+                onChanged={onChanged}
+              />
+            </div>
+          </>
+        )}
+      </RecipeMasterDetail>
     </Card>
+  )
+}
+
+/** Layout 2 cột kiểu "danh sách món — chi tiết công thức", theo mẫu URY-Việt. */
+function RecipeMasterDetail({
+  items,
+  selectedId,
+  onSelect,
+  children,
+}: {
+  items: { id: string; label: string }[]
+  selectedId: string
+  onSelect: (id: string) => void
+  children: React.ReactNode
+}) {
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-[220px_1fr]">
+      <div className="border-b border-border/60 p-2 md:max-h-[560px] md:overflow-y-auto md:border-b-0 md:border-r md:border-border/60">
+        <div className="flex gap-1 overflow-x-auto scrollbar-cream md:flex-col md:overflow-visible">
+          {items.map((item) => {
+            const active = item.id === selectedId
+            return (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => onSelect(item.id)}
+                className={cn(
+                  'shrink-0 rounded-lg px-3 py-2.5 text-left text-[13px] font-medium transition-colors md:w-full',
+                  active ? 'bg-accent text-accent-foreground' : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                )}
+              >
+                {item.label}
+              </button>
+            )
+          })}
+        </div>
+      </div>
+      <div className="min-w-0 p-5">{children}</div>
+    </div>
+  )
+}
+
+/** Hộp tổng hợp giá vốn theo công thức hiện hành — theo mẫu URY-Việt. */
+function RecipeCostBox({
+  rows,
+  materialPrices,
+}: {
+  rows: RecipeRowLike[]
+  materialPrices: Record<string, number>
+}) {
+  const active = rows.filter((r) => r.effective_to === null)
+  const totalCost = active.reduce((sum, r) => sum + r.quantity * (materialPrices[r.material_id] ?? 0), 0)
+  const lastUpdated = active.reduce<string | null>(
+    (latest, r) => (!latest || r.effective_from > latest ? r.effective_from : latest),
+    null
+  )
+
+  return (
+    <div className="mt-4 grid grid-cols-3 gap-4 rounded-xl bg-muted/50 p-4 sm:gap-8 sm:p-5">
+      <div>
+        <div className="text-[10px] uppercase tracking-wide text-muted-foreground">Giá vốn theo công thức</div>
+        <div className="mt-1.5 truncate text-base font-bold tabular-nums sm:text-lg">{formatVND(totalCost)}</div>
+      </div>
+      <div>
+        <div className="text-[10px] uppercase tracking-wide text-muted-foreground">Số NVL trong công thức</div>
+        <div className="mt-1.5 text-base font-bold tabular-nums sm:text-lg">{active.length}</div>
+      </div>
+      <div>
+        <div className="text-[10px] uppercase tracking-wide text-muted-foreground">Cập nhật gần nhất</div>
+        <div className="mt-1.5 text-base font-bold sm:text-lg">{lastUpdated ? formatDate(lastUpdated) : '—'}</div>
+      </div>
+    </div>
   )
 }
 
@@ -521,6 +612,7 @@ function MaterialRecipeBrandSection({
   brand,
   materials,
   unitCodeByMaterial,
+  materialPrices,
   recipes,
   userId,
   onChanged,
@@ -528,6 +620,7 @@ function MaterialRecipeBrandSection({
   brand: Brand
   materials: Material[]
   unitCodeByMaterial: Record<string, string>
+  materialPrices: Record<string, number>
   recipes: MaterialRecipe[]
   userId: string
   onChanged: () => void
@@ -555,73 +648,80 @@ function MaterialRecipeBrandSection({
     )
   }
 
-  const ingredientRows = recipes.filter((r) => r.btp_material_id === selectedMaterialId)
+  const selectedMaterial = materials.find((m) => m.id === selectedMaterialId) ?? null
+  const ingredientRows = recipes
+    .filter((r) => r.btp_material_id === selectedMaterialId)
+    .map((r) => ({ ...r, material_id: r.input_material_id }))
   // Nguyên liệu đầu vào không gồm chính BTP đang chọn (DB cũng chặn bằng CHECK).
   const ingredientOptions = materials.filter((m) => m.id !== selectedMaterialId)
 
   return (
-    <Card className="border-border/60">
-      <CardHeader className="gap-3 pb-3">
-        <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <CardTitle className="flex items-center gap-2 text-base">
-            <span className="grid size-8 place-items-center rounded-lg bg-primary/10 text-primary ring-1 ring-primary/20">
-              <Beaker className="size-4" />
-            </span>
-            {brand.name}
-          </CardTitle>
-          <Select value={selectedMaterialId} onValueChange={setSelectedMaterialId}>
-            <SelectTrigger className="w-full sm:w-64"><SelectValue placeholder="Chọn NVL / BTP" /></SelectTrigger>
-            <SelectContent>
-              {materials.map((m) => (
-                <SelectItem key={m.id} value={m.id}>{m.name}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        <p className="text-xs text-muted-foreground">
-          Công thức BTP chỉ 1 tầng — chọn nguyên liệu thô làm đầu vào, không chọn BTP khác.
-        </p>
+    <Card className="overflow-hidden border-border/60 p-0">
+      <CardHeader className="border-b border-border/60 px-5 py-4">
+        <CardTitle className="flex items-center gap-2 text-base">
+          <span className="grid size-8 place-items-center rounded-lg bg-primary/10 text-primary ring-1 ring-primary/20">
+            <Beaker className="size-4" />
+          </span>
+          {brand.name}
+          <Badge variant="outline" className="font-mono text-[10px]">{brand.code}</Badge>
+        </CardTitle>
       </CardHeader>
-      <CardContent>
-        <RecipeTable
-          rows={ingredientRows.map((r) => ({ ...r, material_id: r.input_material_id }))}
-          materials={ingredientOptions}
-          unitCodeByMaterial={unitCodeByMaterial}
-          ownerLabel="BTP"
-          quantityHint="để ra 1 đơn vị thành phẩm"
-          userId={userId}
-          onAdd={async (materialId, quantity, effectiveFrom) => {
-            const { error } = await supabase.from('material_recipes').insert({
-              btp_material_id: selectedMaterialId,
-              input_material_id: materialId,
-              quantity,
-              effective_from: effectiveFrom,
-              created_by: userId || null,
-            })
-            return error?.message ?? null
-          }}
-          onRevise={async (row, newQuantity, newEffectiveFrom) => {
-            const { error: closeErr } = await supabase
-              .from('material_recipes')
-              .update({ effective_to: newEffectiveFrom })
-              .eq('id', row.id)
-            if (closeErr) return closeErr.message
-            const { error: insertErr } = await supabase.from('material_recipes').insert({
-              btp_material_id: selectedMaterialId,
-              input_material_id: row.material_id,
-              quantity: newQuantity,
-              effective_from: newEffectiveFrom,
-              created_by: userId || null,
-            })
-            return insertErr?.message ?? null
-          }}
-          onDelete={async (row) => {
-            const { error } = await supabase.from('material_recipes').delete().eq('id', row.id)
-            return error?.message ?? null
-          }}
-          onChanged={onChanged}
-        />
-      </CardContent>
+      <RecipeMasterDetail
+        items={materials.map((m) => ({ id: m.id, label: m.name }))}
+        selectedId={selectedMaterialId}
+        onSelect={setSelectedMaterialId}
+      >
+        {selectedMaterial && (
+          <>
+            <h3 className="text-lg font-bold tracking-tight">{selectedMaterial.name}</h3>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Công thức BTP chỉ 1 tầng — chọn nguyên liệu thô làm đầu vào, để ra 1 đơn vị thành phẩm.
+            </p>
+
+            <RecipeCostBox rows={ingredientRows} materialPrices={materialPrices} />
+
+            <div className="mt-4">
+              <RecipeTable
+                rows={ingredientRows}
+                materials={ingredientOptions}
+                unitCodeByMaterial={unitCodeByMaterial}
+                ownerLabel="BTP"
+                userId={userId}
+                onAdd={async (materialId, quantity, effectiveFrom) => {
+                  const { error } = await supabase.from('material_recipes').insert({
+                    btp_material_id: selectedMaterialId,
+                    input_material_id: materialId,
+                    quantity,
+                    effective_from: effectiveFrom,
+                    created_by: userId || null,
+                  })
+                  return error?.message ?? null
+                }}
+                onRevise={async (row, newQuantity, newEffectiveFrom) => {
+                  const { error: closeErr } = await supabase
+                    .from('material_recipes')
+                    .update({ effective_to: newEffectiveFrom })
+                    .eq('id', row.id)
+                  if (closeErr) return closeErr.message
+                  const { error: insertErr } = await supabase.from('material_recipes').insert({
+                    btp_material_id: selectedMaterialId,
+                    input_material_id: row.material_id,
+                    quantity: newQuantity,
+                    effective_from: newEffectiveFrom,
+                    created_by: userId || null,
+                  })
+                  return insertErr?.message ?? null
+                }}
+                onDelete={async (row) => {
+                  const { error } = await supabase.from('material_recipes').delete().eq('id', row.id)
+                  return error?.message ?? null
+                }}
+                onChanged={onChanged}
+              />
+            </div>
+          </>
+        )}
+      </RecipeMasterDetail>
     </Card>
   )
 }
@@ -641,7 +741,6 @@ function RecipeTable({
   materials,
   unitCodeByMaterial,
   ownerLabel,
-  quantityHint,
   userId,
   onAdd,
   onRevise,
@@ -652,7 +751,6 @@ function RecipeTable({
   materials: Material[]
   unitCodeByMaterial: Record<string, string>
   ownerLabel: string
-  quantityHint: string
   userId: string
   onAdd: (materialId: string, quantity: number, effectiveFrom: string) => Promise<string | null>
   onRevise: (row: RecipeRowLike, newQuantity: number, newEffectiveFrom: string) => Promise<string | null>
@@ -682,9 +780,7 @@ function RecipeTable({
   return (
     <div className="space-y-3">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <span className="text-xs text-muted-foreground">
-          Số lượng tính theo đơn vị ĐVT Kho của NVL, {quantityHint}.
-        </span>
+        <span className="text-xs font-semibold text-foreground">Thành phần</span>
         <Button size="sm" className="gap-1.5 self-start" onClick={() => { setEditing(null); setDialogOpen(true) }}>
           <Plus className="size-4" />
           Thêm dòng công thức

@@ -69,6 +69,7 @@ function DieuChuyenGrid({
 }) {
   const router = useRouter()
   const { toast } = useToast()
+  const { selectedStore } = useStore()
   const { loading, materials, reload } = useOperationMaterials(storeId, brandId)
 
   const [destStoreId, setDestStoreId] = React.useState(destOptions[0]?.id ?? '')
@@ -154,6 +155,7 @@ function DieuChuyenGrid({
       </Card>
 
       <OperationTable
+        storeName={selectedStore?.name}
         loading={loading}
         note={note}
         onNoteChange={setNote}

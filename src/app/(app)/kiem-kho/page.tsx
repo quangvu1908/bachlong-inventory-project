@@ -44,6 +44,7 @@ export default function KiemKhoPage() {
 function KiemKhoGrid({ storeId, brandId }: { storeId: string; brandId: string }) {
   const router = useRouter()
   const { toast } = useToast()
+  const { selectedStore } = useStore()
   const { loading, materials, reload } = useOperationMaterials(storeId, brandId)
 
   const [note, setNote] = React.useState('')
@@ -103,6 +104,7 @@ function KiemKhoGrid({ storeId, brandId }: { storeId: string; brandId: string })
 
   return (
     <OperationTable
+      storeName={selectedStore?.name}
       loading={loading}
       note={note}
       onNoteChange={setNote}

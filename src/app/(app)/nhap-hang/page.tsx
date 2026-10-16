@@ -44,6 +44,7 @@ export default function NhapHangPage() {
 function NhapHangGrid({ storeId, brandId }: { storeId: string; brandId: string }) {
   const router = useRouter()
   const { toast } = useToast()
+  const { selectedStore } = useStore()
   const { loading, materials, reload } = useOperationMaterials(storeId, brandId)
 
   const [note, setNote] = React.useState('')
@@ -100,6 +101,7 @@ function NhapHangGrid({ storeId, brandId }: { storeId: string; brandId: string }
 
   return (
     <OperationTable
+      storeName={selectedStore?.name}
       loading={loading}
       dateLabel={undefined}
       note={note}

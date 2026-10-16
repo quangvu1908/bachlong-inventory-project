@@ -1,11 +1,12 @@
 'use client'
 
 import * as React from 'react'
-import { Search, Save, RotateCcw, Inbox, Calendar, Loader2 } from 'lucide-react'
+import { Search, Save, RotateCcw, Inbox, Calendar, Loader2, Store } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Badge } from '@/components/ui/badge'
 import {
   Select,
   SelectContent,
@@ -18,6 +19,7 @@ import { matchVi } from '@/lib/vi-search'
 import { cn } from '@/lib/utils'
 
 interface OperationTableProps {
+  storeName?: string
   dateLabel?: string
   date?: string
   onDateChange?: (d: string) => void
@@ -36,6 +38,7 @@ interface OperationTableProps {
 }
 
 export function OperationTable({
+  storeName,
   dateLabel,
   date,
   onDateChange,
@@ -81,6 +84,11 @@ export function OperationTable({
     <Card className="overflow-hidden border-border/60">
       {/* Toolbar */}
       <div className="border-b border-border/60 bg-muted/30 p-3 sm:p-4">
+        {storeName && (
+          <Badge variant="neutral" className="mb-3 gap-1 font-normal">
+            <Store className="size-3" />{storeName}
+          </Badge>
+        )}
         <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
           <div className="flex flex-1 flex-col gap-2 sm:flex-row sm:items-end">
             {dateLabel && date !== undefined && onDateChange && (

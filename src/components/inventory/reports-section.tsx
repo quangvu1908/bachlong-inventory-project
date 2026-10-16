@@ -1,11 +1,19 @@
 'use client'
 
 import * as React from 'react'
-import { Boxes, Calculator, Download, FileSpreadsheet, Info, TrendingUp, Loader2, ShieldAlert } from 'lucide-react'
+import { Boxes, Calculator, Download, FileSpreadsheet, Info, TrendingUp, Loader2, ShieldAlert, Package, Wallet, Coffee, AlertTriangle, Store } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Badge } from '@/components/ui/badge'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { useAuth } from '@/lib/auth/auth-context'
 import { useStore } from '@/lib/store-context'
 import { supabase } from '@/lib/supabase/client'
@@ -32,6 +40,30 @@ interface StockRow {
 
 /* ---------- Tồn Kho report ---------- */
 
+function MiniStat({
+  icon: Icon,
+  label,
+  value,
+  tone,
+}: {
+  icon: React.ComponentType<{ className?: string }>
+  label: string
+  value: string
+  tone: string
+}) {
+  return (
+    <div className="rounded-xl border border-border bg-card p-3.5">
+      <div className="flex items-start justify-between gap-2">
+        <span className="truncate text-[10px] font-medium text-muted-foreground">{label}</span>
+        <span className={cn('grid size-7 shrink-0 place-items-center rounded-lg', tone)}>
+          <Icon className="size-3.5" />
+        </span>
+      </div>
+      <div className="mt-2 truncate text-base font-bold tabular-nums">{value}</div>
+    </div>
+  )
+}
+
 export function StockReport() {
   const { selectedStore } = useStore()
   const { profile } = useAuth()
@@ -41,6 +73,7 @@ export function StockReport() {
   const [loading, setLoading] = React.useState(true)
   const [rows, setRows] = React.useState<StockRow[]>([])
   const [query, setQuery] = React.useState('')
+  const [categoryFilter, setCategoryFilter] = React.useState('all')
 
   React.useEffect(() => {
     if (!selectedStore) {
@@ -82,9 +115,13 @@ export function StockReport() {
     })
   }, [selectedStore])
 
-  const filtered = rows.filter((m) => matchVi(m.name, query))
+  const categories = Array.from(new Set(rows.map((m) => m.categoryName))).sort()
+  const filtered = rows.filter(
+    (m) => matchVi(m.name, query) && (categoryFilter === 'all' || m.categoryName === categoryFilter)
+  )
   const totalKho = rows.reduce((s, m) => s + (m.price ?? 0) * m.khoStock, 0)
   const totalBar = rows.reduce((s, m) => s + ((m.price ?? 0) / (m.convertFactor || 1)) * m.barStock, 0)
+  const lowStockCount = rows.filter((m) => m.khoStock <= m.minStock).length
 
   const buildExportRows = (): (string | number)[][] => [
     canViewPrice
@@ -117,17 +154,22 @@ export function StockReport() {
   }
 
   return (
-    <Card className="h-full border-border/60">
-      <CardHeader className="pb-3">
+    <Card className="h-full overflow-hidden border-border/60 p-0">
+      <CardHeader className="border-b border-border/60 px-5 py-4">
         <div className="flex items-start justify-between gap-2">
           <div>
             <CardTitle className="flex items-center gap-2 text-base">
-              <span className="grid size-8 place-items-center rounded-lg bg-emerald-500/10 text-emerald-600 ring-1 ring-emerald-500/20">
+              <span className="grid size-8 place-items-center rounded-lg bg-primary/10 text-primary ring-1 ring-primary/20">
                 <Boxes className="size-4" />
               </span>
               Tồn Kho
             </CardTitle>
-            <CardDescription className="mt-1 text-xs">{selectedStore.name} — thời điểm hiện tại</CardDescription>
+            <CardDescription className="mt-1.5 flex flex-wrap items-center gap-1.5 text-xs">
+              <Badge variant="neutral" className="gap-1 font-normal">
+                <Store className="size-3" />{selectedStore.name}
+              </Badge>
+              thời điểm hiện tại
+            </CardDescription>
           </div>
           <div className="flex gap-1.5">
             <Button variant="outline" size="sm" className="gap-1.5" onClick={handleExport}>
@@ -139,62 +181,86 @@ export function StockReport() {
           </div>
         </div>
       </CardHeader>
-      <CardContent className="space-y-3">
+      <CardContent className="space-y-4 p-5">
         {canViewPrice && (
-          <div className="grid grid-cols-2 gap-2">
-            <div className="rounded-lg border border-border bg-primary/5 px-3 py-2">
-              <div className="text-[10px] uppercase tracking-wide text-muted-foreground">Giá trị Kho</div>
-              <div className="text-sm font-bold text-primary">{formatVND(totalKho)}</div>
-            </div>
-            <div className="rounded-lg border border-border bg-accent/30 px-3 py-2">
-              <div className="text-[10px] uppercase tracking-wide text-muted-foreground">Giá trị Bar</div>
-              <div className="text-sm font-bold text-accent-foreground">{formatVND(totalBar)}</div>
-            </div>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            <MiniStat icon={Package} label="Mã NVL" value={formatNum(rows.length)} tone="bg-muted text-muted-foreground" />
+            <MiniStat icon={Wallet} label="Giá trị Kho" value={formatVND(totalKho)} tone="bg-primary/10 text-primary" />
+            <MiniStat icon={Coffee} label="Giá trị Bar" value={formatVND(totalBar)} tone="bg-accent/50 text-accent-foreground" />
+            <MiniStat
+              icon={AlertTriangle}
+              label="Dưới định mức"
+              value={formatNum(lowStockCount)}
+              tone={lowStockCount > 0 ? 'bg-destructive/10 text-destructive' : 'bg-[#EDF3E6] text-[#4C6B3F]'}
+            />
           </div>
         )}
 
-        <Input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Lọc theo tên NVL..." className="h-8 text-xs" />
+        <div className="flex flex-col gap-2 sm:flex-row">
+          <Input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Tìm theo tên NVL..."
+            className="h-9 text-xs sm:max-w-xs"
+          />
+          <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+            <SelectTrigger className="h-9 text-xs sm:w-48"><SelectValue placeholder="Tất cả danh mục" /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Tất cả danh mục</SelectItem>
+              {categories.map((c) => (
+                <SelectItem key={c} value={c}>{c}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
 
         {loading ? (
           <div className="grid place-items-center py-10"><Loader2 className="size-5 animate-spin text-muted-foreground" /></div>
         ) : (
-          <div className="max-h-[340px] overflow-y-auto scrollbar-cream rounded-lg border border-border/40">
-            <table className="w-full text-xs">
-              <thead className="sticky top-0 bg-muted/60 text-left uppercase tracking-wide text-muted-foreground backdrop-blur">
-                <tr>
-                  <th className="px-2.5 py-2 font-medium">NVL</th>
-                  <th className="px-2.5 py-2 text-right font-medium">Kho</th>
-                  <th className="px-2.5 py-2 text-right font-medium">Bar</th>
-                  {canViewPrice && <th className="px-2.5 py-2 text-right font-medium">GT</th>}
-                </tr>
-              </thead>
-              <tbody>
-                {filtered.map((m) => {
-                  const gt = (m.price ?? 0) * m.khoStock
-                  const isLow = m.khoStock <= m.minStock
-                  return (
-                    <tr key={m.id} className="border-t border-border/30 hover:bg-muted/30">
-                      <td className="px-2.5 py-2">
-                        <div className="flex items-center gap-1.5">
-                          <span className="inline-flex shrink-0 items-center rounded border border-border/60 bg-muted/40 px-1 py-0.5 text-[9px] font-medium">
-                            {m.categoryName.slice(0, 3)}
+          <div className="overflow-hidden rounded-lg border border-border/60">
+            <div className="max-h-[420px] overflow-y-auto scrollbar-cream">
+              <table className="w-full text-xs">
+                <thead className="sticky top-0 bg-muted/60 text-left uppercase tracking-wide text-muted-foreground backdrop-blur">
+                  <tr>
+                    <th className="px-3 py-2.5 font-medium">NVL</th>
+                    <th className="px-3 py-2.5 text-right font-medium">Tồn Kho</th>
+                    <th className="px-3 py-2.5 text-right font-medium">Tồn Bar</th>
+                    <th className="px-3 py-2.5 text-right font-medium">Định mức</th>
+                    {canViewPrice && <th className="px-3 py-2.5 text-right font-medium">Giá trị</th>}
+                  </tr>
+                </thead>
+                <tbody>
+                  {filtered.map((m) => {
+                    const gt = (m.price ?? 0) * m.khoStock
+                    const isLow = m.khoStock <= m.minStock
+                    return (
+                      <tr key={m.id} className="border-t border-border/30 hover:bg-muted/30">
+                        <td className="px-3 py-2.5">
+                          <div className="flex items-center gap-1.5">
+                            <span className="inline-flex shrink-0 items-center rounded border border-border/60 bg-muted/40 px-1 py-0.5 text-[9px] font-medium">
+                              {m.categoryName.slice(0, 3)}
+                            </span>
+                            <span className="truncate font-medium">{m.name}</span>
+                          </div>
+                        </td>
+                        <td className="px-3 py-2.5 text-right tabular-nums">
+                          <span className="inline-flex items-center gap-1.5">
+                            <span className={cn(isLow && 'font-bold text-destructive')}>{formatNum(m.khoStock)}</span>
+                            {isLow && <Badge variant="warning" className="px-1.5 py-0 text-[9px]">Tồn thấp</Badge>}
                           </span>
-                          <span className="truncate font-medium">{m.name}</span>
-                        </div>
-                      </td>
-                      <td className={cn('px-2.5 py-2 text-right tabular-nums', isLow && 'font-bold text-destructive')}>
-                        {formatNum(m.khoStock)}
-                      </td>
-                      <td className="px-2.5 py-2 text-right tabular-nums text-muted-foreground">{formatNum(m.barStock)}</td>
-                      {canViewPrice && <td className="px-2.5 py-2 text-right tabular-nums">{formatVND(gt)}</td>}
-                    </tr>
-                  )
-                })}
-                {filtered.length === 0 && (
-                  <tr><td colSpan={4} className="px-2.5 py-8 text-center text-muted-foreground">Không có dữ liệu.</td></tr>
-                )}
-              </tbody>
-            </table>
+                        </td>
+                        <td className="px-3 py-2.5 text-right tabular-nums text-muted-foreground">{formatNum(m.barStock)}</td>
+                        <td className="px-3 py-2.5 text-right tabular-nums text-muted-foreground">{formatNum(m.minStock)}</td>
+                        {canViewPrice && <td className="px-3 py-2.5 text-right tabular-nums">{formatVND(gt)}</td>}
+                      </tr>
+                    )
+                  })}
+                  {filtered.length === 0 && (
+                    <tr><td colSpan={5} className="px-3 py-8 text-center text-muted-foreground">Không có dữ liệu.</td></tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
         )}
       </CardContent>
