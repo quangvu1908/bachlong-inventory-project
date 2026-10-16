@@ -60,7 +60,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         href="/tong-quan"
         className="flex items-center gap-2.5 border-b border-sidebar-border px-5 py-4 transition-colors hover:bg-sidebar-accent/40"
       >
-        <div className="grid size-9 shrink-0 place-items-center rounded-lg bg-primary text-primary-foreground">
+        <div className="grid size-9 shrink-0 place-items-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
           <CupSoda className="size-4.5" />
         </div>
         <div className="flex flex-col leading-none">
@@ -90,16 +90,16 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                       key={item.href}
                       href={item.href}
                       className={cn(
-                        'group flex items-center gap-2.5 rounded-r-md border-l-2 py-1.5 pl-3 pr-3 text-[13px] font-medium transition-colors',
+                        'group flex items-center gap-2.5 rounded-lg py-2 pl-3 pr-3 text-[13px] font-medium transition-colors',
                         active
-                          ? 'border-primary bg-sidebar-accent text-white'
-                          : 'border-transparent text-sidebar-foreground hover:bg-sidebar-accent/40 hover:text-white'
+                          ? 'bg-sidebar-primary text-sidebar-primary-foreground'
+                          : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
                       )}
                     >
                       <Icon
                         className={cn(
                           'size-4 shrink-0',
-                          active ? 'text-primary-foreground' : 'text-sidebar-foreground/80'
+                          active ? 'text-sidebar-primary-foreground' : 'text-sidebar-foreground/80'
                         )}
                       />
                       <span className="flex-1 truncate">{item.label}</span>
@@ -108,7 +108,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                           className={cn(
                             'shrink-0 rounded px-1 py-0.5 font-mono text-[9px]',
                             active
-                              ? 'bg-white/15 text-white'
+                              ? 'bg-black/10 text-sidebar-primary-foreground'
                               : 'bg-white/5 text-sidebar-foreground/70'
                           )}
                         >
@@ -161,7 +161,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         {/* Top bar */}
         <header
           className={cn(
-            'sticky top-0 z-20 flex h-14 items-center gap-2 border-b border-border bg-card px-4 sm:px-6',
+            'sticky top-0 z-20 flex h-16 items-center gap-2 border-b border-border bg-background px-4 sm:px-6',
           )}
         >
           {/* Mobile menu */}
@@ -237,7 +237,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </header>
 
         {/* Page content */}
-        <main className="min-h-[calc(100vh-3.5rem)]">{children}</main>
+        <main className="min-h-[calc(100vh-4rem)]">{children}</main>
       </div>
     </div>
   )

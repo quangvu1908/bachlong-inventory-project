@@ -35,20 +35,23 @@ export function DashboardKpis({ totalKhoValue, totalBarValue, lowStockCount, tod
 }
 
 function KpiCard({ icon: Icon, label, value, tone }: { icon: React.ComponentType<{ className?: string }>; label: string; value: string; tone: 'slate' | 'violet' | 'red' | 'emerald' | 'blue' }) {
-  const tones = {
-    slate: 'bg-slate-500',
-    violet: 'bg-violet-600',
-    red: 'bg-red-600',
-    emerald: 'bg-emerald-600',
-    blue: 'bg-primary',
+  const tones: Record<typeof tone, { chip: string; icon: string }> = {
+    slate: { chip: 'bg-muted', icon: 'text-muted-foreground' },
+    violet: { chip: 'bg-accent/50', icon: 'text-accent-foreground' },
+    red: { chip: 'bg-destructive/10', icon: 'text-destructive' },
+    emerald: { chip: 'bg-[#EDF3E6]', icon: 'text-[#4C6B3F]' },
+    blue: { chip: 'bg-primary/10', icon: 'text-primary' },
   }
+  const t = tones[tone]
   return (
-    <div className={cn('flex flex-col gap-1.5 rounded-xl p-4 text-white', tones[tone])}>
+    <div className="flex flex-col gap-3 rounded-xl border border-border bg-card p-4 sm:p-5">
       <div className="flex items-start justify-between gap-2">
-        <div className="truncate text-xl font-extrabold tabular-nums tracking-tight sm:text-2xl">{value}</div>
-        <Icon className="size-6 shrink-0 text-white/55" />
+        <span className="truncate text-[11px] font-medium text-muted-foreground">{label}</span>
+        <span className={cn('grid size-8 shrink-0 place-items-center rounded-lg', t.chip, t.icon)}>
+          <Icon className="size-4" />
+        </span>
       </div>
-      <div className="truncate text-xs font-medium text-white/90">{label}</div>
+      <div className="truncate text-xl font-bold tabular-nums tracking-tight sm:text-2xl">{value}</div>
     </div>
   )
 }

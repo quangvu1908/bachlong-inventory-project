@@ -142,13 +142,13 @@ export function StockReport() {
       <CardContent className="space-y-3">
         {canViewPrice && (
           <div className="grid grid-cols-2 gap-2">
-            <div className="rounded-lg border border-amber-500/20 bg-amber-500/5 px-3 py-2">
+            <div className="rounded-lg border border-border bg-primary/5 px-3 py-2">
               <div className="text-[10px] uppercase tracking-wide text-muted-foreground">Giá trị Kho</div>
-              <div className="text-sm font-bold text-amber-700 dark:text-amber-300">{formatVND(totalKho)}</div>
+              <div className="text-sm font-bold text-primary">{formatVND(totalKho)}</div>
             </div>
-            <div className="rounded-lg border border-rose-500/20 bg-rose-500/5 px-3 py-2">
+            <div className="rounded-lg border border-border bg-accent/30 px-3 py-2">
               <div className="text-[10px] uppercase tracking-wide text-muted-foreground">Giá trị Bar</div>
-              <div className="text-sm font-bold text-rose-700 dark:text-rose-300">{formatVND(totalBar)}</div>
+              <div className="text-sm font-bold text-accent-foreground">{formatVND(totalBar)}</div>
             </div>
           </div>
         )}

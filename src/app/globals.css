@@ -43,78 +43,78 @@
   --radius-xl: calc(var(--radius) + 4px);
 }
 
-/* ===== Professional Admin Palette =====
-   Primary  : blue (dense enterprise dashboard look)
-   Sidebar  : dark navy
-   Surface  : flat neutral gray
+/* ===== URY Việt Palette =====
+   Primary  : forest green / near-black CTA (giống bản demo URY-Việt)
+   Accent   : chanh non (lime) cho trạng thái active/nổi bật
+   Surface  : be/sage ấm, viền mảnh, bo góc rộng
 */
 :root {
-  --radius: 0.625rem;
-  --background: #F6F7F9;
-  --foreground: #18181B;
+  --radius: 0.75rem;
+  --background: #F6F7F3;
+  --foreground: #242A25;
   --card: #FFFFFF;
-  --card-foreground: #18181B;
+  --card-foreground: #242A25;
   --popover: #FFFFFF;
-  --popover-foreground: #18181B;
-  --primary: #2563EB;
+  --popover-foreground: #242A25;
+  --primary: #1F2A1E;
   --primary-foreground: #FFFFFF;
-  --secondary: #F4F4F5;
-  --secondary-foreground: #18181B;
-  --muted: #F4F4F5;
-  --muted-foreground: #71717A;
-  --accent: #EFF4FF;
-  --accent-foreground: #2563EB;
-  --destructive: #DC2626;
-  --border: #E4E4E7;
-  --input: #E4E4E7;
-  --ring: #2563EB;
-  --chart-1: #2563EB;
-  --chart-2: #16A34A;
-  --chart-3: #D97706;
-  --chart-4: #7C3AED;
-  --chart-5: #DB2777;
-  --sidebar: #1C2434;
-  --sidebar-foreground: #AEB9CD;
-  --sidebar-primary: #2563EB;
-  --sidebar-primary-foreground: #FFFFFF;
-  --sidebar-accent: #28334B;
-  --sidebar-accent-foreground: #FFFFFF;
-  --sidebar-border: #28334B;
-  --sidebar-ring: #3B82F6;
+  --secondary: #F0F4E9;
+  --secondary-foreground: #242A25;
+  --muted: #F4F5EE;
+  --muted-foreground: #8B918A;
+  --accent: #DCECAA;
+  --accent-foreground: #283920;
+  --destructive: #C2503D;
+  --border: #E7EAE2;
+  --input: #E7EAE2;
+  --ring: #90B365;
+  --chart-1: #427151;
+  --chart-2: #769464;
+  --chart-3: #D98F35;
+  --chart-4: #8BA6B7;
+  --chart-5: #A3B88C;
+  --sidebar: #191F1B;
+  --sidebar-foreground: #A6B09F;
+  --sidebar-primary: #DCECAA;
+  --sidebar-primary-foreground: #283521;
+  --sidebar-accent: #293126;
+  --sidebar-accent-foreground: #EDF0E8;
+  --sidebar-border: #2A332A;
+  --sidebar-ring: #90B365;
 }
 
 .dark {
-  --background: #15181F;
-  --foreground: #E4E7EC;
-  --card: #1B1F29;
-  --card-foreground: #E4E7EC;
-  --popover: #1B1F29;
-  --popover-foreground: #E4E7EC;
-  --primary: #3B82F6;
-  --primary-foreground: #0B1220;
-  --secondary: #232835;
-  --secondary-foreground: #E4E7EC;
-  --muted: #232835;
-  --muted-foreground: #8B93A7;
-  --accent: #1E2A45;
-  --accent-foreground: #93C5FD;
-  --destructive: #F87171;
+  --background: #14180F;
+  --foreground: #E4E8DF;
+  --card: #1D241C;
+  --card-foreground: #E4E8DF;
+  --popover: #1D241C;
+  --popover-foreground: #E4E8DF;
+  --primary: #DCECAA;
+  --primary-foreground: #223420;
+  --secondary: #262E23;
+  --secondary-foreground: #E4E8DF;
+  --muted: #262E23;
+  --muted-foreground: #9AA68F;
+  --accent: #2A3326;
+  --accent-foreground: #DCECAA;
+  --destructive: #E2786A;
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 14%);
-  --ring: #3B82F6;
-  --chart-1: #3B82F6;
-  --chart-2: #22C55E;
-  --chart-3: #F59E0B;
-  --chart-4: #A78BFA;
-  --chart-5: #F472B6;
-  --sidebar: #11151F;
-  --sidebar-foreground: #AEB9CD;
-  --sidebar-primary: #3B82F6;
-  --sidebar-primary-foreground: #FFFFFF;
-  --sidebar-accent: #1F2A40;
-  --sidebar-accent-foreground: #FFFFFF;
-  --sidebar-border: #1F2A40;
-  --sidebar-ring: #3B82F6;
+  --ring: #A9C97E;
+  --chart-1: #8BBF7A;
+  --chart-2: #C8DB9E;
+  --chart-3: #DCECAA;
+  --chart-4: #E3A75C;
+  --chart-5: #9FC0CF;
+  --sidebar: #12160F;
+  --sidebar-foreground: #A6B09F;
+  --sidebar-primary: #DCECAA;
+  --sidebar-primary-foreground: #223420;
+  --sidebar-accent: #232B1F;
+  --sidebar-accent-foreground: #EDF0E8;
+  --sidebar-border: #262E20;
+  --sidebar-ring: #A9C97E;
 }
 
 @layer base {
